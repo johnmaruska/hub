@@ -1,0 +1,7 @@
+# Clojure files
+target/
+
+# Emacs files
+*~
+*#*
+.nrepl-port
