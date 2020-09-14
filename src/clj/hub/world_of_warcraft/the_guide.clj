@@ -10,37 +10,41 @@
 
 (def filename "world_of_warcraft/the_guide.csv")
 
-(defrecord Enemy [spec class])
-(defrecord Match [arena enemy-1 enemy-2 result target-note misc-note])
+(defn ->match [arena enemy-1 enemy-2 result target-note misc-note]
+  {:arena       arena
+   :enemy-1     enemy-1     :enemy-2   enemy-2
+   :result      result
+   :target-note target-note :misc-note misc-note})
 
-(defn Enemy->string [enemy]
+(defn enemy->string [enemy]
   (str/join " " [(:spec enemy) (:class enemy)]))
-(defn string->Enemy [s]
+(defn string->enemy [s]
   (let [[spec & class] (str/split s #" ")]
-    (->Enemy spec (str/join " " class))))
+    {:spec  spec
+     :class (str/join " " class)}))
 
 (def healers
-  (->> ["mistweaver monk"
-        "holy paladin"
+  (->> ["discipline priest"
         "holy priest"
+        "holy paladin"
+        "mistweaver monk"
         "restoration druid"
         "restoration shaman"]
-       (map string->Enemy)
+       (map string->enemy)
        (into #{})))
 
 ;;; have to use (into #{} ...) so duplicates dont throw exception
 (defn enemy-set [match] (into #{} [(:enemy-1 match) (:enemy-2 match)]))
 (defn class-set [match] (into #{} [(get-in match [:enemy-1 :class])
                                    (get-in match [:enemy-2 :class])]))
-(defn class-set [match] (into #{} [(get-in match [:enemy-1 :spec])
+(defn spec-set  [match] (into #{} [(get-in match [:enemy-1 :spec])
                                    (get-in match [:enemy-2 :spec])]))
 
 (defn parse [csv]
   (map (fn parse-row [row]
-         (map->Match
-          (-> row
-              (update :enemy-1 string->Enemy)
-              (update :enemy-2 string->Enemy))))
+         (-> row
+             (update :enemy-1 string->enemy)
+             (update :enemy-2 string->enemy)))
        csv))
 
 ;; TODO: delay reading without messing with the atom. memoize, probably
@@ -51,8 +55,8 @@
 
 (defn format-row [row]
   (str/join "," [(:arena row)
-                 (Enemy->string (:enemy-1 row))
-                 (Enemy->string (:enemy-2 row))
+                 (enemy->string (:enemy-1 row))
+                 (enemy->string (:enemy-2 row))
                  (:result row)
                  (format "\"%s\"" (:target-note row))
                  (format "\"%s\"" (:misc-note row))]))
@@ -63,7 +67,7 @@
    (let [row (format-row match)]
      (util/write! filename (format-row match) :append true)))
   ([arena enemy-1 enemy-2 result & [target-note misc-note]]
-   (log-match! (->Match arena enemy-1 enemy-2 result target-note misc-note))))
+   (log-match! (->match arena enemy-1 enemy-2 result target-note misc-note))))
 
 ;;;; filter predicates
 
@@ -74,7 +78,7 @@
   (not (healer-comp? match)))
 
 (defn exact-matchup? [enemies match]
-  (set/subset? (into set enemies) (enemy-set match)))
+  (set/subset? (into #{} enemies) (enemy-set match)))
 
 (defn spec-matchup? [enemy-spec match]
   (contains? (spec-set match) enemy-spec))
