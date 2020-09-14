@@ -3,7 +3,8 @@
   Currently assumes 2v2 with rogue/warlock."
   (:require
    [hub.util :as util]
-   [clojure.string :as str]))
+   [clojure.string :as str]
+   [clojure.set :as set]))
 
 ;;;; IO operations
 
@@ -18,11 +19,28 @@
   (let [[spec & class] (str/split s #" ")]
     (->Enemy spec (str/join " " class))))
 
+(def healers
+  (->> ["mistweaver monk"
+        "holy paladin"
+        "holy priest"
+        "restoration druid"
+        "restoration shaman"]
+       (map string->Enemy)
+       (into #{})))
+
+;;; have to use (into #{} ...) so duplicates dont throw exception
+(defn enemy-set [match] (into #{} [(:enemy-1 match) (:enemy-2 match)]))
+(defn class-set [match] (into #{} [(get-in match [:enemy-1 :class])
+                                   (get-in match [:enemy-2 :class])]))
+(defn class-set [match] (into #{} [(get-in match [:enemy-1 :spec])
+                                   (get-in match [:enemy-2 :spec])]))
+
 (defn parse [csv]
   (map (fn parse-row [row]
-         (-> row
-             (update :enemy-1 string->Enemy)
-             (update :enemy-2 string->Enemy)))
+         (map->Match
+          (-> row
+              (update :enemy-1 string->Enemy)
+              (update :enemy-2 string->Enemy))))
        csv))
 
 ;; TODO: delay reading without messing with the atom. memoize, probably
@@ -46,3 +64,25 @@
      (util/write! filename (format-row match) :append true)))
   ([arena enemy-1 enemy-2 result & [target-note misc-note]]
    (log-match! (->Match arena enemy-1 enemy-2 result target-note misc-note))))
+
+;;;; filter predicates
+
+(defn healer-comp? [match]
+  (some (partial contains? healers) (enemy-set match)))
+
+(defn double-damage? [match]
+  (not (healer-comp? match)))
+
+(defn exact-matchup? [enemies match]
+  (set/subset? (into set enemies) (enemy-set match)))
+
+(defn spec-matchup? [enemy-spec match]
+  (contains? (spec-set match) enemy-spec))
+
+(defn class-matchup? [enemy-class match]
+  (contains? (class-set match) enemy-class))
+
+;;;; retrieval
+
+(defn get-match-history [& [pred]]
+  (filter (or pred identity) (the-guide)))
