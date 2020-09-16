@@ -5,3 +5,6 @@ target/
 *~
 *#*
 .nrepl-port
+
+# Discord secrets
+data/settings/settings.json
