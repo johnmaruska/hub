@@ -1,0 +1,8 @@
+{
+    "token" : "Your Auth Token",
+    "prefix" : "!",
+    "bot-name" : "Smithers",
+    "extension-folders" : [
+        "src/clj/hub/discord/extensions"
+    ]
+}
