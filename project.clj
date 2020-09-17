@@ -6,4 +6,5 @@
                  [claudio "0.1.3"]
                  ;; discord api wrapper
                  [discord.clj "2.0.0"]]
-  :source-paths ["src/clj"])
+  :source-paths ["src/clj"]
+  :main hub.core)
