@@ -43,11 +43,11 @@ This is intended for making @ groups for anyone interested in gamez.
 
 Commands are as follows:
 
-  !role list - list all mentionable roles in the server
-  !role list-mine - list all mentionable roles associated with your user
-  !role new [ROLE] - Create a new role named the entirety of the following message
-  !role join [ROLE] - add a role to your user. No need to prepend with @ just use exact string
-  !role leave [ROLE] - remove a role from your user. No need to prepend with @ just use exact string"))
+  !role list         - list all mentionable roles in the server
+  !role list-mine    - list all mentionable roles associated with your user
+  !role new [ROLE]   - Create a new role named the entirety of the following message
+  !role join [ROLE]  - add a role to your user. No need to prepend with @ just use exact string
+  !role leave [ROLE] - remove a role from your user. No need to prepend with @ just use exact string")   )
 
   (:list
    "Show names of all roles"
