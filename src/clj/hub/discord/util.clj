@@ -8,6 +8,23 @@
        (filter (fn [role] (= role-name (:name role))))
        (first)))
 
+(defn format-roles [roles]
+  (->> (map :name roles)
+       (map #(str "`" % "`"))
+       (str/join ", ")))
+
+(defn get-user-roles
+  "List of roles IDs assigned to a `user-id`. Pulls from server."
+  [client guild user-id]
+  (let [user     (http/get-guild-member client guild user-id)
+        role-ids (into #{} (:roles user))]
+    (filter (fn [role] (contains? role-ids (:id role)))
+            (http/get-roles client guild))))
+
+;; removing the extension-command from the message contents would be good for the library imo
+(defn strip-command [s]
+  (str/join " " (drop 1 (str/split s #" "))))
+
 ;;; not sure why these aren't in discord/http.clj
 (defn create-role [auth guild & {:keys [name permissions color hoist mentionable] :as params}]
   (http/discord-request :create-role auth
@@ -25,11 +42,3 @@
                         :guild  guild
                         :member member
                         :role   role))
-
-(defn get-user-roles
-  "List of roles IDs assigned to a `user-id`. Pulls from server."
-  [client guild user-id]
-  (let [user     (http/get-guild-member client guild user-id)
-        role-ids (into #{} (:roles user))]
-    (filter (fn [role] (contains? role-ids (:id role)))
-            (http/get-roles client guild))))

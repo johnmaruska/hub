@@ -21,3 +21,7 @@
 (defn write!
   [filename contents & opts]
   (apply spit (io/resource filename) contents opts))
+
+
+(defn find-by [k v coll]
+  (first (filter #(= v (k %)) coll)))
