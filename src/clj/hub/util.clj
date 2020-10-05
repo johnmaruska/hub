@@ -10,18 +10,20 @@
             repeat)
        (rest csv-data)))
 
+(defn stream-csv
+  [reader & {:keys [separator quote]
+             :or {separator \, quote \"}}]
+  (csv-data->maps (csv/read-csv reader :separator separator)))
+
 (defn load-csv
   "Read `filename` csv into a vector of maps."
-  [filename]
+  [filename & options]
   (with-open [reader (io/reader (io/resource filename))]
-    (-> (csv/read-csv reader)
-        csv-data->maps
-        vec)))
+    (vec (apply stream-csv reader options))))
 
 (defn write!
   [filename contents & opts]
   (apply spit (io/resource filename) contents opts))
-
 
 (defn find-by [k v coll]
   (first (filter #(= v (k %)) coll)))

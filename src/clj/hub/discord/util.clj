@@ -1,6 +1,7 @@
 (ns hub.discord.util
   "Helper utilities for Discord. Some of these could be added to the library."
   (:require
+   [clojure.string :as string]
    [discord.http :as http]))
 
 (defn get-role-by-name [auth guild role-name]
@@ -11,7 +12,7 @@
 (defn format-roles [roles]
   (->> (map :name roles)
        (map #(str "`" % "`"))
-       (str/join ", ")))
+       (string/join ", ")))
 
 (defn get-user-roles
   "List of roles IDs assigned to a `user-id`. Pulls from server."
@@ -23,7 +24,7 @@
 
 ;; removing the extension-command from the message contents would be good for the library imo
 (defn strip-command [s]
-  (str/join " " (drop 1 (str/split s #" "))))
+  (string/join " " (drop 1 (string/split s #" "))))
 
 ;;; not sure why these aren't in discord/http.clj
 (defn create-role [auth guild & {:keys [name permissions color hoist mentionable] :as params}]
