@@ -11,7 +11,6 @@ I'm just going to put all my side-project Clojure stuff into this catch-all proj
 
 1. id3 tag fix for Windows Media Player CD rips
 
-
 ## Components to add, written somewhere else already
 
 1. Pokemon utilities

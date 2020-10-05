@@ -8,13 +8,26 @@
 
 ;;;; IO operations
 
-(def filename "world_of_warcraft/the_guide.csv")
+(def twos-guide   "world_of_warcraft/the_guide_2v2.csv")
+(def threes-guide "world_of_warcraft/the_guide_3v3.csv")
 
-(defn ->match [arena enemy-1 enemy-2 result target-note misc-note]
-  {:arena       arena
-   :enemy-1     enemy-1     :enemy-2   enemy-2
-   :result      result
-   :target-note target-note :misc-note misc-note})
+(defn twos?   [match] (= 2 (count (match :enemies))))
+(defn threes? [match] (= 3 (count (match :enemies))))
+
+(defn filename [mode] (if (= :twos mode) twos-guide threes-guide))
+(defn mode [match] (if (twos? match) :twos :threes))
+
+(defn ->match
+  ([arena enemies result target-note misc-note]
+   {:arena       arena
+    :enemies     enemies
+    :result      result
+    :target-note target-note
+    :misc-note   misc-note})
+  ([arena enemy-1 enemy-2 result target-note misc-note]
+   (->match arena [enemy-1 enemy-2] result target-note misc-note))
+  ([arena enemy-1 enemy-2 enemy-3 result target-note misc-note]
+   (->match arena [enemy-1 enemy-2 enemy-3] result target-note misc-note)))
 
 (defn enemy->string [enemy]
   (str/join " " [(:spec enemy) (:class enemy)]))
@@ -34,59 +47,57 @@
        (into #{})))
 
 ;;; have to use (into #{} ...) so duplicates dont throw exception
-(defn enemy-set [match] (into #{} [(:enemy-1 match) (:enemy-2 match)]))
-(defn class-set [match] (into #{} [(get-in match [:enemy-1 :class])
-                                   (get-in match [:enemy-2 :class])]))
-(defn spec-set  [match] (into #{} [(get-in match [:enemy-1 :spec])
-                                   (get-in match [:enemy-2 :spec])]))
+(defn enemy-set [match] (into #{} (match :enemies)))
+(defn class-set [match] (into #{} (->> match :enemies (map :class))))
+(defn spec-set  [match] (into #{} (->> match :enemies (map :spec))))
+
+(defn enemies [row]
+  (->> [(:enemy-1 row) (:enemy-2 row) (:enemy-3 row)]
+       (filter identity)
+       (map string->enemy)))
 
 (defn parse [csv]
-  (map (fn parse-row [row]
-         (-> row
-             (update :enemy-1 string->enemy)
-             (update :enemy-2 string->enemy)))
-       csv))
+  (map (fn [row] (assoc row :enemies (enemies row))) csv))
 
-;; TODO: delay reading without messing with the atom. memoize, probably
-(def match-history (atom nil))
-(defn the-guide []
-  (or @match-history
-      (reset! match-history (parse (util/load-csv filename)))))
+(def match-history (atom {}))
+(defn the-guide [mode]
+  (or (get @match-history mode)
+      (swap! match-history assoc :mode
+             (-> mode filename util/load-csv parse))))
 
 (defn format-row [row]
-  (str/join "," [(:arena row)
-                 (enemy->string (:enemy-1 row))
-                 (enemy->string (:enemy-2 row))
-                 (:result row)
-                 (format "\"%s\"" (:target-note row))
-                 (format "\"%s\"" (:misc-note row))]))
+  (->> [(:arena row)
+        (map enemy->string (:enemies row))
+        (:result row)
+        (format "\"%s\"" (:target-note row))
+        (format "\"%s\"" (:misc-note row))]
+       (apply concat)
+       (str/join ",")))
 
-(defn log-match!
-  ([match]
-   (swap! match-history #(concat % [match]))
-   (let [row (format-row match)]
-     (util/write! filename (format-row match) :append true)))
-  ([arena enemy-1 enemy-2 result & [target-note misc-note]]
-   (log-match! (->match arena enemy-1 enemy-2 result target-note misc-note))))
+(defn log-match! [match]
+  (swap! match-history #(concat % [match]))
+  (let [row  (format-row match)
+        file (filename (mode match))]
+    (util/write! file row :append true)))
 
 ;;;; filter predicates
 
-(defn healer-comp? [match]
+(defn healer-comp?   [match]
   (some (partial contains? healers) (enemy-set match)))
 
 (defn double-damage? [match]
   (not (healer-comp? match)))
 
-(defn exact-matchup? [enemies match]
+(defn exact-matchup? [match enemies]
   (set/subset? (into #{} enemies) (enemy-set match)))
 
-(defn spec-matchup? [enemy-spec match]
+(defn spec-matchup?  [match enemy-spec]
   (contains? (spec-set match) enemy-spec))
 
-(defn class-matchup? [enemy-class match]
+(defn class-matchup? [match enemy-class]
   (contains? (class-set match) enemy-class))
 
 ;;;; retrieval
 
-(defn get-match-history [& [pred]]
-  (filter (or pred identity) (the-guide)))
+(defn get-match-history [mode & [pred]]
+  (filter (or pred identity) (the-guide mode)))
