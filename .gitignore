@@ -1,5 +1,6 @@
 # Clojure files
 target/
+.lein-failures
 
 # Emacs files
 *~

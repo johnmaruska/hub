@@ -5,6 +5,7 @@ I'm just going to put all my side-project Clojure stuff into this catch-all proj
 ## Components added, checked in REPL
 
 1. World of Warcraft arena match log, i.e. The Guide
+1. discord bot roles interaction
 
 ## Components added but not tested
 
@@ -13,13 +14,12 @@ I'm just going to put all my side-project Clojure stuff into this catch-all proj
 
 ## Components to add, written somewhere else already
 
-1. Conway game of life
-1. Advent of Code exercises
 1. Pokemon utilities
    - PokeJobs assignments
-1. Discord bot basic interactions
 1. Playing cards deck
 1. Dice Bag
+1. Conway game of life
+1. Advent of Code exercises
 
 ## Ideas for components to write
 
@@ -28,9 +28,34 @@ I'm just going to put all my side-project Clojure stuff into this catch-all proj
 1. Discord bot interaction with playing cards
 1. Discord bot interaction for @ing video game groups,
    i.e. programmatic role assignment
+   ( this is roughly just about done? )
 1. Web interaction with The Guide
 
 ## Playground ideas
 
 1. Clara rules to implement games, e.g. tic tac toe, Pokemon, D&D
 1. 
+
+
+## Extra Scripts
+
+### imdb.py
+
+This is just some throwaway plotting of IMDB data, originally for
+episode ratings to compare seasons of a series. IMDB data isn't
+committed here because yuck. Three files are needed:
+
+  - title.basics.tsv
+  - title.episode.tsv
+  - title.ratings.tsv
+
+source: https://datasets.imdbws.com/
+
+Each of these extracted tsv files should be in `./resources/imdb/`
+
+This is still in here because I planned on doing it in Clojure
+originally but had problems with reading the
+TSVs... `clojure.data.csv` gets mad about an unexpected `)` and I
+couldn't figure out how to make it work. If you successfully
+`clojure.data.csv/read-csv` the file `title.basics.tsv`, let me know
+how that exception was resolved.
