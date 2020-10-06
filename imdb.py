@@ -19,7 +19,7 @@ def tconst(primary_title):
     """Scan the basics for an entry with `primary_title` and returns its `tconst`.
 This is a fairly expensive IO scanning operationg. Please god just save the value
 instead of repeatedly calling this."""
-    with open(basics_tsv, encoding='utf-8') as f:
+    with open(BASICS_TSV, encoding='utf-8') as f:
         return find(
             lambda row: row['primaryTitle'] == primary_title,
             tsv_reader(f)
@@ -78,4 +78,4 @@ def boxplot_season_ratings(data):
 
 SOUTH_PARK_TCONST = "tt0121955"
 
-boxplot_season_ratings(by_season(with_ratings(episodes(tconst("Steven Universe")))))
+boxplot_season_ratings(by_season(with_ratings(episodes(tconst("The Simpsons")))))
