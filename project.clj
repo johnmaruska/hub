@@ -7,4 +7,5 @@
                  ;; discord api wrapper
                  [discord.clj "2.0.0"]]
   :source-paths ["src/clj"]
+  :test-paths ["test/clj"]
   :main hub.core)

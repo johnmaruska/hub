@@ -7,12 +7,12 @@ I'm just going to put all my side-project Clojure stuff into this catch-all proj
 1. World of Warcraft arena match log, i.e. The Guide
 1. discord bot roles interaction
 1. id3 tag fix for Windows Media Player CD rips
+1. Playing cards deck
 
 ## Components to add, written somewhere else already
 
 1. Pokemon utilities
    - PokeJobs assignments
-1. Playing cards deck
 1. Dice Bag
 1. Conway game of life
 1. Advent of Code exercises
