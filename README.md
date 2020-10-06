@@ -6,9 +6,6 @@ I'm just going to put all my side-project Clojure stuff into this catch-all proj
 
 1. World of Warcraft arena match log, i.e. The Guide
 1. discord bot roles interaction
-
-## Components added but not tested
-
 1. id3 tag fix for Windows Media Player CD rips
 
 ## Components to add, written somewhere else already
@@ -30,10 +27,13 @@ I'm just going to put all my side-project Clojure stuff into this catch-all proj
    ( this is roughly just about done? )
 1. Web interaction with The Guide
 
+## Nicely Wrap things up
+
+1. can run id3 tag fix from command line, root-dir as optional argument
+
 ## Playground ideas
 
 1. Clara rules to implement games, e.g. tic tac toe, Pokemon, D&D
-1. 
 
 
 ## Extra Scripts
