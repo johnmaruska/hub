@@ -37,8 +37,6 @@
                          (+ top-pixel  (* row cell-size))
                          cell-size cell-size))))))
 
-;; TODO: accept parameters for def'd properties above, bind over them
-;; don't wanna have to pass everything down all weird
 (defn sketch
   [grid & {:keys [cell-size frame-rate]
            :or   {cell-size  default-cell-size
