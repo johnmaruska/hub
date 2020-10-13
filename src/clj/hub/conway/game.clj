@@ -9,11 +9,9 @@
 (def alive 1)
 (def dead  0)
 
-(def ^:dynamic dimensions)
-
 (defn get-dimensions [grid]
-  {:m (count grid)
-   :n (count (first grid))})
+  {:y (count grid)
+   :x (count (first grid))})
 
 (defn alive?
   ([cell] (= alive cell))
@@ -59,15 +57,3 @@
 
 (defn play [seed]
   (iterate step-grid seed))
-
-(defn start!
-  "Start the game, outputing each iteration with given `display` fn
-
-  `display` must accept the grid"
-  [display seed-grid iterations]
-  ;; bind over dynamic var so we dont recalculate constantly
-  (binding [dimensions (get-dimensions seed-grid)]
-    (run! #(display % dimensions) (take iterations (play seed-grid)))))
-
-
-#_ (game/start! terminal/display! seed/toad 5)

@@ -6,22 +6,30 @@
    [hub.conway.seed :as seed]
    [hub.conway.util :as util]))
 
-(defn setup [seed-grid]
-  (q/frame-rate 5)
-  (q/color-mode :rgb)
-  ;; pick seed board
+;;; colors
+(def white 255)
+(def black 0)
+;;; properties
+(def fill white)
+(def background black)
+;;; param properties
+(def default-cell-size 25)
+(def default-frame-rate 5)
+
+(defn- setup
+  [seed-grid frame-rate]
+  (q/frame-rate frame-rate)
+  (q/fill fill)
   {:grid seed-grid})
 
-(defn update-state [state]
+(defn- update-state [state]
   (update state :grid game/step-grid))
 
-(def cell-size 50)
-(defn draw-state [state]
-  ;; TODO is default origin top-left or bottom-left?
+(defn- draw-state
+  [state]
   (let [top-pixel  0
         left-pixel 0]
-    (q/background 0)
-    (q/fill 255)
+    (q/background background)  ; clear sketch
     (->> (util/get-coords (:grid state))
          (filter (comp game/alive? :value))
          (run! (fn [{:keys [row col value]}]
@@ -29,15 +37,23 @@
                          (+ top-pixel  (* row cell-size))
                          cell-size cell-size))))))
 
-(def initial-grid
-  (-> (seed/all-dead 10 10)
-      (seed/overlay seed/glider)))
-
-(q/defsketch sketch
-  :title "Conway's Game of Life"
-  :update update-state
-  :setup (partial setup initial-grid)
-  :draw draw-state
-  :size [500 500]
-  :features [:keep-on-top]
-  :middleware [m/fun-mode])
+;; TODO: accept parameters for def'd properties above, bind over them
+;; don't wanna have to pass everything down all weird
+(defn sketch
+  [grid & {:keys [cell-size frame-rate]
+           :or   {cell-size  default-cell-size
+                  frame-rate default-frame-rate}}]
+  (let [{:keys [x y]} (game/get-dimensions grid)
+        grid-size     [x y]
+        sketch-size   (mapv #(* cell-size %) grid-size)]
+    (q/sketch
+     ;;; basic properties
+     :title    "Conway's Game of Life"
+     :features [:keep-on-top]
+     :size     sketch-size
+     ;;; lifecycle fns
+     :setup  #(setup initial-grid frame-rate)
+     :update update-state
+     :draw   draw-state
+     ;;; extra things, TODO look into
+     :middleware [m/fun-mode])))

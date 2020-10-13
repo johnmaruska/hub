@@ -5,8 +5,8 @@
 
 ;; initializing
 
-(defn all-dead [m n]
-  (vec (take m (repeat (vec (take n (repeat game/dead)))))))
+(defn all-dead [x y]
+  (vec (take y (repeat (vec (take x (repeat game/dead)))))))
 
 (defn overlay-cell
   "Overlay a value into an nd-array. Maintains alive cells, overwrites dead cells.

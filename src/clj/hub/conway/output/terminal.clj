@@ -33,11 +33,11 @@
        (take (total-chars-per-line n))
        (apply str)))
 
-(defn clear! []
+(defn clear []
   (print (str (char 27) "[2J")) ; clear screen
   (print (str (char 27) "[;H"))) ; move cursor to the top left corner of the screen
 
-(defn display!
+(defn display
   " Prints to the console the given grid with `=` top/bottom, `X` alive and `.`
   dead cells.
   =======
@@ -46,6 +46,11 @@
   .  .  X
   ======="
   [grid dimensions]
-  (clear!)
+  (clear)
   (let [bookend (make-bookend (:n dimensions))]
     (println (apply str [bookend "\n" (->string grid) "\n" bookend]))))
+
+(defn start!
+  [seed-grid iterations]
+  (let [dimensions (game/get-dimensions seed-grid)]
+    (run! #(display % dimensions) (take iterations (game/play seed-grid)))))
