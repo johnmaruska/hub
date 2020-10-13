@@ -51,7 +51,7 @@
   (map-indexed (fn [x _] (step-cell grid x y)) row))
 
 ;; perform iteration over entire grid
-(defn- step-grid
+(defn step-grid
   "Expects a `grid` whose cells are all either `alive` or `dead`, and whose
   dimensions match those in `m` and `n` via `set-dimensions!`."
   [grid]
