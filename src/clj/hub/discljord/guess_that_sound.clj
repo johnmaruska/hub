@@ -1,13 +1,13 @@
 (ns hub.discljord.guess-that-sound
   (:require
    [clojure.string :as string]
-   [discljord.formatting :refer mention-user]
+   [discljord.formatting :refer [mention-user]]
    [discljord.messaging :as m]))
 
 ;;;; Reply messages
 
 (def canned-reply
-  {:start-game-welcome   "*Time to play `GUESS THAT SOUND`.*"
+  {:start-game-welcome   "**Time to play `GUESS THAT SOUND`.**"
    :game-already-started "A game has already started."
    :no-game-started      "No guessing game has started"
    :guess-help           "Whatever mysterious sound is happening in voice, type `!guess` followed by whatever you think the sound is."
@@ -16,10 +16,9 @@
 (defn drop-first-word [s]
   (string/join " " (rest (string/split s #" "))))
 
-(defn reply [bot event contents]
-  (m/create-message! (:message-ch bot)
-                     (:channel-id event)
-                     contents))
+(defn reply [bot event content]
+  (m/create-message! (:message-ch bot) (:channel-id event)
+                     :content content))
 
 ;;;; Game state
 
@@ -76,12 +75,13 @@
 
 ;;;; create-message event handler
 
-(defn handler [bot event]
+(defn handle [bot event]
   (letfn [(when-game-started [action]
             (if (game-started?)
               (action bot event)
               (reply bot event (:no-game-started canned-reply))))]
-    (condp string/starts-with? (:content event)
-      "!play guess-that-sound" (start! bot)
+    (condp (fn [substr s] (string/starts-with? s substr)) (:content event)
+      "!play guess-that-sound" (start! bot event)
       "!guess"  (when-game-started guess!)
-      "!answer" (when-game-started answer!))))
+      "!answer" (do (when-game-started answer!) (stop!))
+      nil)))
