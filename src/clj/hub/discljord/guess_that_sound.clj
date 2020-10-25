@@ -1,11 +1,8 @@
 (ns hub.discljord.guess-that-sound
-  (:require [clojure.string :as string]))
-
-;;;; NOT YET IMPLEMENTED
-
-(def mention identity)
-(def reply println)
-
+  (:require
+   [clojure.string :as string]
+   [discljord.formatting :refer mention-user]
+   [discljord.messaging :as m]))
 
 ;;;; Reply messages
 
@@ -19,6 +16,11 @@
 (defn drop-first-word [s]
   (string/join " " (rest (string/split s #" "))))
 
+(defn reply [bot event contents]
+  (m/create-message! (:message-ch bot)
+                     (:channel-id event)
+                     contents))
+
 ;;;; Game state
 
 (def initial-state
@@ -31,7 +33,7 @@
 (defn game-started? [] (not (nil? @game)))
 
 (defn display []
-  (let [guess-line  (fn [x] (str (mention (:author x))
+  (let [guess-line  (fn [x] (str (mention-user (:author x))
                                  " guessed "
                                  (:guess x)))
         answer-line (str "Answer: " (:answer @game))
@@ -41,53 +43,45 @@
 
 ;;;; User actions
 
-(defn guess!
-  "Track a guess"
-  [bot event]
+(defn guess! [bot event]
   (let [guess  (drop-first-word (:content event))
         append (fn [a g] (update a :guesses conj g))]
     (swap! game append {:author (:author event) :guess guess})))
 
 (defn answer! [bot event]
   (swap! game assoc :answer (drop-first-word (:content event)))
-  (reply (display)))
+  (reply bot event (display)))
 
 
 ;;;; Game lifecycle
 
-(defn start-reply [bot header]
+(defn start-reply [bot event header]
   (let [{:keys [guess-help answer-help]} canned-reply
         lines [header guess-help answer-help]]
-    (reply (string/join "\n" lines))))
+    (reply bot event (string/join "\n" lines))))
 
-(defn init-game! [bot]
-  (start-reply bot (:start-game-welcome canned-reply))
+(defn init-game! [bot event]
+  (start-reply bot event (:start-game-welcome canned-reply))
   (reset! game initial-state))
 
-(defn game-already-started [bot]
-  (start-reply bot (:game-already-started canned-reply)))
+(defn game-already-started [bot event]
+  (start-reply bot event (:game-already-started canned-reply)))
 
-(defn start! [bot]
+(defn start! [bot event]
   (if (game-started?)
-    (game-already-started bot)
-    (init-game! bot)))
+    (game-already-started bot event)
+    (init-game! bot event)))
 
 (defn stop! [] (reset! game nil))
 
 ;;;; create-message event handler
 
-(defmacro when-game-started [& body]
-  `(if (game-started?)
-     (do ~@body)
-     (reply (:no-game-started canned-reply))))
-
 (defn handler [bot event]
-  (condp string/starts-with? (:content event)
-    "!play guess-that-sound"
-    (start! bot)
-
-    "!guess"
-    (when-game-started (guess! bot event))
-
-    "!answer"
-    (when-game-started (answer! bot event))))
+  (letfn [(when-game-started [action]
+            (if (game-started?)
+              (action bot event)
+              (reply bot event (:no-game-started canned-reply))))]
+    (condp string/starts-with? (:content event)
+      "!play guess-that-sound" (start! bot)
+      "!guess"  (when-game-started guess!)
+      "!answer" (when-game-started answer!))))
