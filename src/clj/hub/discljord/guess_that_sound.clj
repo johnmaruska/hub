@@ -80,8 +80,7 @@
             (if (game-started? (:channel-id event))
               (action bot event)
               (util/reply bot event (:no-game-started canned-reply))))]
-    (condp (fn [substr s] (string/starts-with? s substr)) (:content event)
-      "!play guess-that-sound" (start! bot event)
-      "!guess"  (when-game-started guess!)
-      "!answer" (do (when-game-started answer!) (stop! event))
-      nil)))
+    (util/command (:content event)
+        "!play guess-that-sound" (start! bot event)
+        "!guess"  (when-game-started guess!)
+        "!answer" (do (when-game-started answer!) (stop! event)))))
