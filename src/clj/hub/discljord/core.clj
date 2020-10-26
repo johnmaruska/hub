@@ -1,9 +1,11 @@
 (ns hub.discljord.core
   (:require
    [clojure.core.async :as a]
+   [clojure.pprint :as pprint]
    [discljord.connections :as c]
    [discljord.events :as e]
-   [discljord.messaging :as m]))
+   [discljord.messaging :as m]
+   [hub.discljord.guess-that-sound :as guess-that-sound]))
 
 (def token (System/getenv "DISCORD_TOKEN"))
 
@@ -14,21 +16,29 @@
      :message-ch    (m/start-connection! token)}))
 
 (defn stop! [bot]
-  (m/stop-connection! (:message-ch bot))
-  (c/disconnect-bot!  (:connection-ch bot))
-  (a/close! (:event-ch bot)))
+  (try (m/stop-connection! (:message-ch bot))
+       (catch Exception ex nil))
+  (try (c/disconnect-bot!  (:connection-ch bot))
+       (catch Exception ex nil))
+  (try (a/close! (:event-ch bot))
+       (catch Exception ex nil)))
 
-(defn handle-message-create [data]
-  )
+(def ignored-events
+  #{;;; bot control events
+    :connected-all-shards
+    :ready
+    :guild-create  ; it's connected to a server
+    ;;; user action events
+    :presence-updated  ; also triggers on game/activity changes like spotify
+    :typing-started})
 
-(defn handle-event [[event-type event-data]]
-  (println "NEW EVENT!")
-  (println "Event type:" event-type)
-  (println "Event data:" (pr-str event-data)))
+(defn handle-event [bot [event-type event-data]]
+  (when (= :message-create event-type)
+    (guess-that-sound/handle bot event-data)))
 
 (defn spin-forever! [bot]
   (try
     (loop []
-      (handle-message (a/<!! (:event-ch bot)))
+      (handle-event bot (a/<!! (:event-ch bot)))
       (recur))
     (finally (stop! bot))))
