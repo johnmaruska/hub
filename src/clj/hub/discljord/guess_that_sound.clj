@@ -74,7 +74,7 @@
 
 ;;;; create-message event handler
 
-(defn handle [bot event]
+(defn handle! [bot event]
   {:pre [(spec.event/message-create? event)]}
   (letfn [(when-game-started [action]
             (if (game-started? (:channel-id event))

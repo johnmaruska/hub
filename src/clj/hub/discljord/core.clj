@@ -32,13 +32,13 @@
     :presence-updated  ; also triggers on game/activity changes like spotify
     :typing-started})
 
-(defn handle-event [bot [event-type event-data]]
+(defn handle-event! [bot [event-type event-data]]
   (when (= :message-create event-type)
-    (guess-that-sound/handle bot event-data)))
+    (guess-that-sound/handle! bot event-data)))
 
 (defn spin-forever! [bot]
   (try
     (loop []
-      (handle-event bot (a/<!! (:event-ch bot)))
+      (handle-event! bot (a/<!! (:event-ch bot)))
       (recur))
     (finally (stop! bot))))
