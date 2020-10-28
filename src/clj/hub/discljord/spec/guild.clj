@@ -19,3 +19,15 @@
     [:map
      [:user user]
      [:premium-since p/timestamp]])))
+
+;; https://discord.com/developers/docs/topics/permissions#role-object
+(def role
+  [:map
+   [:id p/snowflake]
+   [:name string?]
+   [:color integer?]
+   [:hoist boolean?]
+   [:position integer?]
+   [:permissions string?]
+   [:managed boolean?]
+   [:mentionable boolean?]])

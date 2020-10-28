@@ -12,6 +12,11 @@
        ~@body
        nil)))
 
+(defn display-seq [xs]
+  (->> xs
+       (map #(str "`" % "`"))
+       (string/join ", ")))
+
 (defn drop-first-word [s]
   (string/join " " (rest (string/split s #" "))))
 
