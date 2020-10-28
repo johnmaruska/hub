@@ -4,5 +4,4 @@
 
 (defn handle [bot event]
   (util/command (:content event)
-    "!working"
-    (util/reply bot event "https://giphy.com/gifs/9K2nFglCAQClO")))
+    "!working" (util/reply bot event "https://giphy.com/gifs/9K2nFglCAQClO")))
