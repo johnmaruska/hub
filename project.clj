@@ -5,8 +5,7 @@
                  ;; https://github.com/pandeiro/claudio
                  [claudio "0.1.3"]
                  ;; discord api wrapper
-                 [discord.clj "2.0.0"]  ;old, bad, remove
-                 [org.suskalo/discljord "1.1.1"] ; new, good, keep
+                 [org.suskalo/discljord "1.1.1"]
                  ;; data-driven schemas that aren't clojure.spec
                  [metosin/malli "0.2.1"]
                  ;; drawing library for Conway
