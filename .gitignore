@@ -8,8 +8,8 @@ pom.xml
 *#*
 .nrepl-port
 
+# imdb data -- large files
+resources/imdb/*
+
 # Discord secrets
 data/settings/settings.json
-
-# imdb data
-resources/imdb/
