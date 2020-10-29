@@ -1,5 +1,7 @@
 (ns hub.conway.output.terminal
-  (:require [hub.conway.game :as game]))
+  (:require
+   [hub.conway.game :as game]
+   [hub.util.grid]))
 
 ;; print iteration
 (def alive-ascii "X")
@@ -49,3 +51,8 @@
   (clear!)
   (let [bookend (make-bookend (:n dimensions))]
     (println (apply str [bookend "\n" (->string grid) "\n" bookend]))))
+
+(defn start!
+  [seed-grid iterations]
+  (let [dimensions (util/get-dimensions seed-grid)]
+    (run! #(display % dimensions) (take iterations (game/play seed-grid)))))

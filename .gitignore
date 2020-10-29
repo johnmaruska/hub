@@ -1,6 +1,7 @@
 # Clojure files
 target/
 .lein-failures
+pom.xml
 
 # Emacs files
 *~
@@ -9,3 +10,6 @@ target/
 
 # Discord secrets
 data/settings/settings.json
+
+# imdb data
+resources/imdb/

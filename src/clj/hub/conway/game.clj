@@ -3,52 +3,31 @@
   Intended usage includes:
     - `play` to receive a LazySeq of game iterations
     - `alive`, `dead` to abstract representation
-    - `start!` to play with a provided display output fn")
+    - `start!` to play with a provided display output fn"
+  (:require [hub.util :as util]))
 
 ;; count living/dead neighbors
 (def alive 1)
 (def dead  0)
 
-(def ^:dynamic dimensions)
-
-(defn get-dimensions [grid]
-  {:m (count grid)
-   :n (count (first grid))})
-
 (defn alive?
   ([cell] (= alive cell))
-  ([grid x y]
-   (try
-     (alive? (nth (nth grid y) x))
-     (catch IndexOutOfBoundsException ex
-       false))))
+  ([grid [x y]]
+   (alive? (nth (nth grid y) x))))
 
-(defn- neighbor-coords
-  "Get the value of each neighbor in a clockwise-from-12 vec"
-  [x y]
-  [[     x  (dec y)]  ; above
-   [(inc x) (dec y)]  ; above right
-   [(inc x)      y]   ; right,
-   [(inc x) (inc y)]  ; below right
-   [     x  (inc y)]  ; below
-   [(dec x) (inc y)]  ; below left
-   [(dec x)      y]   ; left
-   [(dec x) (dec y)]  ; above left
-   ])
-
-(defn count-neighbors [grid x y]
-  (->> (neighbor-coords x y)
-       (filter (fn [[nx ny]] (alive? grid nx ny)))
-       (count)))
+(defn count-neighbors [grid coord]
+  (->> (util/get-neighbors coord)
+       (filter #(alive? grid %))
+       count))
 
 ;; determine iteration for point
-(defn- step-cell [grid x y]
-  (if (alive? grid x y)
-    (if (<= 2 (count-neighbors grid x y) 3) alive dead)
-    (if ( = 3 (count-neighbors grid x y))   alive dead)))
+(defn- step-cell [grid [x y]]
+  (if (alive? grid [x y])
+    (if (<= 2 (count-neighbors grid [x y]) 3) alive dead)
+    (if ( = 3 (count-neighbors grid [x y]))   alive dead)))
 
 (defn- step-row [grid y row]
-  (map-indexed (fn [x _] (step-cell grid x y)) row))
+  (map-indexed (fn [x _] (step-cell grid [x y])) row))
 
 ;; perform iteration over entire grid
 (defn- step-grid
