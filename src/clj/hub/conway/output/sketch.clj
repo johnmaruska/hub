@@ -4,22 +4,22 @@
    [quil.middleware :as m]
    [hub.conway.game :as game]
    [hub.conway.seed :as seed]
-   [hub.conway.util :as util]))
+   [hub.util.grid :as util]))
 
 ;;; colors
 (def white 255)
 (def black 0)
 ;;; properties
-(def fill white)
-(def background black)
+(def alive white)
+(def dead  black)
 ;;; param properties
-(def default-cell-size 25)
-(def default-frame-rate 5)
+(def cell-size 25)
+(def frame-rate 5)
 
 (defn- setup
   [seed-grid frame-rate]
   (q/frame-rate frame-rate)
-  (q/fill fill)
+  (q/fill alive)
   {:grid seed-grid})
 
 (defn- update-state [state]
@@ -29,8 +29,8 @@
   [state]
   (let [top-pixel  0
         left-pixel 0]
-    (q/background background)  ; clear sketch
-    (->> (util/get-coords (:grid state))
+    (q/background dead)  ; clear sketch
+    (->> (util/get-coord-objs (:grid state))
          (filter (comp game/alive? :value))
          (run! (fn [{:keys [row col value]}]
                  (q/rect (+ left-pixel (* col cell-size))
@@ -38,10 +38,8 @@
                          cell-size cell-size))))))
 
 (defn sketch
-  [grid & {:keys [cell-size frame-rate]
-           :or   {cell-size  default-cell-size
-                  frame-rate default-frame-rate}}]
-  (let [{:keys [x y]} (game/get-dimensions grid)
+  [grid]
+  (let [{:keys [x y]} (util/get-dimensions grid)
         grid-size     [x y]
         sketch-size   (mapv #(* cell-size %) grid-size)]
     (q/sketch
@@ -50,8 +48,14 @@
      :features [:keep-on-top]
      :size     sketch-size
      ;;; lifecycle fns
-     :setup  #(setup initial-grid frame-rate)
+     :setup  #(setup grid frame-rate)
      :update update-state
      :draw   draw-state
      ;;; extra things, TODO look into
      :middleware [m/fun-mode])))
+
+
+#_
+(-> (seed/all-dead 50 50)
+    (seed/overlay seed/glider 5 5)
+    sketch)
