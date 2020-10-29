@@ -1,19 +1,19 @@
 (ns hub.conway.seed
   (:require
    [hub.conway.game :as game]
-   [hub.conway.util :as util]))
+   [hub.util.grid :as util]))
 
 ;; initializing
 
 (defn all-dead [x y]
-  (vec (take y (repeat (vec (take x (repeat game/dead)))))))
+  (util/init x y game/dead))
 
 (defn overlay-cell
   "Overlay a value into an nd-array. Maintains alive cells, overwrites dead cells.
 
   returns unchanged grid if coordinates out of bounds, following behavior of `game/alive?`"
   [grid x y val]
-  (if (game/alive? grid x y)
+  (if (game/alive? grid [x y])
     grid
     (assoc-in grid [y x] val)))
 
@@ -28,7 +28,7 @@
                            (+ y0 (:row coord))
                            (:value coord)))
            grid
-           (util/get-coords seed))))
+           (util/get-coord-objs seed))))
 
 ;; Still lifes
 
