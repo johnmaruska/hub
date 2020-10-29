@@ -4,7 +4,7 @@
     - `play` to receive a LazySeq of game iterations
     - `alive`, `dead` to abstract representation
     - `start!` to play with a provided display output fn"
-  (:require [hub.util :as util]))
+  (:require [hub.util.grid :as util]))
 
 ;; count living/dead neighbors
 (def alive 1)
