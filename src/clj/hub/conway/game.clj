@@ -30,7 +30,7 @@
   (map-indexed (fn [x _] (step-cell grid [x y])) row))
 
 ;; perform iteration over entire grid
-(defn- step-grid
+(defn step-grid
   "Expects a `grid` whose cells are all either `alive` or `dead`, and whose
   dimensions match those in `m` and `n` via `set-dimensions!`."
   [grid]
@@ -38,15 +38,3 @@
 
 (defn play [seed]
   (iterate step-grid seed))
-
-(defn start!
-  "Start the game, outputing each iteration with given `display` fn
-
-  `display` must accept the grid"
-  [display seed-grid iterations]
-  ;; bind over dynamic var so we dont recalculate constantly
-  (binding [dimensions (get-dimensions seed-grid)]
-    (run! #(display % dimensions) (take iterations (play seed-grid)))))
-
-
-#_ (game/start! terminal/display! seed/toad 5)

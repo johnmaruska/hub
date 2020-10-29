@@ -12,9 +12,6 @@ dependencies between repos because ehhh...
 1. discord bot roles interaction
 1. id3 tag fix for Windows Media Player CD rips
 1. Playing cards deck
-
-## Components added, need to test
-
 1. Conway game of life
 
 ## Components to add, written somewhere else already
@@ -37,7 +34,8 @@ dependencies between repos because ehhh...
 
 ## Nicely Wrap things up
 
-1. can run id3 tag fix from command line, root-dir as optional argument
+1. can run id3 tag fix from command line, root-dir as optional
+   argument (would rather in REPL user.clj tbh)
 
 ## Playground ideas
 
@@ -49,9 +47,6 @@ Small Stuff:
 - implement inputs, either filename or randomize given dimensions +
   density
 - implement potential output, save iteration to file
-
-Big Things:
-- do a graphical display instead of a terminal display
 
 ## Extra Scripts
 
