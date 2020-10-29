@@ -13,7 +13,7 @@
 
   returns unchanged grid if coordinates out of bounds, following behavior of `game/alive?`"
   [grid x y val]
-  (if (game/alive? grid x y)
+  (if (game/alive? grid [x y])
     grid
     (assoc-in grid [y x] val)))
 

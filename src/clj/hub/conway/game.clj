@@ -16,15 +16,15 @@
    (alive? (nth (nth grid y) x))))
 
 (defn count-neighbors [grid coord]
-  (->> (util/get-neighbors coord)
+  (->> (util/get-neighbors grid coord)
        (filter #(alive? grid %))
        count))
 
 ;; determine iteration for point
-(defn- step-cell [grid [x y]]
-  (if (alive? grid [x y])
-    (if (<= 2 (count-neighbors grid [x y]) 3) alive dead)
-    (if ( = 3 (count-neighbors grid [x y]))   alive dead)))
+(defn- step-cell [grid coord]
+  (if (alive? grid coord)
+    (if (<= 2 (count-neighbors grid coord) 3) alive dead)
+    (if ( = 3 (count-neighbors grid coord))   alive dead)))
 
 (defn- step-row [grid y row]
   (map-indexed (fn [x _] (step-cell grid [x y])) row))
