@@ -1,7 +1,10 @@
 (ns hub.discljord.role
   (:require
+   [clojure.string :as string]
+   [discljord.formatting :as f :refer [mention-user mention-role]]
    [discljord.messaging :as m]
-   [hub.discljord.util :as util]))
+   [hub.discljord.util :as util]
+   [hub.util :refer [find-by]]))
 
 ;;;; query
 
@@ -13,33 +16,33 @@
 
 (defn list-all [bot event]
   (let [response (str "All roles in the server are: "
-                      (util/format-seq (map :name (all bot event))))]
-    (reply bot event response)))
+                      (util/display-seq (map :name (all bot event))))]
+    (util/reply bot event response)))
 
 (defn list-authors [bot event]
   (let [roles    @(m/get-guild-member! (:message-ch bot)
                                        (:guild-id event)
                                        (-> event :author :id))
         response (str (mention-user (:author event)) "'s roles are: "
-                      (util/format-seq (map :name roles)))]
-    (reply bot event response)))
+                      (util/display-seq (map :name roles)))]
+    (util/reply bot event response)))
 
 (defn create [bot event]
   (let [role-name (string/replace (:content event) #"^!role new " "")
-        result    @(m/create-guid-role (:message-ch bot)
-                                       (:guild-id event)
-                                       :name role-name
-                                       :hoist true
-                                       :mentionable true)]
+        result    @(m/create-guild-role! (:message-ch bot)
+                                         (:guild-id event)
+                                         :name role-name
+                                         :hoist true
+                                         :mentionable true)]
     (util/reply bot event (str "Created role " (mention-role result)))))
 
 (defn add-to-author [bot event]
   (let [role-name (string/replace (:content event) #"^!role join " "")]
-    (if-let [role-id (:id (util/find-by :name role-name (all bot event)))]
-      (do @(m/add-guild-member-role (:message-ch bot)
-                                    (:guild-id event)
-                                    (-> event :author :id)
-                                    role-id)
+    (if-let [role-id (:id (find-by :name role-name (all bot event)))]
+      (do @(m/add-guild-member-role! (:message-ch bot)
+                                     (:guild-id event)
+                                     (-> event :author :id)
+                                     role-id)
           (util/reply bot event
                       (str "Added role " role-name " to user "
                            (mention-user (:author event)))))
@@ -48,15 +51,15 @@
 
 (defn remove-from-author [bot event]
   (let [role-name (string/replace (:content event) #"^!role leave " "")]
-    (if-let [role-id (:id (util/find-by :name role-name (all bot event)))]
-      (do @(m/remove-guild-member-role (:message-ch bot)
-                                       (:guild-id event)
-                                       (-> event :author :id)
-                                       role-id)
-          (reply bot event (str "Removed role " role-name
-                                " from user " (mention-user (:author event)))))
-      (reply bot event (str "No role by the name " role-name
-                            " was assigned to " (mention-user (:author event)))))))
+    (if-let [role-id (:id (find-by :name role-name (all bot event)))]
+      (do @(m/remove-guild-member-role! (:message-ch bot)
+                                        (:guild-id event)
+                                        (-> event :author :id)
+                                        role-id)
+          (util/reply bot event (str "Removed role " role-name
+                                     " from user " (mention-user (:author event)))))
+      (util/reply bot event (str "No role by the name " role-name
+                                 " was assigned to " (mention-user (:author event)))))))
 
 (def help-message
   "The `role` extension is used for basic role management.

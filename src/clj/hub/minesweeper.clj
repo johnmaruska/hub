@@ -3,7 +3,6 @@
    [clojure.string :as string]
    [hub.util.grid :as util]))
 
-;;; tentatively using truthy, will change after numbers loaded
 (def BOMB 'B)
 (defn bomb? [v] (= BOMB v))
 (defn safe? [v] (not (bomb? v)))
@@ -39,27 +38,3 @@
   (-> (util/init height width)
       (add-bombs (bomb-coords height width num-bombs))
       add-counters))
-
-
-;;; discljord
-
-(defn spoiler [s]
-  (str "||" s "||"))
-
-(def output
-  {1    ":one:"
-   2    ":two:"
-   3    ":three:"
-   4    ":four:"
-   5    ":five:"
-   6    ":six:"
-   7    ":seven:"
-   8    ":eight:"
-   9    ":nine:"
-   0    ":zero:"
-   BOMB ":burn:"})
-
-(defn discord-fmt [grid]
-  (letfn [(fmt-row [row]
-            (apply str (map #(spoiler (get output %)) row)))]
-    (string/join "\n" (vec (map fmt-row grid)))))

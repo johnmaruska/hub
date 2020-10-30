@@ -23,3 +23,6 @@
 (defn reply [bot event content]
   (m/create-message! (:message-ch bot) (:channel-id event)
                      :content content))
+
+(defn spoiler [s]
+  (str "||" s "||"))

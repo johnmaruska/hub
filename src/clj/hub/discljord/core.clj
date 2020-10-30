@@ -5,7 +5,10 @@
    [discljord.connections :as c]
    [discljord.events :as e]
    [discljord.messaging :as m]
-   [hub.discljord.guess-that-sound :as guess-that-sound]))
+   [hub.discljord.admin :as admin]
+   [hub.discljord.guess-that-sound :as guess-that-sound]
+   [hub.discljord.minesweeper :as minesweeper]
+   [hub.discljord.role :as role]))
 
 (def token (System/getenv "DISCORD_TOKEN"))
 
@@ -32,9 +35,16 @@
     :presence-updated  ; also triggers on game/activity changes like spotify
     :typing-started})
 
+(def message-create-handlers
+  [guess-that-sound/handle!
+   minesweeper/handle
+   admin/handle
+   role/handle])
+
 (defn handle-event! [bot [event-type event-data]]
   (when (= :message-create event-type)
-    (guess-that-sound/handle! bot event-data)))
+    (doseq [h message-create-handlers]
+      (h bot event-data))))
 
 (defn spin-forever! [bot]
   (try
