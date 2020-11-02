@@ -12,4 +12,9 @@
                  [quil "3.1.0"]]
   :source-paths ["src/clj"]
   :test-paths ["test/clj"]
-  :main hub.core)
+
+  ;;; Packaging
+  :uberjar-name "hub.jar"
+  :main hub.core
+  :profiles {:uberjar {:aot         :all
+                       :omit-source true}})

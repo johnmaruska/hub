@@ -1,8 +1,7 @@
 (ns hub.core
   (:gen-class))
 
-(defn destroy! [& args])
-
-(defn init! [& args])
-
-(defn -main [& args])
+(defn -main [& args]
+  (println "hub core")
+  (doseq [arg *command-line-args*]
+    (println "arg" arg)))

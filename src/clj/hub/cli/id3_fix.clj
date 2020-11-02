@@ -1,4 +1,4 @@
-(ns hub.id3-fix
+(ns hub.cli.id3-fix
   "Windows Media Player, when auto-ripping a CD, will often miss the track data
   for the first track (album, artist, etc. not track title or name though).
 

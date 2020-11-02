@@ -1,7 +1,7 @@
 (ns hub.conway.output.terminal
   (:require
    [hub.conway.game :as game]
-   [hub.util.grid]))
+   [hub.util.grid :as util]))
 
 ;; print iteration
 (def alive-ascii "X")
