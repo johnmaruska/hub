@@ -18,6 +18,7 @@
    (sketch/animate seed game/play-round delay-ms)))
 
 (defn console-print
+  "Display game state in the terminal, ASCII animation"
   ([]
    (console-print (seed/random default-width default-height)))
   ([seed]
@@ -25,6 +26,8 @@
      (terminal/animate seed game/play-round delay-ms))))
 
 (defn autoplay
+  "Generate a lazy-sequence of game states from `seed`.
+  If no `seed` provided, randomly generate an initial state."
   ([]
    (autoplay (seed/random default-width default-height)))
   ([seed]
