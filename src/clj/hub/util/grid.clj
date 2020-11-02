@@ -3,11 +3,11 @@
 (defn init
   "Generate a `height` x `width` array, all indices false."
   ([height width]
-   (init height width nil))
-  ([height width value]
+   (init height width (constantly nil)))
+  ([height width value-fn]
    (vec (for [x (range width)]
           (vec (for [y (range height)]
-                 value))))))
+                 (value-fn)))))))
 
 (defn get-coord [board [x y]]
   (nth (nth board y) x))
