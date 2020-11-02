@@ -1,13 +1,11 @@
 (ns hub.conway.output.terminal
   (:require
    [hub.conway.game :as game]
-   [hub.util.grid :as util]))
+   [hub.util.grid :as grid]))
 
-;; print iteration
-(def alive-ascii "X")
-(def dead-ascii ".")
-(defn- cell->string [cell]
-  (if (game/alive? cell) alive-ascii dead-ascii))
+(def cell->string
+  {game/alive "X"
+   game/dead  "."})
 
 (def spacing 2)
 (defn- ->string [grid]
@@ -47,12 +45,18 @@
   X  .  X
   .  .  X
   ======="
-  [grid dimensions]
+  [grid & [dimensions]]
   (clear)
-  (let [bookend (make-bookend (:n dimensions))]
+  (let [dimensions (or dimensions (grid/get-dimensions grid))
+        bookend    (make-bookend (:x dimensions))]
     (println (apply str [bookend "\n" (->string grid) "\n" bookend]))))
 
-(defn start!
-  [seed-grid iterations]
-  (let [dimensions (util/get-dimensions seed-grid)]
-    (run! #(display % dimensions) (take iterations (game/play seed-grid)))))
+(defn animate
+  "Continuously display grid updates, animating changes.
+  Blocking call that spins infinitely. Used either in isolation or from a thread."
+  [seed-grid update-fn delay-ms]
+  (let [dimensions (grid/get-dimensions seed-grid)]
+    (run! (fn [x]
+            (display x dimensions)
+            (Thread/sleep delay-ms))
+          (iterate update-fn seed-grid))))
