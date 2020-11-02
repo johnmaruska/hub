@@ -26,7 +26,7 @@
   (let [top-pixel  0
         left-pixel 0]
     (q/background dead)  ; clear sketch
-    (->> (grid/get-coord-objs (:grid state))
+    (->> (grid/coord-maps (:grid state))
          (filter (comp game/alive? :value))
          (run! (fn [{:keys [row col value]}]
                  (q/rect (+ left-pixel (* col cell-size))
@@ -36,7 +36,7 @@
 ;; TODO: check if this is blocking, probably not with quil right?
 (defn animate
   [grid update-fn delay-ms]
-  (let [{:keys [x y]} (grid/get-dimensions grid)
+  (let [{:keys [x y]} (grid/dimensions grid)
         grid-size     [x y]
         sketch-size   (mapv #(* cell-size %) grid-size)
         frame-rate    (/ 1000 delay-ms)]

@@ -10,21 +10,20 @@
    [hub.discljord.minesweeper :as minesweeper]
    [hub.discljord.role :as role]))
 
-(def token (System/getenv "DISCORD_TOKEN"))
-
 (defn start! []
-  (let [event-ch (a/chan 100)]
+  (let [event-ch (a/chan 100)
+        token    (System/getenv "DISCORD_TOKEN")]
     {:event-ch      event-ch
      :connection-ch (c/connect-bot! token event-ch)
      :message-ch    (m/start-connection! token)}))
 
+(defmacro attempt [& body]
+  `(try ~@body (catch Exception ex nil)))
+
 (defn stop! [bot]
-  (try (m/stop-connection! (:message-ch bot))
-       (catch Exception ex nil))
-  (try (c/disconnect-bot!  (:connection-ch bot))
-       (catch Exception ex nil))
-  (try (a/close! (:event-ch bot))
-       (catch Exception ex nil)))
+  (attempt (m/stop-connection! (:message-ch bot)))
+  (attempt (c/disconnect-bot!  (:connection-ch bot)))
+  (attempt (a/close! (:event-ch bot))))
 
 (def ignored-events
   #{;;; bot control events

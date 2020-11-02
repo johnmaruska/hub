@@ -47,7 +47,7 @@
   ======="
   [grid & [dimensions]]
   (clear)
-  (let [dimensions (or dimensions (grid/get-dimensions grid))
+  (let [dimensions (or dimensions (grid/dimensions grid))
         bookend    (make-bookend (:x dimensions))]
     (println (apply str [bookend "\n" (->string grid) "\n" bookend]))))
 
@@ -55,7 +55,7 @@
   "Continuously display grid updates, animating changes.
   Blocking call that spins infinitely. Used either in isolation or from a thread."
   [seed-grid update-fn delay-ms]
-  (let [dimensions (grid/get-dimensions seed-grid)]
+  (let [dimensions (grid/dimensions seed-grid)]
     (run! (fn [x]
             (display x dimensions)
             (Thread/sleep delay-ms))

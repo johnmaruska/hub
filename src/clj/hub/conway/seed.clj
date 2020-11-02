@@ -34,7 +34,7 @@
                            (+ y0 (:row coord))
                            (:value coord)))
            grid
-           (grid/get-coord-objs seed))))
+           (grid/coord-maps seed))))
 
 ;; Still lifes
 
