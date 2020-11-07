@@ -4,7 +4,8 @@
 (def red-suits (set ["Hearts" "Diamonds"]))
 (def black-suits (set ["Clubs" "Spades"]))
 (def suits (union red-suits black-suits))
-(def ranks ["Ace" "Two" "Three" "Four" "Five" "Six" "Seven" "Eight" "Nine" "Ten" "Jack" "Queen" "King"])
+(def ranks ["Ace" "Two" "Three" "Four" "Five" "Six" "Seven"
+            "Eight" "Nine" "Ten" "Jack" "Queen" "King"])
 
 (defn red?   [suit] (contains? red-suits suit))
 (defn joker? [card] (= "Joker" (:rank card)))

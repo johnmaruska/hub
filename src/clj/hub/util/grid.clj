@@ -31,11 +31,11 @@
              :when (not (and (= x xp) (= y yp)))]
          [xp yp])))
 
-(defn get-neighbors [grid coord]
+(defn neighbors [grid coord]
   (filter #(within-bounds? grid %)
           (neighbor-coords coord)))
 
-(defn get-coord-objs
+(defn coord-maps
   "Convert a grid into a list of {:row :col :value} maps.
   Sometimes these are easier to calculate over."
   [grid]
@@ -50,13 +50,13 @@
                       (concat acc)))
                [])))
 
-(defn get-dimensions [grid]
+(defn dimensions [grid]
   {:y (count grid)
    :x (count (first grid))})
 
 (defn corner?
   ([grid coord]
-   (let [{:keys [x y]} (get-dimensions grid)]
+   (let [{:keys [x y]} (dimensions grid)]
      (corner? y x coord)))
   ([height width [x y]]
    (and (or (= x width)  (zero? x))

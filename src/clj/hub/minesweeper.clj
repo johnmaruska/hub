@@ -5,7 +5,6 @@
 
 (def BOMB 'B)
 (defn bomb? [v] (= BOMB v))
-(defn safe? [v] (not (bomb? v)))
 
 (defn bomb-coords [height width num-bombs]
   (let [all-coords (for [x (range width)
@@ -20,19 +19,18 @@
           board
           coords))
 
-(defn count-adjacent-bombs [grid coord]
-  (->> (grid/get-neighbors grid coord)
-       (filter #(bomb? (grid/get-coord grid %)))
-       count))
+(defn adjacent-bombs [grid coord]
+  (filter #(bomb? (grid/get-coord grid %))
+          (grid/neighbors grid coord)))
 
-(defn add-counter [grid {:keys [col row value] :as obj}]
-  (if (bomb? value)
-    grid
-    (let [result (count-adjacent-bombs grid [col row])]
-      (grid/set-coord grid [col row] result))))
+(defn add-counter [grid {:keys [col row value]}]
+  (if (not (bomb? value))
+    (let [result (count (adjacent-bombs grid [col row]))]
+      (grid/set-coord grid [col row] result))
+    grid))
 
 (defn add-counters [grid]
-  (reduce add-counter grid (grid/get-coord-objs grid)))
+  (reduce add-counter grid (grid/coord-maps grid)))
 
 (defn create [height width num-bombs]
   (-> (grid/init height width)
