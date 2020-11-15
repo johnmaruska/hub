@@ -1,6 +1,6 @@
-# ClojureScript + Reagent Front-End
+# Web-Dev Environment
 
-## Setup
+## Front-end Setup
 
 To get an interactive development environment run:
 
@@ -17,3 +17,13 @@ Start a REPL in terminal
 Start a REPL specifically using dev build
 
     lein cljs-dev-repl
+
+## Back-end Setup
+
+Start the back-end web-server and pull up webpage
+
+    lein ring server
+
+Start the back-end web-server but don't pull up webpage
+
+    lein ring server-headless
