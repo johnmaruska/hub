@@ -36,5 +36,3 @@
    (->> albums
         (filter #(= artist (:Artist %)))
         (map #(dissoc % :Artist)))))
-
-(by-artist (vinyl (albums)) "Black Sabbath")
