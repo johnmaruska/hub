@@ -17,7 +17,7 @@
             :content "width=device-width, initial-scale=1"}]
     (include-css "/css/style.css")]
    [:body
-    [:h2 "reload?!"]
+    [:h2 "Clojure Function!"]
     [:div {:id "app"}]
     (include-js "/cljs-out/dev-main.js")]))
 
@@ -26,7 +26,7 @@
   (route/resources "/")
   (route/not-found "Page not found"))
 
-(defn app []
+(def app
   (-> main-routes
       (wrap-defaults site-defaults)
       wrap-reload))

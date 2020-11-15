@@ -1,29 +1,17 @@
 # Web-Dev Environment
 
-## Front-end Setup
 
-To get an interactive development environment run:
+## In a REPL
 
-    npm install
-    lein figwheel
+Start a ClojureScript figwheel-main REPL building dev.
 
-To console.log CLJS data-structures, make sure you enable [devtools in
-Chrome](https://developers.google.com/web/tools/chrome-devtools).
+    M-x cider-jack-in-cljs
 
-Start a REPL in terminal
+    C-c M-S-j
 
-    lein cljs-repl
+    $ lein cljs-dev-repl
 
-Start a REPL specifically using dev build
-
-    lein cljs-dev-repl
-
-## Back-end Setup
-
-Start the back-end web-server and pull up webpage
-
-    lein ring server
-
-Start the back-end web-server but don't pull up webpage
-
-    lein ring server-headless
+The REPL should pull up a webpage displaying the application. After a
+short delay, you should see `cljs.user=>` appear as your prompt. This
+means that figwheel connected with the front-end, and the REPL can now
+be used to evaluate ClojureScript.

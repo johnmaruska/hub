@@ -1,3 +1,4 @@
-^{:css-dirs ["resources/public/css"]
-  :open-url "http://localhost:8080/"}
-{:main hub.core}
+^{:css-dirs     ["resources/public/css"]
+  :ring-handler hub.server/app}
+{:main       hub.core
+ :source-map true}
