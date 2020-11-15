@@ -2,6 +2,7 @@
 target/
 .lein-failures
 pom.xml
+figwheel_server.log
 
 # Emacs files
 *~

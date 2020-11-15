@@ -1,0 +1,6 @@
+{:main         hub.core
+ :source-paths ["src/cljs" "src/clj"]
+ :figwheel     {:on-jsload "hub.core/on-js-reload"}
+ :compiler     {;; To console.log CLJS data-structures make sure you enable devtools in Chrome
+                ;; https://github.com/binaryage/cljs-devtools
+                :preloads   [devtools.preload]}}
