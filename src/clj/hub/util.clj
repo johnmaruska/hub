@@ -1,7 +1,10 @@
 (ns hub.util
   (:require
    [clojure.data.csv :as csv]
-   [clojure.java.io :as io]))
+   [clojure.edn :as edn]
+   [clojure.java.io :as io])
+  (:import
+   (java.io PushbackReader)))
 
 (defn csv-data->maps [csv-data]
   (map zipmap
@@ -20,6 +23,10 @@
   [filename & options]
   (with-open [reader (io/reader (io/resource filename))]
     (vec (apply stream-csv reader options))))
+
+(defn load-edn [filename]
+  (with-open [reader (io/reader (io/resource filename))]
+    (edn/read (PushbackReader. reader))))
 
 (defn write!
   [filename contents & opts]

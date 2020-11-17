@@ -1,0 +1,57 @@
+{:iron-ore {:name          :iron-ore
+            :output        1
+            :crafting-time 2
+            :building      :miner}
+
+ :iron-ingot            {:name          :iron-ingot
+                         :crafting-time 2
+                         :ingredients   {:iron-ore 1}
+                         :building      :smelter
+                         :output        1}
+ :iron-plate            {:name          :iron-plate
+                         :crafting-time 6
+                         :ingredients   {:iron-ingot 3}
+                         :building      :constructor
+                         :output        2}
+ :iron-rod              {:name          :iron-rod
+                         :crafting-time 4
+                         :ingredients   {:iron-ingot 1}
+                         :building      :constructor
+                         :output        1}
+ :screw                 {:name          :screw
+                         :crafting-time 6
+                         :ingredients   {:iron-rod 1}
+                         :building      :constructor
+                         :output        4}
+ :reinforced-iron-plate {:name          :reinforced-iron-plate
+                         :crafting-time 12
+                         :ingredients   {:screw      12
+                                         :iron-plate 6}
+                         :building      :assembler
+                         :output        1}
+ :copper-ingot          {:name          :copper-ingot
+                         :crafting-time 2
+                         :ingredients   {:copper-ore 1}
+                         :building      :smelter
+                         :output        1}
+ :copper-sheet          {:name          :copper-sheet
+                         :crafting-time 6
+                         :ingredients   {:copper-ingot 2}
+                         :building      :constructor
+                         :output        1}
+ :alclad-aluminum-sheet {:name          :alclad-aluminum-sheet
+                         :crafting-time 8
+                         :ingredients   {:aluminum-ingot 8
+                                         :copper-ingot   3}
+                         :building      :assembler
+                         :output        4}
+ :wire                  {:name          :wire
+                         :crafting-time 4
+                         :ingredients   {:copper-ingot 1}
+                         :building      :constructor
+                         :output        2}
+ :cable                 {:name          :cable
+                         :crafting-time 2
+                         :ingredients   {:wire 2}
+                         :building      :constructor
+                         :output        1}}
