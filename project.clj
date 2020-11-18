@@ -13,6 +13,8 @@
                                org.eclipse.jetty/jetty-http]]
                  ;; data-driven schemas that aren't clojure.spec
                  [metosin/malli "0.2.1"]
+                 ;; http format negotiation
+                 [metosin/muuntaja "0.6.7"]
                  ;; drawing library for Conway
                  [quil "3.1.0"]
                  ;; Ring web-server

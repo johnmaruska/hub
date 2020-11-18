@@ -1,12 +1,11 @@
 (ns hub.server
   (:require
-   [compojure.core :refer [defroutes GET]]
+   [compojure.core :as compojure :refer [GET]]
    [compojure.route :as route]
    [hiccup.page :refer [html5 include-js include-css]]
-   [ring.adapter.jetty :refer [run-jetty]]
-   [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
-   [ring.middleware.reload :refer [wrap-reload]]
-   [ring.middleware.resource :refer [wrap-resource]]))
+   [hub.server.inventory :as inventory]
+   [hub.server.middleware :as middleware]
+   [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn index-html []
   (html5
@@ -21,17 +20,19 @@
     [:div {:id "app"}]
     (include-js "/cljs-out/dev-main.js")]))
 
-(defroutes main-routes
-  (GET "/" [] (index-html))
-  (route/resources "/")
-  (route/not-found "Page not found"))
+(def data-routes
+  (-> (compojure/routes
+       inventory/routes)
+      (compojure/wrap-routes middleware/data-routes)))
 
 (def app
-  (-> main-routes
-      (wrap-defaults site-defaults)
-      wrap-reload))
+  (compojure/routes
+   (GET "/" [] (index-html))
+   data-routes
+   (route/resources "/")
+   (route/not-found "Page not found")))
 
 (defn start!
   "non(?)-blocking call to start web-server."
   []
-  (run-jetty (app) {:port 4000 :join? false}))
+  (run-jetty #'app {:port 4000 :join? false}))

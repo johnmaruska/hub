@@ -21,6 +21,7 @@
 (defn add-album [album]
   (add-albums [album]))
 
+;; TODO: I dunno if I even like this. In the REPL it's nice, probably less so on the front-end.
 (defn sieve
   "Filter a seq of maps by key `k`'s value `v`, and remove that key that from the map.
 
@@ -33,16 +34,16 @@
 (defn ownership
   "Lazy sequence of all albums with matching Ownership value, one of `CD`, `Vinyl`, `Digital`."
   [albums value]
-  (sieve albums :Ownership value))
+  (sieve albums :ownership value))
 
 (defn by-artist
   "Get all albums by `artist`."
   [albums artist]
-  (sieve albums :Artist artist))
+  (sieve albums :artist artist))
 
 (defn release
   [albums release-name]
-  (sieve albums :Release release-name))
+  (sieve albums :release release-name))
 
 ;;; helper functions for easier readability
 
