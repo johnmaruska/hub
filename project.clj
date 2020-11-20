@@ -4,8 +4,6 @@
                  ;; work with mp3 id3 tags
                  ;; https://github.com/pandeiro/claudio
                  [claudio "0.1.3"]
-                 ;; web-server routing
-                 [compojure "1.6.2"]
                  ;; discord api wrapper
                  [org.suskalo/discljord "1.1.1"
                   :exclusions [org.eclipse.jetty.websocket/websocket-api
