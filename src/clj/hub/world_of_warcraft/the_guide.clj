@@ -78,7 +78,7 @@
   (swap! match-history #(concat % [match]))
   (let [row  (format-row match)
         file (filename (mode match))]
-    (util/write! file row :append true)))
+    (util/append-csv file [row])))
 
 ;;;; filter predicates
 
