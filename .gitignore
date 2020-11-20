@@ -2,7 +2,6 @@
 target/
 .lein-failures
 pom.xml
-figwheel_server.log
 
 # Emacs files
 *~
@@ -17,3 +16,4 @@ data/settings/settings.json
 
 # Log files
 debug.log
+figwheel_server.log
