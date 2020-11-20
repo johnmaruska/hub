@@ -15,6 +15,8 @@
                  [metosin/malli "0.2.1"]
                  ;; http format negotiation
                  [metosin/muuntaja "0.6.7"]
+                 ;; data-driven router
+                 [metosin/reitit "0.5.10"]
                  ;; drawing library for Conway
                  [quil "3.1.0"]
                  ;; Ring web-server
