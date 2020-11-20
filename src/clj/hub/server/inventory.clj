@@ -1,6 +1,5 @@
 (ns hub.server.inventory
   (:require
-   [compojure.core :refer [context defroutes GET POST]]
    [hub.inventory :as inventory]
    [hub.inventory.spec :as spec]
    [malli.core :as m]
@@ -25,15 +24,16 @@
     {:status 200
      :body   {:results results}}))
 
-(def get-albums-route
-  {:handler    get-albums
-   :responses  {200 {:body (results (mu/optional-keys spec/album))}}
-   :parameters {:query (mu/optional-keys spec/album)}})
-
 (defn post-album
-  [{:keys [body-params] :as req}]
-  (if (m/validate spec/album body-params)
-    (do
-      (inventory/add-album body-params)
-      {:status 201})
-    {:status 400 :body "Bad Request"}))
+  [{{:keys [body]} :parameters}]
+  (inventory/add-album body)
+  {:status 201})
+
+(def routes
+  ["/inventory"
+   ["/albums" {:get  {:handler    get-albums
+                      :responses  {200 {:body (results (mu/optional-keys spec/album))}}
+                      :parameters {:query (mu/optional-keys spec/album)}}
+               :post {:handler    post-album
+                      :responses  {201 nil}
+                      :parameters {:body spec/album}}}]])

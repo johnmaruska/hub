@@ -29,12 +29,14 @@
   (ring/ring-handler
    (ring/router
     [["/" {:handler index-html}]
-     ["/inventory"
-      ["/albums" {:get inventory/get-albums-route}]]]
+     inventory/routes]
     {:data {:coercion   reitit.coercion.malli/coercion
             :muuntaja   m/instance
             :middleware [parameters/parameters-middleware
-                         muuntaja/format-middleware
+                         muuntaja/format-negotiate-middleware
+                         muuntaja/format-response-middleware
+                         rrc/coerce-exceptions-middleware
+                         muuntaja/format-request-middleware
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware]}})
    (ring/create-default-handler
