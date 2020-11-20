@@ -3,8 +3,31 @@
 ## Get index html from backend webserver
 GET http://localhost:4000
 
-## GET all albums
+## GET all albums -- 200 OK
 
-GET http://localhost:4000/inventory/albums
+GET http://localhost:4000/inventory/albums?artist=Devin%20Townsend
 Accept: application/edn
 Content-Type: application/edn
+
+
+## POST an album -- 201 Created
+
+POST http://localhost:4000/inventory/albums
+Accept: application/edn
+Content-Type: application/edn
+{
+    :artist "Devin Townsend"
+    :release "Order ,of, Magnitude - Empath Live Volume 1"
+    :ownership "CD"
+}
+
+## POST an album -- 400 Bad Request
+
+POST http://localhost:4000/inventory/albums
+Accept: application/edn
+Content-Type: application/edn
+{
+    :artist "Devin Townsend"
+    :broken-key "Order of Magnitude - Empath Live Volume 1"
+    :ownership "CD"
+}

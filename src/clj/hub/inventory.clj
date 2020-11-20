@@ -15,8 +15,7 @@
 (defn add-albums
   "Write a sequence of albums to a CSV."
   [albums]
-  ;; TODO: ensure proper quoting happens
-  (util/append-csv albums-csv (map album->vec) albums))
+  (util/append-csv albums-csv (map album->vec albums)))
 
 (defn add-album [album]
   (add-albums [album]))

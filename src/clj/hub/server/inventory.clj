@@ -1,11 +1,15 @@
 (ns hub.server.inventory
   (:require
    [compojure.core :refer [context defroutes GET POST]]
-   [hub.inventory :as inventory]))
+   [hub.inventory :as inventory]
+   [hub.inventory.spec :as inventory.spec]
+   [malli.core :as m]))
 
 ;; TODO: what happens with comma-separated route vars? `artist=Abba,Mastodon`
 ;; answer: it doesn't work, treats it as single name.
 ;; eventually want to do this
+
+;; TODO: when entities accessible individually, RESTy link in responses
 
 (defn get-albums
   "Handler to GET albums. Assumes 0-or-1 values for each query-param"
@@ -20,9 +24,11 @@
 
 (defn post-album
   [{:keys [body-params] :as req}]
-  ;; TODO: spec validate body-params
-  (inventory/add-album body-params)
-  {:status 201})
+  (if (m/validate inventory.spec/album body-params)
+    (do
+      (inventory/add-album body-params)
+      {:status 201})
+    {:status 400 :body "Bad Request"}))
 
 (defroutes albums-routes
   (context "/albums" []
