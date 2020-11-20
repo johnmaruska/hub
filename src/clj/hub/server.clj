@@ -1,11 +1,13 @@
 (ns hub.server
   (:require
-   [compojure.core :as compojure :refer [GET]]
-   [compojure.route :as route]
    [hiccup.page :refer [html5 include-js include-css]]
    [hub.server.inventory :as inventory]
-   [hub.server.middleware :as middleware]
+   [muuntaja.core :as m]
+   [reitit.coercion.malli]
    [reitit.ring :as ring]
+   [reitit.ring.coercion :as rrc]
+   [reitit.ring.middleware.muuntaja :as muuntaja]
+   [reitit.ring.middleware.parameters :as parameters]
    [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn index-html [_request]
@@ -23,26 +25,22 @@
               [:div {:id "app"}]
               (include-js "/cljs-out/dev-main.js")])})
 
-(def data-routes
-  (-> (compojure/routes
-       inventory/routes)
-      (compojure/wrap-routes middleware/data-routes)))
-
-(def app-compojure
-  (compojure/routes
-   (GET "/" req (index-html req))
-   data-routes
-   (route/resources "/")
-   (route/not-found "Page not found")))
-
-(def app-reitit
+(def app
   (ring/ring-handler
    (ring/router
-    [["/" {:handler index-html}]])
+    [["/" {:handler index-html}]
+     ["/inventory"
+      ["/albums" {:get inventory/get-albums-route}]]]
+    {:data {:coercion   reitit.coercion.malli/coercion
+            :muuntaja   m/instance
+            :middleware [parameters/parameters-middleware
+                         muuntaja/format-middleware
+                         rrc/coerce-request-middleware
+                         rrc/coerce-response-middleware]}})
    (ring/create-default-handler
     {:not-found (constantly {:status 404 :body "Not found"})})))
 
 (defn start!
   "non(?)-blocking call to start web-server."
   []
-  (run-jetty #'app-reitit {:port 4000 :join? false}))
+  (run-jetty #'app {:port 4000 :join? false}))
