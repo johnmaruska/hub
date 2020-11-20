@@ -1,9 +1,9 @@
 (ns hub.server.inventory
   (:require
-   [compojure.core :refer [context defroutes GET POST]]
    [hub.inventory :as inventory]
-   [hub.inventory.spec :as inventory.spec]
-   [malli.core :as m]))
+   [hub.inventory.spec :as spec]
+   [malli.core :as m]
+   [malli.util :as mu]))
 
 ;; TODO: what happens with comma-separated route vars? `artist=Abba,Mastodon`
 ;; answer: it doesn't work, treats it as single name.
@@ -11,32 +11,29 @@
 
 ;; TODO: when entities accessible individually, RESTy link in responses
 
+(defn results [entity]
+  [:map [:results [:vector entity]]])
+
 (defn get-albums
   "Handler to GET albums. Assumes 0-or-1 values for each query-param"
-  [{:keys [params] :as req}]
-  (let [{:keys [artist release ownership]} params
-        result (cond-> (inventory/albums)
-                 ownership (inventory/ownership ownership)
-                 artist    (inventory/by-artist artist)
-                 release   (inventory/release release))]
+  [{{{:keys [artist release ownership]} :query} :parameters}]
+  (let [results (cond-> (inventory/albums)
+                  ownership (inventory/ownership ownership)
+                  artist    (inventory/by-artist artist)
+                  release   (inventory/release release))]
     {:status 200
-     :body   {:result result}}))
+     :body   {:results results}}))
 
 (defn post-album
-  [{:keys [body-params] :as req}]
-  (if (m/validate inventory.spec/album body-params)
-    (do
-      (inventory/add-album body-params)
-      {:status 201})
-    {:status 400 :body "Bad Request"}))
+  [{{:keys [body]} :parameters}]
+  (inventory/add-album body)
+  {:status 201})
 
-(defroutes albums-routes
-  (context "/albums" []
-    (GET "/" req
-      (get-albums req))
-    (POST "/" req
-      (post-album req))))
-
-(defroutes routes
-  (context "/inventory"[]
-    albums-routes))
+(def routes
+  ["/inventory"
+   ["/albums" {:get  {:handler    get-albums
+                      :responses  {200 {:body (results (mu/optional-keys spec/album))}}
+                      :parameters {:query (mu/optional-keys spec/album)}}
+               :post {:handler    post-album
+                      :responses  {201 nil}
+                      :parameters {:body spec/album}}}]])

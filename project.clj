@@ -4,8 +4,6 @@
                  ;; work with mp3 id3 tags
                  ;; https://github.com/pandeiro/claudio
                  [claudio "0.1.3"]
-                 ;; web-server routing
-                 [compojure "1.6.2"]
                  ;; discord api wrapper
                  [org.suskalo/discljord "1.1.1"
                   :exclusions [org.eclipse.jetty.websocket/websocket-api
@@ -15,6 +13,8 @@
                  [metosin/malli "0.2.1"]
                  ;; http format negotiation
                  [metosin/muuntaja "0.6.7"]
+                 ;; data-driven router
+                 [metosin/reitit "0.5.10"]
                  ;; drawing library for Conway
                  [quil "3.1.0"]
                  ;; Ring web-server
