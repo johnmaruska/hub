@@ -62,7 +62,7 @@
 (def match-history (atom {}))
 (defn the-guide [mode]
   (or (get @match-history mode)
-      (swap! match-history assoc :mode
+      (swap! match-history assoc mode
              (-> mode filename util/load-csv parse))))
 
 (defn format-row [row]
