@@ -21,8 +21,10 @@
                   ownership (inventory/ownership ownership)
                   artist    (inventory/by-artist artist)
                   release   (inventory/release release))]
-    {:status 200
-     :body   {:results results}}))
+    {:status  200
+     :headers {"Access-Control-Allow-Origin"  "*"
+               "Access-Control-Allow-Headers" "Content-Type"}
+     :body    {:results results}}))
 
 (defn post-album
   [{{:keys [body]} :parameters}]
