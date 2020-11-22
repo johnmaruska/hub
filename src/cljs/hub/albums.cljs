@@ -7,7 +7,6 @@
 (rf/reg-event-fx
  ::fetch
  (fn [_ [_ query-params]]
-   (println "fetching albums")
    {:http-xhrio {:uri     "http://localhost:4000/inventory/albums"
                  :params  (or query-params {})
                  :method  :get
