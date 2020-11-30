@@ -18,7 +18,7 @@
      :message-ch    (m/start-connection! token)}))
 
 (defmacro attempt [& body]
-  `(try ~@body (catch Exception ex nil)))
+  `(try ~@body (catch Exception ex# nil)))
 
 (defn stop! [bot]
   (attempt (m/stop-connection! (:message-ch bot)))

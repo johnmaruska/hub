@@ -62,7 +62,7 @@
 (def match-history (atom {}))
 (defn the-guide [mode]
   (or (get @match-history mode)
-      (swap! match-history assoc :mode
+      (swap! match-history assoc mode
              (-> mode filename util/load-csv parse))))
 
 (defn format-row [row]
@@ -78,7 +78,7 @@
   (swap! match-history #(concat % [match]))
   (let [row  (format-row match)
         file (filename (mode match))]
-    (util/write! file row :append true)))
+    (util/append-csv file [row])))
 
 ;;;; filter predicates
 

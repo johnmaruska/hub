@@ -1,0 +1,4 @@
+^{:css-dirs     ["resources/public/css"]
+  :ring-handler hub.server/app}
+{:main       hub.core
+ :source-map true}
