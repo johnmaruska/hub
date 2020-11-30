@@ -99,5 +99,8 @@
 
 ;;;; retrieval
 
-(defn get-match-history [mode & [pred]]
-  (filter (or pred identity) (the-guide mode)))
+(defn get-match-history
+  ([mode]
+   (the-guide mode))
+  ([mode pred]
+   (filter pred (the-guide mode))))
