@@ -21,7 +21,8 @@
   (loop [remaining entries]
     (let [head (first remaining)
           tail (rest remaining)]
-      (when (and head (seq tail))  ; dont explode if theyre empty
+      ;; dont explode if theyre empty
+      (when (and head (seq tail))
         (if-let [result (f head tail)]
           (conj (->vec result) head)
           (recur tail))))))
@@ -37,7 +38,7 @@
           entries))
 
 (defn part1 [input goal]
-  (apply * (find-pair input goal))) ; => 539851
+  (apply * (find-pair input goal)))
 
 (defn part2 [input goal]
   (apply * (find-triple input goal)))
