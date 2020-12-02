@@ -1,4 +1,5 @@
-(ns hub.advent-of-code.util)
+(ns hub.advent-of-code.util
+  (:require [clojure.java.io :as io]))
 
 (defn input [year day]
   (format "advent_of_code/%s/day/%s/input.txt" year day))
