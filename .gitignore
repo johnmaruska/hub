@@ -1,6 +1,7 @@
 # Clojure files
 target/
 .lein-failures
+.lein-repl-history
 pom.xml
 
 # Emacs files
