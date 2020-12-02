@@ -1,10 +1,11 @@
 (ns hub.advent-of-code.2020.day01
   "https://adventofcode.com/2020/day/1"
-  (:require [clojure.java.io :as io]))
+  (:require
+   [clojure.java.io :as io]
+   [hub.advent-of-code.util :as util]))
 
-(defn read-file [file]
-  (with-open [reader (io/reader (io/resource FILE))]
-    (vec (map #(Integer/parseInt %) (line-seq reader)))))
+(defn parse [reader]
+  (map #(Integer/parseInt %) (line-seq reader)))
 
 (defn ->vec [x]
   (if (vector? x) x [x]))
@@ -49,7 +50,7 @@
 (defn part2 [input goal]
   (apply * (find-triple input goal)))
 
-(defn test
+(defn verify
   "Verify that the code matches provided example."
   []
   (let [example-input [1721 979 366 299 675 1456]]
@@ -58,8 +59,8 @@
 (defn run
   "Run the exercise, printing answers."
   []
-  (let [file  "advent_of_code/2020/day/1/input.txt"
+  (let [file  (util/input 2020 1)
         goal  2020
-        input (read-file FILE)]
+        input (util/read-file parse file)]
     (println "part 1:" (part1 input goal))
     (println "part 2:" (part2 input goal))))
