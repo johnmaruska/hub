@@ -1,4 +1,5 @@
 (ns hub.advent-of-code.2020.day02
+  "https://adventofcode.com/2020/day/2"
   (:require
    [clojure.string :as string]
    [hub.advent-of-code.util :as util]))
