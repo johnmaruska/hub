@@ -12,21 +12,14 @@
   (vec (map parse-group
             (string/split input #"\r?\n\r?\n"))))
 
-(defn union-group [group]
-  (apply set/union group))
-
-(defn intersect-group [group]
-  (apply set/intersection group))
-
 (defn sum [results]
   (reduce + (map count results)))
 
 (defn part1 [input]
-  (sum (map union-group input)))
+  (sum (map #(apply set/union %) input)))
 
 (defn part2 [input]
-  ;; 1748 is too low
-  (sum (map intersect-group input)))
+  (sum (map #(apply set/intersection %) input)))
 
 (defn run []
   (let [file  (util/input 2020 6)
