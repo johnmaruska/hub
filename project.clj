@@ -9,6 +9,8 @@
                   :exclusions [org.eclipse.jetty.websocket/websocket-api
                                org.eclipse.jetty.websocket/websocket-common
                                org.eclipse.jetty/jetty-http]]
+                 ;; context-free-grammar parsing
+                 [instaparse "1.4.10"]
                  ;; data-driven schemas that aren't clojure.spec
                  [metosin/malli "0.2.1"]
                  ;; http format negotiation

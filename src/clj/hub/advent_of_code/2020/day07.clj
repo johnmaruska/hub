@@ -1,21 +1,28 @@
 (ns hub.advent-of-code.2020.day07
   (:require
+   [clojure.java.io :as io]
    [clojure.set :as set]
+   [clojure.string :as string]
+   [hub.advent-of-code.util :as util]
    [instaparse.core :as insta]))
 
 (def parser
   (insta/parser
    "LINE = BAG ' bags contain ' CONTENTS '.';
-    CONTENTS = CONTENT (', ' CONTENT)*;
-    CONTENT = NUM ' ' BAG ' bags';
+    CONTENTS = CONTENT (', ' CONTENT)* | NOCONTENT;
+    NOCONTENT = 'no other bags';
+    CONTENT = NUM ' ' BAG ' bag' 's'?;
     NUM = #'[0-9]+';
     BAG = #'[a-z]+ [a-z]+';"))
 
 (def transform
-  {:CONTENT (fn [[_ num] _ [_ bag] _]
+  {:CONTENT (fn [[_ num] _ [_ bag] & _]
               [bag num])
+   :NUM      (fn [x]
+               [:NUM (Integer/parseInt x)])
    :CONTENTS (fn [& contents]
                [:CONTENTS (->> contents
+                               (filter #(not= :NOCONTENT (first %)))
                                (filter #(not= ", " %))
                                (into {}))])
    :LINE (fn [[_ bag] _ [_ contents] _]
@@ -24,8 +31,20 @@
 (defn parse-line [line]
   (insta/transform transform (parser line)))
 
-(defn parse [reader]
-  (apply merge (map parse-line (line-seq reader))))
+(defn parse [lines]
+  (apply merge (map parse-line lines)))
+
+(def example
+  "shiny gold bags contain 2 dark red bags.
+dark red bags contain 2 dark orange bags.
+dark orange bags contain 2 dark yellow bags.
+dark yellow bags contain 2 dark green bags.
+dark green bags contain 2 dark blue bags.
+dark blue bags contain 2 dark violet bags.
+dark violet bags contain no other bags.")
+
+(def example-rules
+  (parse (clojure.string/split example #"\n")))
 
 (defn holds [bag-rules container contained]
   (get-in bag-rules [container contained] 0))
@@ -39,12 +58,34 @@
        (into #{})))
 
 (defn all-containers [bag-rules initial-bag]
-  (loop [rem-bags     (into #{} (keys (dissoc bag-rules initial-bag)))
-         [curr & rem] #{initial-bag}
-         all          #{}]
-    (let [containers (direct-containers (select-keys bag-rules rem-bags) curr)]
-      (if (and (empty? rem) (empty? containers))
-        all
-        (recur (set/difference rem-bags containers)
-               (set/union rem containers)
-               (set/union all containers))))))
+  (count
+   (loop [rem-bags     (into #{} (keys (dissoc bag-rules initial-bag)))
+          [curr & rem] #{initial-bag}
+          all          #{}]
+     (let [containers (direct-containers (select-keys bag-rules rem-bags) curr)]
+       (if (and (empty? rem) (empty? containers))
+         all
+         (recur (set/difference rem-bags containers)
+                (set/union rem containers)
+                (set/union all containers)))))))
+
+(defn total-contained-bags [bag-rules initial-bag]
+  (if-let [contents (get bag-rules initial-bag)]
+    (reduce + (for [[bag amount] contents]
+                (+ amount (* amount (total-contained-bags bag-rules bag)))))
+    0))
+
+(defn part1 [input]
+  (all-containers input "shiny gold"))
+
+(defn part2 [input]
+  (total-contained-bags input "shiny gold"))
+
+(defn run []
+  (let [file  (util/input 2020 7)
+        input (-> (io/resource file)
+                  slurp
+                  (string/split #"\n")
+                  parse)]
+    (println "part 1:" (part1 input))
+    (println "part 2:" (part2 input))))
