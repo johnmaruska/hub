@@ -23,13 +23,17 @@
   (filter #(bomb? (grid/get-coord grid %))
           (grid/neighbors grid coord)))
 
-(defn add-counter [grid {:keys [col row value]}]
+(defn add-counter
+  "Add an adjacent-bomb counter to given empty space."
+  [grid {:keys [col row value]}]
   (if (not (bomb? value))
     (let [result (count (adjacent-bombs grid [col row]))]
       (grid/set-coord grid [col row] result))
     grid))
 
-(defn add-counters [grid]
+(defn add-counters
+  "Adds adjacent-bomb counter to empty spaces."
+  [grid]
   (reduce add-counter grid (grid/coord-maps grid)))
 
 (defn create [height width num-bombs]
