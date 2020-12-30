@@ -44,5 +44,7 @@
                    :clean-targets ^{:protect false} ["resources/public/js/compiled"
                                                      :target-path]}}
 
+  :main "hub.core"
+
   :aliases {"cljs-repl"     ["trampoline" "run" "-m" "figwheel.main"]
             "cljs-dev-repl" ["trampoline" "run" "-m" "figwheel.main" "--build" "dev" "--repl"]})
