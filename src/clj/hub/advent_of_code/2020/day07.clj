@@ -16,8 +16,8 @@
     BAG = #'[a-z]+ [a-z]+';"))
 
 (def transform
-  {:CONTENT (fn [[_ num] _ [_ bag] & _]
-              [bag num])
+  {:CONTENT  (fn [[_ num] _ [_ bag] & _]
+               [bag num])
    :NUM      (fn [x]
                [:NUM (Integer/parseInt x)])
    :CONTENTS (fn [& contents]
@@ -25,8 +25,8 @@
                                (filter #(not= :NOCONTENT (first %)))
                                (filter #(not= ", " %))
                                (into {}))])
-   :LINE (fn [[_ bag] _ [_ contents] _]
-           {bag contents})})
+   :LINE     (fn [[_ bag] _ [_ contents] _]
+               {bag contents})})
 
 (defn parse-line [line]
   (insta/transform transform (parser line)))
