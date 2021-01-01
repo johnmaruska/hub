@@ -9,6 +9,8 @@
                   :exclusions [org.eclipse.jetty.websocket/websocket-api
                                org.eclipse.jetty.websocket/websocket-common
                                org.eclipse.jetty/jetty-http]]
+                 ;; context-free-grammar parsing
+                 [instaparse "1.4.10"]
                  ;; data-driven schemas that aren't clojure.spec
                  [metosin/malli "0.2.1"]
                  ;; http format negotiation
@@ -41,6 +43,8 @@
                    ;; need to add the compiled assets to the :clean-targets
                    :clean-targets ^{:protect false} ["resources/public/js/compiled"
                                                      :target-path]}}
+
+  :main "hub.core"
 
   :aliases {"cljs-repl"     ["trampoline" "run" "-m" "figwheel.main"]
             "cljs-dev-repl" ["trampoline" "run" "-m" "figwheel.main" "--build" "dev" "--repl"]})
