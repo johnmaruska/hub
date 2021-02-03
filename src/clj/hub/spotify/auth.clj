@@ -3,8 +3,8 @@
   (:require
    [clj-http.client :as http]
    [clojure.string :as string]
-   [ring.util.codec :as codec])
-  (:import (java.util Base64)))
+   [hub.spotify.util :as util]
+   [hub.spotify.token :as token]))
 
 ;; TODO: from more secure location than local envvars
 (def client-secret (System/getenv "SPOTIFY_SECRET"))
@@ -17,21 +17,15 @@
             "playlist-modify-public"
             "playlist-modify-private"])
 
-(def token (atom nil))
-
-(defn encode [s]
-  (.encodeToString (Base64/getEncoder) (.getBytes s)))
-
-(defn url [endpoint]
-  (str "https://accounts.spotify.com" endpoint))
+(def url (partial util/url :accounts))
 
 (defn post-basic-auth [form-params]
-  (let [creds (str client-id ":" client-secret)
-        auth  (str "Basic " (encode creds))]
-    (:body (http/post (url "/api/token")
-                      {:form-params form-params
-                       :basic-auth [client-id client-secret]
-                       :as :json}))))
+  (:body (http/post (url "/api/token")
+                    {:form-params form-params
+                     :basic-auth [client-id client-secret]
+                     :as :json})))
+
+;;;; Client Credentials flow
 
 (defn client-credentials
   "Request an access token via the client credentials flow.
@@ -39,27 +33,46 @@
   []
   (post-basic-auth {:grant_type "client_credentials"}))
 
+;;;; Authorization Code flow
+
+(defn refresh-token!
+  "Refresh the stored API token"
+  [api-token]
+  (token/persist!
+   (post-basic-auth {:grant_type "refresh_token"
+                     :refresh_token (:refresh_token api-token)})))
+
+(defn expired-token? [ex]
+  (try
+    (string/includes? (get (util/parse-json (:body ex)) "message")
+                      "The access token expired")
+    (catch NullPointerException ex
+      false)))
+
+(defmacro with-refresh-token [& body]
+  `(try
+     ~@body
+     (catch Exception ex#
+       (if (expired-token? ex#)
+         (do
+           (refresh-token! @token)
+           ~@body)
+         (throw ex#)))))
+
 (defn authorization-code
   "Request an access token via the authorization code flow using the code
   provided by the /authorize endpoint."
   [auth-code & [state]]
-  (let [result (post-basic-auth {:grant_type   "authorization_code"
-                                 :code         auth-code
-                                 :redirect_uri redirect-uri})]
-    (reset! token result)
-    result))
-
-(defn refresh-token
-  "Refresh a given access token acquired previously."
-  [api-token]
-  (post-basic-auth {:grant_type "refresh_token"
-                    :refresh_token (:refresh_token api-token)}))
+  (token/persist!
+   (post-basic-auth {:grant_type   "authorization_code"
+                     :code         auth-code
+                     :redirect_uri redirect-uri})))
 
 (def auth-url
-  (str (url "/authorize") "?"
-       (codec/form-encode {:response_type "code"
-                           :client_id     client-id
-                           :scope         scope
-                           :redirect_uri  redirect-uri
-                           ;; TODO: supply a `state` for CSRF protection
-                           })))
+  (url "/authorize"
+       {:response_type "code"
+        :client_id     client-id
+        :scope         scope
+        :redirect_uri  redirect-uri
+        ;; TODO: supply a `state` for CSRF protection
+        }))

@@ -12,8 +12,8 @@ pom.xml
 # imdb data -- large files
 resources/imdb/*
 
-# Discord secrets
-data/settings/settings.json
+# Secrets
+.tokens/authorization-code.edn
 
 # Log files
 debug.log
