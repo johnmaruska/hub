@@ -23,7 +23,6 @@
   ([req bearer-token]
    (letfn [(send-request! [req]
              (auth/with-refresh-token
-               (println "requesting URL" (:url req))
                (http/request req)))]
      (-> req
          (assoc :oauth-token (:access_token bearer-token))

@@ -11,13 +11,9 @@
 
 (def playlists-to-sort
   #{"Discover Weekly" "Release Radar"})
+
 (defn sort? [playlist]
   (contains? playlists-to-sort (:name playlist)))
-
-
-;; "https://api.spotify.com/v1/playlists/37i9dQZEVXcCui38GLYlsN/tracks"
-(defn get-tracks [playlist]
-  (crawl! (-> playlist :tracks :href)))
 
 (defn playlist-priority [{:keys [features]}]
   (* (:danceability features)
@@ -28,12 +24,3 @@
         features (tracks/audio-features tracks)
         enriched (tracks/enrich tracks features)]
     (sort-by playlist-priority (vals enriched))))
-
-
-(comment
-  (def tracks (get-tracks (first (my-playlists))))
-  (def features (tracks/audio-features tracks))
-
-  (def enriched (tracks/enrich tracks features))
-  (sort-by playlist-priority (vals enriched)))
-(sort-playlist (first (my-playlists)))

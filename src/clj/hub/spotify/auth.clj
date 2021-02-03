@@ -44,8 +44,9 @@
 
 (defn expired-token? [ex]
   (try
-    (string/includes? (get (util/parse-json (:body ex)) "message")
-                      "The access token expired")
+    (-> (util/parse-json (:body (ex-data ex)))
+        (get-in [:error :error :message])
+        (string/includes? "The access token expired"))
     (catch NullPointerException ex
       false)))
 
@@ -69,10 +70,10 @@
                      :redirect_uri redirect-uri})))
 
 (def auth-url
-  (url "/authorize"
-       {:response_type "code"
-        :client_id     client-id
-        :scope         scope
-        :redirect_uri  redirect-uri
-        ;; TODO: supply a `state` for CSRF protection
-        }))
+  (str (url "/authorize"
+            {:response_type "code"
+             :client_id     client-id
+             :redirect_uri  redirect-uri
+             ;; TODO: supply a `state` for CSRF protection
+             })
+       "&scope=" (string/join " " scope)))
