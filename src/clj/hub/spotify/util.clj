@@ -7,11 +7,14 @@
 (defn parse-json [s]
   (json/read-str s :key-fn keyword))
 
-(defn request! [req]
-  (-> req
-      (assoc :oauth-token (auth/client-credentials))
-      http/request
-      (update :body parse-json)))
+(defn request!
+  ([req]
+   (request! req (or @auth/token (auth/client-credentials))))
+  ([req bearer-token]
+   (-> req
+       (assoc :oauth-token (:access_token bearer-token))
+       http/request
+       (update :body parse-json))))
 
 (defn get! [url]
   (request! {:method :get :url url}))
