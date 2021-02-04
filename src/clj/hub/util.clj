@@ -1,6 +1,7 @@
 (ns hub.util
   (:require
    [clojure.data.csv :as csv]
+   [clojure.data.json :as json]
    [clojure.java.io :as io]))
 
 (defn csv-data->maps [csv-data]
@@ -31,3 +32,6 @@
 
 (defn find-by [k v coll]
   (first (filter #(= v (k %)) coll)))
+
+(defn parse-json [s]
+  (json/read-str s :key-fn keyword))

@@ -2,6 +2,7 @@
   (:require
    [hiccup.page :refer [html5 include-js include-css]]
    [hub.server.inventory :as inventory]
+   [hub.server.spotify :as spotify]
    [muuntaja.core :as m]
    [reitit.coercion.malli]
    [reitit.ring :as ring]
@@ -28,8 +29,9 @@
 (def app
   (ring/ring-handler
    (ring/router
-    [["/" {:handler index-html}]
-     inventory/routes]
+    [["/" {:handler #'index-html}]
+     inventory/routes
+     spotify/routes]
     {:data {:coercion   reitit.coercion.malli/coercion
             :muuntaja   m/instance
             :middleware [parameters/parameters-middleware
