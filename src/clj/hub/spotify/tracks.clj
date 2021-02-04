@@ -1,7 +1,7 @@
 (ns hub.spotify.tracks
   (:require
    [clojure.string :as string]
-   [hub.spotify.util :as util]))
+   [hub.spotify.util :refer [api get!]]))
 
 (defn group-by-id [f xs]
   (->> xs
@@ -13,9 +13,10 @@
 (defn audio-features
   [tracks]
   {:pre [(>= 100 (count tracks))]}
-  (let [ids (map (comp :id :track) tracks)
-        url (str "/v1/audio-features?ids=" (string/join "," ids))]
-    (:audio_features (util/get! (util/api url)))))
+  (let [ids (->> tracks
+                 (map (comp :id :track))
+                 (string/join ","))]
+    (:audio_features (get! (api "/v1/audio-features?ids=" ids)))))
 
 (defn enrich
   "Request audio features for a collection of tracks."

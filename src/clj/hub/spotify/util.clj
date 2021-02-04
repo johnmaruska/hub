@@ -1,21 +1,12 @@
 (ns hub.spotify.util
   (:require
    [clj-http.client :as http]
-   [clojure.data.json :as json]
    [hub.spotify.auth :as auth]
    [hub.spotify.token :as token]
+   [hub.util :refer [parse-json]]
    [ring.util.codec :as codec]))
 
-(defn url
-  ([target endpoint]
-   (str "https://" (name target) ".spotify.com" endpoint))
-  ([target endpoint query-params]
-   (url target (str endpoint "?" (codec/form-encode query-params)))))
-
-(def api (partial url :api))
-
-(defn parse-json [s]
-  (json/read-str s :key-fn keyword))
+(def api (partial str "https://api.spotify.com"))
 
 (defn request!
   ([req]
@@ -27,7 +18,7 @@
      (-> req
          (assoc :oauth-token (:access_token bearer-token))
          send-request!
-         (update :body parse-json)))))
+         (update :body #(when %1 (parse-json %1)))))))
 
 (defn get! [url]
   (:body (request! {:method :get :url url})))

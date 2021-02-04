@@ -3,8 +3,9 @@
   (:require
    [clj-http.client :as http]
    [clojure.string :as string]
-   [hub.spotify.util :as util]
-   [hub.spotify.token :as token]))
+   [hub.spotify.token :as token]
+   [hub.util :refer [parse-json]]
+   [ring.util.codec :as codec]))
 
 ;; TODO: from more secure location than local envvars
 (def client-secret (System/getenv "SPOTIFY_SECRET"))
@@ -17,7 +18,17 @@
             "playlist-modify-public"
             "playlist-modify-private"])
 
-(def url (partial util/url :accounts))
+(def url (partial str "https://accounts.spotify.com"))
+
+(def auth-url
+  (url "/authorize?"
+       (codec/form-encode
+        {:response_type "code"
+         :client_id     client-id
+         :redirect_uri  redirect-uri
+         ;; TODO: supply a `state` for CSRF protection
+         })
+       "&scope=" (string/join " " scope)))
 
 (defn post-basic-auth [form-params]
   (:body (http/post (url "/api/token")
@@ -42,11 +53,16 @@
    (post-basic-auth {:grant_type "refresh_token"
                      :refresh_token (:refresh_token api-token)})))
 
+(defn unauthorized? [ex]
+  (or (= "Unauthorized" (:reason-phrase (ex-data ex)))
+      (= 401 (:status (ex-data ex)))))
+
+(defn error-message [ex]
+  (-> (ex-data ex) :body parse-json :error :message))
+
 (defn expired-token? [ex]
   (try
-    (-> (util/parse-json (:body (ex-data ex)))
-        (get-in [:error :error :message])
-        (string/includes? "The access token expired"))
+    (= "The access token expired" (error-message ex))
     (catch NullPointerException ex
       false)))
 
@@ -54,9 +70,9 @@
   `(try
      ~@body
      (catch Exception ex#
-       (if (expired-token? ex#)
+       (if (and (unauthorized? ex#) (expired-token? ex#))
          (do
-           (refresh-token! @token)
+           (refresh-token! (token/api-token))
            ~@body)
          (throw ex#)))))
 
@@ -68,12 +84,3 @@
    (post-basic-auth {:grant_type   "authorization_code"
                      :code         auth-code
                      :redirect_uri redirect-uri})))
-
-(def auth-url
-  (str (url "/authorize"
-            {:response_type "code"
-             :client_id     client-id
-             :redirect_uri  redirect-uri
-             ;; TODO: supply a `state` for CSRF protection
-             })
-       "&scope=" (string/join " " scope)))
