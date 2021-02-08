@@ -2,6 +2,8 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/data.csv "1.0.0"]
                  [org.clojure/data.json "1.0.0"]
+                 ;;; Logging
+                 [org.clojure/tools.logging "1.1.0"]
                  ;; work with mp3 id3 tags
                  ;; https://github.com/pandeiro/claudio
                  [claudio "0.1.3"]
@@ -19,6 +21,8 @@
                  [metosin/muuntaja "0.6.7"]
                  ;; data-driven router
                  [metosin/reitit "0.5.10"]
+                 ;; component lifecycle
+                 [mount "0.1.16"]
                  ;; drawing library for Conway
                  [quil "3.1.0"]
                  ;; Ring web-server

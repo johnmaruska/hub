@@ -9,6 +9,7 @@
   {;; Admin
    "!bot please be kill"    (fn [& _]
                               (throw (ex-info "ManualKill" {:manual-kill? true})))
+   "!nickname"              #'admin/change-nickname
    "!working"               #'admin/working
    ;; Guess that sound
    "!play guess-that-sound" #'guess-that-sound/start!

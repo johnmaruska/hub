@@ -12,11 +12,10 @@
    (handle-event! bot (a/<!! (:event-ch bot))))
   ([bot [event-type event-data]]
    (try
-     (def EVENT-TYPE event-type)
-     (def EVENT-DATA event-data)
      (when (= :message-create event-type)
        (doseq [matching-prefix (commands/matching-prefixes event-data)]
          ;; TODO: if multiple handlers allowed, modify here
+         ;; TODO: strip prefix from content
          ((get commands/prefix matching-prefix) bot event-data)))
      (catch Exception ex
        (def LAST_EXCEPTION ex)  ; chuck into the inspector
@@ -40,10 +39,3 @@
   (attempt (m/stop-connection! (:message-ch bot)))
   (attempt (c/disconnect-bot!  (:connection-ch bot)))
   (attempt (a/close! (:event-ch bot))))
-
-(defn spin-forever!
-  "Listen to events until an exception happens (incl. manual kill signal)."
-  [bot]
-  (loop []
-    (handle-event! bot)
-    (recur)))
