@@ -11,9 +11,9 @@
   {:start-game-welcome   "**Time to play `GUESS THAT SOUND`.**"
    :game-already-started "A game has already started."
    :no-game-started      "No guessing game has started"
+   :got-guess            "Your guess has been recorded"
    :guess-help           "Whatever mysterious sound is happening in voice, type `!guess` followed by whatever you think the sound is."
    :answer-help          "To conclude the game, type `!answer` followed by what the sound was, and everyone's guesses will be printed. See who gets the closest!"})
-
 
 ;;;; Game state
 
@@ -21,10 +21,20 @@
   {:guesses []
    :answer  "Not yet provided"})
 
-(defonce game (atom {}))
+(defonce game (atom nil))
 
 (defn game-started? [channel-id]
   (not (nil? (get @game channel-id))))
+
+(defn record-guess! [{:keys [author channel-id content]}]
+  (let [guess (util/drop-first-word content)]
+    (swap! game
+           update-in [channel-id :guesses]
+           concat [{:author author :guess guess}])))
+
+(defn record-answer! [{:keys [answer channel-id content]}]
+  (let [answer (util/drop-first-word content)]
+    (swap! game assoc-in [channel-id :answer] answer)))
 
 (defn display [channel-id]
   (let [guess-line  (fn [x] (str (mention-user (:author x))
@@ -33,21 +43,6 @@
         answer-line (str "Answer: " (-> @game (get channel-id) :answer))
         guess-lines (mapv guess-line (-> @game (get channel-id) :guesses))]
     (string/join "\n" (concat [answer-line] guess-lines))))
-
-
-;;;; User actions
-
-(defn guess! [bot event]
-  (let [guess  (util/drop-first-word (:content event))
-        append (fn [a g] (update-in a [(:channel-id event) :guesses] conj g))]
-    (swap! game append {:author (:author event) :guess guess})))
-
-(defn answer! [bot event]
-  (let [channel-id (:channel-id event)]
-    (swap! game assoc-in [channel-id :answer]
-           (util/drop-first-word (:content event)))
-    (util/reply bot event (display channel-id))))
-
 
 ;;;; Game lifecycle
 
@@ -71,14 +66,20 @@
 (defn stop! [event]
   (swap! game assoc (:channel-id event) nil))
 
-;;;; create-message event handler
+;;;; User actions
 
-(defn handle! [bot event]
-  (letfn [(when-game-started [action]
-            (if (game-started? (:channel-id event))
-              (action bot event)
-              (util/reply bot event (:no-game-started canned-reply))))]
-    (util/command (:content event)
-      "!play guess-that-sound" (start! bot event)
-      "!guess"  (when-game-started guess!)
-      "!answer" (do (when-game-started answer!) (stop! event)))))
+(defn guess! [bot {:keys [channel-id author] :as event}]
+  (if (game-started? channel-id)
+    (do
+      (record-guess! event)
+      (util/reply bot event (str (:got-guess canned-reply)
+                                 ", " (mention-user author))))
+    (util/reply bot event (:no-game-started canned-reply))))
+
+(defn answer! [bot {:keys [channel-id content] :as event}]
+  (if (game-started? channel-id)
+    (do
+      (record-answer! event)
+      (util/reply bot event (display channel-id))
+      (stop! event))
+    (util/reply bot event (:no-game-started canned-reply))))

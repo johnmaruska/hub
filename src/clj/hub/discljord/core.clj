@@ -1,14 +1,30 @@
 (ns hub.discljord.core
   (:require
    [clojure.core.async :as a]
-   [clojure.pprint :as pprint]
    [discljord.connections :as c]
-   [discljord.events :as e]
+   [discljord.formatting :refer [mention-user]]
    [discljord.messaging :as m]
-   [hub.discljord.admin :as admin]
-   [hub.discljord.guess-that-sound :as guess-that-sound]
-   [hub.discljord.minesweeper :as minesweeper]
-   [hub.discljord.role :as role]))
+   [hub.discljord.commands :as commands]
+   [hub.discljord.util :as util]))
+
+(defn handle-event!
+  ([bot]
+   (handle-event! bot (a/<!! (:event-ch bot))))
+  ([bot [event-type event-data]]
+   (try
+     (def EVENT-TYPE event-type)
+     (def EVENT-DATA event-data)
+     (when (= :message-create event-type)
+       (doseq [matching-prefix (commands/matching-prefixes event-data)]
+         ;; TODO: if multiple handlers allowed, modify here
+         ((get commands/prefix matching-prefix) bot event-data)))
+     (catch Exception ex
+       (def LAST_EXCEPTION ex)  ; chuck into the inspector
+       (if (:manual-kill? (ex-data ex))
+         (util/reply bot event-data (str "Will I dream, " (mention-user (:author event-data)) "?"))
+         (util/reply bot event-data "Could not handle command. See logs."))
+       (throw ex)  ; propagate out
+       ))))
 
 (defn start! []
   (let [event-ch (a/chan 100)
@@ -25,29 +41,9 @@
   (attempt (c/disconnect-bot!  (:connection-ch bot)))
   (attempt (a/close! (:event-ch bot))))
 
-(def ignored-events
-  #{;;; bot control events
-    :connected-all-shards
-    :ready
-    :guild-create  ; it's connected to a server
-    ;;; user action events
-    :presence-updated  ; also triggers on game/activity changes like spotify
-    :typing-started})
-
-(def message-create-handlers
-  [guess-that-sound/handle!
-   minesweeper/handle
-   admin/handle
-   role/handle])
-
-(defn handle-event! [bot [event-type event-data]]
-  (when (= :message-create event-type)
-    (doseq [h message-create-handlers]
-      (h bot event-data))))
-
-(defn spin-forever! [bot]
-  (try
-    (loop []
-      (handle-event! bot (a/<!! (:event-ch bot)))
-      (recur))
-    (finally (stop! bot))))
+(defn spin-forever!
+  "Listen to events until an exception happens (incl. manual kill signal)."
+  [bot]
+  (loop []
+    (handle-event! bot)
+    (recur)))

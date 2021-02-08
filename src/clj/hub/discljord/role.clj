@@ -61,6 +61,7 @@
       (util/reply bot event (str "No role by the name " role-name
                                  " was assigned to " (mention-user (:author event)))))))
 
+;; TODO: make this pull from docstrings
 (def help-message
   "The `role` extension is used for basic role management.
 This is intended for making @ groups for anyone interested in gamez.
@@ -73,19 +74,18 @@ Commands are as follows:
   !role join [ROLE]  - add a role to your user. No need to prepend with @ just use exact string
   !role leave [ROLE] - remove a role from your user. No need to prepend with @ just use exact string")
 
+(defn help [bot event]
+  (util/reply bot event help-message))
+
 ;;;; display
 
 (defn guild-message? [event]
   (boolean (:guild-id event)))
 
-;; I'd rather do this unix-style.
-;; "!role" command dispatches to "list" "list-mine" etc dispatches
-(defn handle [bot event]
-  (when (guild-message? event)
-    (util/command (:content event)
-      "!role help"      (util/reply bot event help-message)
-      "!role list"      (list-all bot event)
-      "!role list-mine" (list-authors bot event)
-      "!role new"       (create bot event)
-      "!role join"      (add-to-author bot event)
-      "!role leave"     (remove-from-author bot event))))
+(def role-commands
+  {"!role help"      help
+   "!role list"      list-all
+   "!role list-mine" list-authors
+   "!role new"       create
+   "!role join"      add-to-author
+   "!role leave"     remove-from-author})
