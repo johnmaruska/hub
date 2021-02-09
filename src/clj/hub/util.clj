@@ -2,7 +2,8 @@
   (:require
    [clojure.data.csv :as csv]
    [clojure.data.json :as json]
-   [clojure.java.io :as io]))
+   [clojure.java.io :as io]
+   [clojure.string :as string]))
 
 (defn csv-data->maps [csv-data]
   (map zipmap
