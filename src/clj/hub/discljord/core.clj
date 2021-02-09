@@ -7,6 +7,9 @@
    [hub.discljord.commands :as commands]
    [hub.discljord.util :as util]))
 
+(defn sign-off [event-data]
+  (str "Will I dream, " (mention-user (:author event-data)) "?"))
+
 (defn handle-event!
   ([bot]
    (handle-event! bot (a/<!! (:event-ch bot))))
@@ -14,16 +17,14 @@
    (try
      (when (= :message-create event-type)
        (doseq [matching-prefix (commands/matching-prefixes event-data)]
-         ;; TODO: if multiple handlers allowed, modify here
-         ;; TODO: strip prefix from content
-         ((get commands/prefix matching-prefix) bot event-data)))
+         (let [handler (get commands/prefix matching-prefix)]
+           ;; TODO: if multiple handlers allowed, modify here
+           (handler bot event-data))))
      (catch Exception ex
-       (def LAST_EXCEPTION ex)  ; chuck into the inspector
        (if (:manual-kill? (ex-data ex))
-         (util/reply bot event-data (str "Will I dream, " (mention-user (:author event-data)) "?"))
+         (util/reply bot event-data (sign-off event-data))
          (util/reply bot event-data "Could not handle command. See logs."))
-       (throw ex)  ; propagate out
-       ))))
+       (throw ex)))))
 
 (defn start! []
   (let [event-ch (a/chan 100)
