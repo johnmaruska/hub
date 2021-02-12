@@ -1,8 +1,8 @@
-(ns hub.logical-clocks.causal-history-test
+(ns hub.sketchbook.logical-clocks.causal-history-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [hub.logical-clocks.causal-history :as sut]
-   [hub.logical-clocks.util :as util]))
+   [hub.sketchbook.logical-clocks.causal-history :as sut]
+   [hub.sketchbook.logical-clocks.util :as util]))
 
 (declare example)
 

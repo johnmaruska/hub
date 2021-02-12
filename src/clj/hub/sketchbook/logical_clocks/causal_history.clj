@@ -1,4 +1,4 @@
-(ns hub.logical-clocks.causal-history
+(ns hub.sketchbook.logical-clocks.causal-history
   "Basic implementation of Figure 2 causal histories approach in ACM's
   Why Logical Clocks are Easy  https://queue.acm.org/detail.cfm?id=2917756"
   (:require [clojure.set :as set])

@@ -1,4 +1,4 @@
-(ns hub.logical-clocks.vector-clock
+(ns hub.sketchbook.logical-clocks.vector-clock
   "Actual implementation of a basic vector clock."
   (:refer-clojure :exclude [merge]))
 

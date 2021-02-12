@@ -1,8 +1,8 @@
-(ns hub.logical-clocks.happened-before-test
+(ns hub.sketchbook.logical-clocks.happened-before-test
   (:require
    [clojure.test :refer [deftest is testing]]
-   [hub.logical-clocks.happened-before :as sut]
-   [hub.logical-clocks.util :as util]))
+   [hub.sketchbook.logical-clocks.happened-before :as sut]
+   [hub.sketchbook.logical-clocks.util :as util]))
 
 (declare example)
 

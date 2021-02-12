@@ -1,4 +1,4 @@
-(ns hub.logical-clocks.util
+(ns hub.sketchbook.logical-clocks.util
   (:require  [clojure.test :as t]))
 
 (defn simulate [{:keys [send bump init-node] :as fns}]

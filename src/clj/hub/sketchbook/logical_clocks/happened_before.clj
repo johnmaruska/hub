@@ -1,4 +1,4 @@
-(ns hub.logical-clocks.happened-before
+(ns hub.sketchbook.logical-clocks.happened-before
   "Basic implementation of Figure 1 happened-before relation in ACM's
   Why Logical Clocks are Easy  https://queue.acm.org/detail.cfm?id=2917756
 
