@@ -2,7 +2,7 @@
   "The Guide :tm: is a log of arena matchups and analytic helper fns.
   Currently assumes 2v2 with rogue/warlock."
   (:require
-   [hub.util :as util]
+   [hub.util.resource :as resource]
    [clojure.string :as str]
    [clojure.set :as set]))
 
@@ -63,7 +63,7 @@
 (defn the-guide [mode]
   (or (get @match-history mode)
       (swap! match-history assoc mode
-             (-> mode filename util/load-csv parse))))
+             (-> mode filename resource/load-csv parse))))
 
 (defn format-row [row]
   (->> [(:arena row)
@@ -78,7 +78,7 @@
   (swap! match-history #(concat % [match]))
   (let [row  (format-row match)
         file (filename (mode match))]
-    (util/append-csv file [row])))
+    (resource/append-csv file [row])))
 
 ;;;; filter predicates
 
