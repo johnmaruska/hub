@@ -2,9 +2,6 @@
   (:require
    [hub.spotify.util :refer [api crawl! get! request!]]))
 
-(defn my-playlists []
-  (crawl! (api "/v1/me/playlists")))
-
 (defn create-playlist [user-id list-name]
   (request! {:method :post
              :url (api "/v1/users/" user-id "/playlists")

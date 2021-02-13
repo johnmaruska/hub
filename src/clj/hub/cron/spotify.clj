@@ -1,5 +1,6 @@
 (ns hub.cron.spotify
   (:require
+   [hub.spotify.me :as my]
    [hub.spotify.playlist :as playlist]
    [hub.spotify.tracks :as tracks]
    [hub.util :refer [find-by]]))
@@ -34,7 +35,7 @@
 ;; TODO: this should be a weekly cron job set to happen between Spotify
 ;; generating playlists and waking up that morning.
 (defn generate-sorted-playlists []
-  (let [all       (playlist/my-playlists)
+  (let [all       (my/playlists)
         target-id (fn [playlist]
                     (let [target-name (str "HUB - " (:name playlist))]
                       (find-id all target-name)))]
