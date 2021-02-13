@@ -1,5 +1,5 @@
 (ns hub.spotify.artist
-  (:require [hub.spotify.util :refer [api crawl! get!]]))
+  (:require [hub.spotify.util :refer [api get!]]))
 
 (defn related [artist-id]
   (:artists (get! (api "/v1/artists/" artist-id "/related-artists"))))
