@@ -1,3 +1,9 @@
+# Intermediate data
+resources/spotify/artists.edn
+resources/spotify/related-artists.edn
+# Secrets
+.tokens/authorization-code.edn
+
 # Clojure files
 target/
 .lein-failures
@@ -11,9 +17,6 @@ pom.xml
 
 # imdb data -- large files
 resources/imdb/*
-
-# Secrets
-.tokens/authorization-code.edn
 
 # Log files
 debug.log

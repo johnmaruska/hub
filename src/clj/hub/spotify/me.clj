@@ -9,6 +9,7 @@
 (def tracks    (partial all-my "tracks"))
 (def shows     (partial all-my "shows"))
 
+;; This times out the REPL because of how many saved songs I have...
 (defn artists []
   (->> (all-my "tracks")  ; (:items (get! (api "/v1/me/tracks?limit=50")))
        (map (comp :artists :track))
