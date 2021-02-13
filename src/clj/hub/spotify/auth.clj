@@ -13,10 +13,14 @@
 ;; TODO: pull from config depending on deploy location
 ;; TODO: pull path from a bidirectional library instead of hard code
 (def redirect-uri "http://127.0.0.1:4000/en/spotify/callback")
-(def scope ["playlist-read-private"
-            "playlist-read-collaborative"
-            "playlist-modify-public"
-            "playlist-modify-private"])
+
+(def scope
+  ["user-library-read"
+   "user-top-read"
+   "playlist-read-private"
+   "playlist-read-collaborative"
+   "playlist-modify-public"
+   "playlist-modify-private"])
 
 (def url (partial str "https://accounts.spotify.com"))
 

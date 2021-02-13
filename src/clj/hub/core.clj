@@ -1,18 +1,18 @@
 (ns hub.core
   (:require
    [clojure.core.async :refer [thread]]
+   [clojure.tools.logging :as log]
    [hub.conway :as conway]
    [hub.conway.seed :as conway.seed]
    [hub.discljord.core :as discord]
    [hub.server :as server]
-   [mount.core :as mount :refer [defstate]]
-   [clojure.tools.logging :as log])
+   [mount.core :as mount :refer [defstate]])
   (:gen-class))
 
 (defstate discord-bot
   :start (discord/start!)
   ;; TODO: thread management with event pump
-  :stop  (discord/stop!))
+  :stop  (discord/stop! discord-bot))
 
 (defstate webserver
   :start (server/start!)
