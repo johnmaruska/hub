@@ -20,8 +20,14 @@
          send-request!
          (update :body #(when %1 (parse-json %1)))))))
 
+(defn delete! [url opts]
+  (request! (merge opts {:method :delete :url url})))
+
 (defn get! [url]
   (:body (request! {:method :get :url url})))
+
+(defn post! [url opts]
+  (request! (merge opts {:method :post :url url})))
 
 (defn results
   "Extract the results vector from the nested body.
