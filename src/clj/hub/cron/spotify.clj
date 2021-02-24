@@ -50,3 +50,4 @@
   (let [artists  (data-file/load-edn artists-file)
         adj-list (artist/related-adjacency-list artists)]
     (data-file/write-edn related-artists-file adj-list)))
+
