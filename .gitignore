@@ -1,6 +1,6 @@
 # Intermediate data
-resources/spotify/artists.edn
-resources/spotify/related-artists.edn
+data/spotify/artists.edn
+data/spotify/related-artists.edn
 # Secrets
 .tokens/authorization-code.edn
 
@@ -16,7 +16,7 @@ pom.xml
 .nrepl-port
 
 # imdb data -- large files
-resources/imdb/*
+data/imdb/*
 
 # Log files
 debug.log

@@ -5,8 +5,7 @@
    [hub.spotify.playlist :as playlist]
    [hub.spotify.tracks :as tracks]
    [hub.util :refer [find-by]]
-   [hub.util.resource :as resource]
-   [clojure.java.io :as io]))
+   [hub.util.data-file :as data-file]))
 
 ;; TODO: move into a configuration
 (def playlists-to-sort #{"Discover Weekly" "Release Radar"})
@@ -44,10 +43,11 @@
 ;;; WARNING: these take a while to run and can't be executed in the REPL.
 ;;; store intermediate results in a file
 (defn generate-saved-artists []
-  (resource/spit artists-file
-                 (my/artists)))
+  (let [artists (map #(select-keys % [:id :name]) (my/artists))]
+    (data-file/write-edn artists-file artists)))
 
 (defn generate-related-artist-adjacency-list []
-  (->> (resource/load-edn artists-file)
-       (artist/related-adjacency-list)
-       (resource/spit related-artists-file)))
+  (let [artists  (data-file/load-edn artists-file)
+        adj-list (artist/related-adjacency-list artists)]
+    (data-file/write-edn related-artists-file adj-list)))
+

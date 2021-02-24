@@ -15,6 +15,8 @@
                                org.eclipse.jetty/jetty-http]]
                  ;; context-free-grammar parsing
                  [instaparse "1.4.10"]
+                 ;; retry management
+                 [listora/again "1.0.0"]
                  ;; data-driven schemas that aren't clojure.spec
                  [metosin/malli "0.2.1"]
                  ;; http format negotiation

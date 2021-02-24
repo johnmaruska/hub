@@ -4,6 +4,7 @@
    [clojure.tools.logging :as log]
    [hub.conway :as conway]
    [hub.conway.seed :as conway.seed]
+   [hub.cron.spotify :as spotify]
    [hub.discljord.core :as discord]
    [hub.server :as server]
    [mount.core :as mount :refer [defstate]])
@@ -52,5 +53,10 @@
       conway/console-print))
 
 (defn -main [& args]
-  (mount/start)
-  (discord-run!))
+  (when (some #{"spotify"} args)
+    (spotify/generate-saved-artists)
+    (spotify/generate-related-artist-adjacency-list)
+    (spotify/generate-sorted-playlists))
+  (when (some #{"server"} args)
+    (mount/start)
+    (discord-run!)))
