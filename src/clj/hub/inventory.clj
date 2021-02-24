@@ -1,12 +1,12 @@
 (ns hub.inventory
-  (:require [hub.util.resource :as resource]))
+  (:require [hub.util.data-file :as data-file]))
 
 (def albums-csv "inventory/albums.csv")
 
 (defn albums
   "Vector of all albums in my inventory."
   []
-  (resource/load-csv albums-csv))
+  (data-file/load-csv albums-csv))
 
 (defn album->vec
   [{:keys [artist release ownership]}]
@@ -15,7 +15,7 @@
 (defn add-albums
   "Write a sequence of albums to a CSV."
   [albums]
-  (resource/append-csv albums-csv (map album->vec albums)))
+  (data-file/append-csv albums-csv (map album->vec albums)))
 
 (defn add-album [album]
   (add-albums [album]))

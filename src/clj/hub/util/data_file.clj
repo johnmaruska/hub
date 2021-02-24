@@ -1,17 +1,19 @@
-(ns hub.util.resource
+(ns hub.util.data-file
   (:require
    [clojure.data.csv :as csv]
    [clojure.edn :as edn]
    [clojure.java.io :as io])
   (:import
-   (java.io PushbackReader))
-  (:refer-clojure :rename {spit core-spit}))
+   (java.io PushbackReader)))
+
+(defn file [filename]
+  (str "data/" filename))
 
 (defn reader [filename]
-  (io/reader (io/resource filename)))
+  (io/reader (file filename)))
 
 (defn writer [filename & opts]
-  (apply io/writer (io/resource filename) opts))
+  (apply io/writer (file filename) opts))
 
 (defn csv-data->maps [csv-data]
   (map zipmap
@@ -37,8 +39,7 @@
 
 (defn load-edn [filename]
   (with-open [f (reader filename)]
-    (edn/read (PushbackReader. reader))))
+    (edn/read (PushbackReader. f))))
 
-(defn spit [filename contents]
-  (core-spit (io/resource filename)
-             contents))
+(defn write-edn [filename contents]
+  (pprint contents (writer filename)))
