@@ -24,6 +24,29 @@ Leiningen 2.9.1 on Java 1.8.0_272 OpenJDK 64-Bit Server VM
 
 - Docker
 
+## Working Pieces / How to run
+
+Webserver and Discord bot
+```
+lein run server
+```
+
+Spotify artifact generators
+```
+lein run spotify
+```
+
+mp3 file metadata tag correction
+```
+lein run id3
+```
+
+Or any combination of above, e.g.
+```
+lein run server spotify id3
+```
+
+
 ## Components to add, written somewhere else already
 
 1. Pokemon utilities

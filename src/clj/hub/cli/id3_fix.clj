@@ -97,6 +97,7 @@
 (defn correct-tracks!
   "Correct id3 tags for all tracks within given `dir`"
   [dir]
+  (println "Correcting tracks for dir" (get-name dir))
   (let [mp3s (mp3s dir)
         tags (enrich-tags mp3s)]
     (run! #(correct-track! % tags) (broken-tracks mp3s))))

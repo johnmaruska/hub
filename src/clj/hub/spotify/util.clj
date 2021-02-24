@@ -1,4 +1,5 @@
 (ns hub.spotify.util
+  "Utilities for requesting from the Spotify API."
   (:require
    [again.core :as again]
    [clj-http.client :as http]
@@ -9,12 +10,16 @@
 
 (def api (partial str "https://api.spotify.com"))
 
-(defn rate-limit [exc]
+(defn rate-limit
+  "Delays thread by amount specified in HTTP response exception."
+  [exc]
   (let [retry-after (get-in (ex-data exc) [:headers "retry-after"])
         delay-ms    (* 1000 (Integer/parseInt retry-after))]
     (Thread/sleep delay-ms)))
 
-(defmacro with-rate-limiting [& body]
+(defmacro with-rate-limiting
+  "Retry 429 responses as specified in the HTTP response exception."
+  [& body]
   `(again/with-retries
      {::again/callback (fn [s#]
                          (let [exc# (::again/exception s#)]
@@ -59,7 +64,10 @@
     body
     (first (vals body))))
 
-(defn crawl! [url]
+(defn crawl!
+  "Crawl a paginated GET request, building lazyseq of results.
+  Query parameters must be encoded into the url"
+  [url]
   (loop [acc [] url url]
     (let [{:keys [items next]} (results (get! url))]
       (if next

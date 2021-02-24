@@ -26,7 +26,10 @@
 
 ;; TODO: this should be a weekly cron job set to happen between Spotify
 ;; generating playlists and waking up that morning.
-(defn generate-sorted-playlists []
+(defn generate-sorted-playlists
+  "Create sorted version of specified playlists into new playlists named
+  format `HUB - <name>`."
+  []
   (let [all       (my/playlists)
         target-id (fn [playlist]
                     (let [target-name (str "HUB - " (:name playlist))]
@@ -40,14 +43,17 @@
          (run! generate))))
 
 
-;;; WARNING: these take a while to run and can't be executed in the REPL.
-;;; store intermediate results in a file
-(defn generate-saved-artists []
+(defn generate-saved-artists
+  "Pull all saved artists from Spotify for currently authorized user and
+  persist that to a local file."
+  []
   (let [artists (map #(select-keys % [:id :name]) (my/artists))]
     (data-file/write-edn artists-file artists)))
 
-(defn generate-related-artist-adjacency-list []
+(defn generate-related-artist-adjacency-list
+  "Requests related artists from Spotify for all artists in `artists-file`.
+  `artists-file` must be generated before the adjacency list."
+  []
   (let [artists  (data-file/load-edn artists-file)
         adj-list (artist/related-adjacency-list artists)]
     (data-file/write-edn related-artists-file adj-list)))
-
