@@ -2,6 +2,7 @@
   (:require
    [clojure.core.async :refer [thread]]
    [clojure.tools.logging :as log]
+   [hub.cli.id3-fix :as id3]
    [hub.conway :as conway]
    [hub.conway.seed :as conway.seed]
    [hub.cron.spotify :as spotify]
@@ -53,6 +54,8 @@
       conway/console-print))
 
 (defn -main [& args]
+  (when (some #{"id3"} args)
+    (id3/apply-fix!))
   (when (some #{"spotify"} args)
     (spotify/generate-saved-artists)
     (spotify/generate-related-artist-adjacency-list)
