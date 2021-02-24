@@ -9,16 +9,23 @@
 
 (def api (partial str "https://api.spotify.com"))
 
-(def rate-limit-strategy
-  {::again/callback (fn [s]
-                      (let [exd (ex-data (::again/exception s))]
-                        (if (= 429 (:status exd))
-                          (Thread/sleep (* 1000 (Integer/parseInt (get-in exd [:headers "retry-after"]))))
-                          ::again/fail)))
-   ::again/strategy [0 0 0]})
+(defn rate-limit [exc]
+  (let [retry-after (get-in (ex-data exc) [:headers "retry-after"])
+        delay-ms    (* 1000 (Integer/parseInt retry-after))]
+    (Thread/sleep delay-ms)))
+
+(defmacro with-rate-limiting [& body]
+  `(again/with-retries
+     {::again/callback (fn [s#]
+                         (let [exc# (::again/exception s#)]
+                           (if (= 429 (:status (ex-data exc#)))
+                             (rate-limit exc#)
+                             ::again/fail)))
+      ::again/strategy [0 0 0]}
+     ~@body))
 
 (defn send-request! [req]
-  (again/with-retries rate-limit-strategy
+  (with-rate-limiting
     (auth/with-refresh-token
       (http/request req))))
 
