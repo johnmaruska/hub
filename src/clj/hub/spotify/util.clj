@@ -21,7 +21,7 @@
                            (if (= 429 (:status (ex-data exc#)))
                              (rate-limit exc#)
                              ::again/fail)))
-      ::again/strategy [0 0 0]}
+      ::again/strategy (repeat 0)}
      ~@body))
 
 (defn send-request! [req]
