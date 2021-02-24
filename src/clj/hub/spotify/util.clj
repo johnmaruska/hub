@@ -1,5 +1,6 @@
 (ns hub.spotify.util
   (:require
+   [again.core :as again]
    [clj-http.client :as http]
    [hub.spotify.auth :as auth]
    [hub.spotify.token :as token]
@@ -8,17 +9,27 @@
 
 (def api (partial str "https://api.spotify.com"))
 
+(def rate-limit-strategy
+  {::again/callback (fn [s]
+                      (let [exd (ex-data (::again/exception s))]
+                        (if (= 429 (:status exd))
+                          (Thread/sleep (* 1000 (Integer/parseInt (get-in exd [:headers "retry-after"]))))
+                          ::again/fail)))
+   ::again/strategy [0 0 0]})
+
+(defn send-request! [req]
+  (again/with-retries rate-limit-strategy
+    (auth/with-refresh-token
+      (http/request req))))
+
 (defn request!
   ([req]
    (request! req (or (token/api-token) (auth/client-credentials))))
   ([req bearer-token]
-   (letfn [(send-request! [req]
-             (auth/with-refresh-token
-               (http/request req)))]
-     (-> req
-         (assoc :oauth-token (:access_token bearer-token))
-         send-request!
-         (update :body #(when %1 (parse-json %1)))))))
+   (-> req
+       (assoc :oauth-token (:access_token bearer-token))
+       send-request!
+       (update :body #(when %1 (parse-json %1))))))
 
 (defn delete! [url opts]
   (request! (merge opts {:method :delete :url url})))
