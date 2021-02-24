@@ -41,6 +41,9 @@
 (defn delete! [url opts]
   (request! (merge opts {:method :delete :url url})))
 
+(defn delete! [url opts]
+  (request! (merge opts {:method :delete :url url})))
+
 (defn get! [url]
   (:body (request! {:method :get :url url})))
 

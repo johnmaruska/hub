@@ -65,6 +65,7 @@
       (swap! match-history assoc mode
              (-> mode filename data-file/load-csv parse))))
 
+
 (defn format-row [row]
   (->> [(:arena row)
         (map enemy->string (:enemies row))
