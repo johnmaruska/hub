@@ -1,4 +1,4 @@
-(ns hub.cron.spotify
+(ns hub.spotify
   (:require
    [hub.spotify.me :as my]
    [hub.spotify.artist :as artist]
@@ -41,7 +41,6 @@
     (->> all
          (filter #(contains? playlists-to-sort (:name %)))
          (run! generate))))
-
 
 (defn generate-saved-artists
   "Pull all saved artists from Spotify for currently authorized user and

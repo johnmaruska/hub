@@ -5,7 +5,7 @@
    [hub.cli.id3-fix :as id3]
    [hub.conway :as conway]
    [hub.conway.seed :as conway.seed]
-   [hub.cron.spotify :as spotify]
+   [hub.spotify :as spotify]
    [hub.discljord.core :as discord]
    [hub.server :as server]
    [mount.core :as mount :refer [defstate]])
@@ -38,9 +38,9 @@
   `(try
      ~@body
      (catch Exception ex#
-       (if (not (~pred (ex-data ex#)))
-         (throw ex#)
-         (log/error ex#)))))
+       (if (~pred (ex-data ex#))
+         (log/error ex#)
+         (throw ex#)))))
 
 (defn discord-run! []
   (swallow-exception :manual-kill?
