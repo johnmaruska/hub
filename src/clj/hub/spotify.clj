@@ -49,10 +49,18 @@
   (let [artists (map #(select-keys % [:id :name]) (my/artists))]
     (data-file/write-edn artists-file artists)))
 
+(defn new-artists [prev-adj-list all-artists]
+  (let [old-artists (into #{} (keys prev-adj-list))
+        old-artist? #(contains? old-artists (:name %))]
+    (remove old-artist? all-artists)))
+
 (defn generate-related-artist-adjacency-list
   "Requests related artists from Spotify for all artists in `artists-file`.
   `artists-file` must be generated before the adjacency list."
   []
-  (let [artists  (data-file/load-edn artists-file)
-        adj-list (artist/related-adjacency-list artists)]
-    (data-file/write-edn related-artists-file adj-list)))
+  (let [prev-adj-list (data-file/load-edn related-artists-file)]
+    (->> (data-file/load-edn artists-file)
+         (new-artists prev-adj-list)
+         artist/related-adjacency-list
+         (merge prev-adj-list)
+         (data-file/write-edn related-artists-file))))
