@@ -1,10 +1,6 @@
 (ns hub.core
   (:require
-   [clojure.core.async :refer [thread]]
-   [clojure.tools.logging :as log]
    [hub.cli.id3-fix :as id3]
-   [hub.conway :as conway]
-   [hub.conway.seed :as conway.seed]
    [hub.spotify :as spotify]
    [hub.discljord.core :as discord]
    [hub.server :as server]
@@ -41,11 +37,6 @@
        ;; most exceptions should just log and continue on
        (swallow-exception (comp not manual-kill?)
          (discord/handle-event! discord-bot))))))
-
-(defn run-conway []
-  (-> (conway.seed/all-dead 50 50)
-      (conway.seed/overlay conway.seed/glider 5 5)
-      conway/console-print))
 
 (defn -main [& args]
   (when (some #{"id3"} args)

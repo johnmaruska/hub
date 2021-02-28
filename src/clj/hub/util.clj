@@ -1,5 +1,6 @@
 (ns hub.util
   (:require
+   [clojure.tools.logging :as log]
    [clojure.data.json :as json]
    [clojure.string :as string]))
 
