@@ -20,18 +20,19 @@
 (defn add-album [album]
   (add-albums [album]))
 
-;; TODO: I dunno if I even like this. In the REPL it's nice, probably less so on the front-end.
+;; TODO: I dunno if I even like this. In the REPL it's nice, probably less
+;; so on the front-end.
 (defn sieve
-  "Filter a seq of maps by key `k`'s value `v`, and remove that key that from the map.
-
-  Only intended for exact-match filtering, since you still know the value in that key."
+  "Filter a seq of maps by key `k`'s value `v`, remove that key that from the map.
+  Only for exact-match filtering, since you still know the value in that key."
   [m k v]
   (->> m
        (filter #(= v (k %)))
        (map #(dissoc % k))))
 
 (defn ownership
-  "Lazy sequence of all albums with matching Ownership value, one of `CD`, `Vinyl`, `Digital`."
+  "Lazy sequence of all `albums` with matching Ownership `value`."
+  {:pre [(some #{"CD" "Vinyl" "Digital"} value)]}
   [albums value]
   (sieve albums :ownership value))
 

@@ -1,4 +1,5 @@
 (ns hub.minesweeper
+  "Create a Minesweeper gameboard."
   (:require
    [clojure.string :as string]
    [hub.util.grid :as grid]))
