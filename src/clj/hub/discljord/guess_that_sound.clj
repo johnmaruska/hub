@@ -8,6 +8,7 @@
 ;;;; Reply messages
 
 (def canned-reply
+  "Pre-made message strings for bot to reply with."
   {:start-game-welcome   "**Time to play `GUESS THAT SOUND`.**"
    :game-already-started "A game has already started."
    :no-game-started      "No guessing game has started"

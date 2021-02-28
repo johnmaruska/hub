@@ -13,7 +13,7 @@
 
 (defn remove-prefix [event-data prefix]
   (update event-data :content
-          #(hub.util/remove-prefix % prefix)))
+          hub.util/remove-prefix prefix))
 
 (defn handle-event!
   ([bot]
