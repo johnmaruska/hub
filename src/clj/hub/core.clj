@@ -8,6 +8,7 @@
    [hub.spotify :as spotify]
    [hub.discljord.core :as discord]
    [hub.server :as server]
+   [hub.util :refer [swallow-exception]]
    [mount.core :as mount :refer [defstate]])
   (:gen-class))
 
@@ -32,21 +33,14 @@
   [& body]
   `(loop [] ~@body (recur)))
 
-(defmacro swallow-exception
-  {:style/indent 1}
-  [pred & body]
-  `(try
-     ~@body
-     (catch Exception ex#
-       (if (~pred (ex-data ex#))
-         (log/error ex#)
-         (throw ex#)))))
-
 (defn discord-run! []
-  (swallow-exception :manual-kill?
-    (spin-forever!
-     (swallow-exception (comp not :manual-kill?)
-       (discord/handle-event! discord-bot)))))
+  (let [manual-kill? (comp :manual-kill? ex-data)]
+    ;; end run but dont crash application
+    (swallow-exception manual-kill?
+      (spin-forever!
+       ;; most exceptions should just log and continue on
+       (swallow-exception (comp not manual-kill?)
+         (discord/handle-event! discord-bot))))))
 
 (defn run-conway []
   (-> (conway.seed/all-dead 50 50)
