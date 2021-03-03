@@ -54,7 +54,7 @@
   "Refresh the stored API token"
   [api-token]
   (token/persist!
-   (post-basic-auth {:grant_type "refresh_token"
+   (post-basic-auth {:grant_type    "refresh_token"
                      :refresh_token (:refresh_token api-token)})))
 
 (defn unauthorized? [ex]
