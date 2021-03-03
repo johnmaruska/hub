@@ -32,8 +32,8 @@
 
 (defn ownership
   "Lazy sequence of all `albums` with matching Ownership `value`."
-  {:pre [(some #{"CD" "Vinyl" "Digital"} value)]}
   [albums value]
+  {:pre [(some #{"CD" "Vinyl" "Digital"} value)]}
   (sieve albums :ownership value))
 
 (defn by-artist
