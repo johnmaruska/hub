@@ -18,12 +18,12 @@
    (sketch/animate seed game/play-round delay-ms)))
 
 (defn console-print
-  "Display game state in the terminal, ASCII animation"
+  "Display game state in the terminal, ASCII animation.
+  Blocking, wrap in thread to unblock."
   ([]
    (console-print (seed/random default-width default-height)))
   ([seed]
-   (thread
-     (terminal/animate seed game/play-round delay-ms))))
+   (terminal/animate seed game/play-round delay-ms)))
 
 (defn autoplay
   "Generate a lazy-sequence of game states from `seed`.
@@ -32,8 +32,3 @@
    (autoplay (seed/random default-width default-height)))
   ([seed]
    (iterate game/play-round seed)))
-
-#_
-(-> (seed/all-dead 50 50)
-    (seed/overlay seed/glider 5 5)
-    animate)

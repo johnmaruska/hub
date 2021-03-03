@@ -1,5 +1,7 @@
 (ns hub.conway.output.sketch
   (:require
+   ;; com.apple.eawt.QuitHandler ClassNotFoundException is because quil
+   ;; wraps Processing which requires Java v8, not higher
    [quil.core :as q]
    [quil.middleware :as m]
    [hub.conway.game :as game]

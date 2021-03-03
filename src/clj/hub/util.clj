@@ -2,35 +2,34 @@
   (:require
    [clojure.data.csv :as csv]
    [clojure.edn :as edn]
-   [clojure.java.io :as io])
+   [clojure.java.io :as io]
+   [clojure.tools.logging :as log]
+   [clojure.data.json :as json]
+   [clojure.string :as string])
   (:import
    (java.io PushbackReader)))
 
-(defn csv-data->maps [csv-data]
-  (map zipmap
-       (->> (first csv-data) ;; First row is the header
-            (map keyword) ;; Drop if you want string keys instead
-            repeat)
-       (rest csv-data)))
+(defn find-by [k v coll]
+  (first (filter #(= v (k %)) coll)))
 
-(defn stream-csv
-  [reader & {:keys [separator quote]
-             :or {separator \, quote \"}}]
-  (csv-data->maps (csv/read-csv reader :separator separator)))
-
-(defn load-csv
-  "Read `filename` csv into a vector of maps."
-  [filename & options]
-  (with-open [reader (io/reader (io/resource filename))]
-    (vec (apply stream-csv reader options))))
+(defn parse-json [s]
+  (json/read-str s :key-fn keyword))
 
 (defn load-edn [filename]
   (with-open [reader (io/reader (io/resource filename))]
     (edn/read (PushbackReader. reader))))
 
-(defn write!
-  [filename contents & opts]
-  (apply spit (io/resource filename) contents opts))
+(defn remove-prefix [s prefix]
+  (if (string/starts-with? s prefix)
+    (string/triml (string/replace-first s prefix ""))
+    s))
 
-(defn find-by [k v coll]
-  (first (filter #(= v (k %)) coll)))
+(defmacro swallow-exception
+  {:style/indent 1}
+  [pred & body]
+  `(try
+     ~@body
+     (catch Exception ex#
+       (if (not (~pred (ex-data ex#)))
+         (throw ex#)
+         (log/error ex#)))))

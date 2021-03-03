@@ -17,9 +17,9 @@
 
 (defn within-bounds?
   "Test that coordinate is without bounds of the grid."
-  [grid [x y]]
+  [grid coord]
   (try
-    (nth (nth grid y) x)
+    (get-coord grid coord)
     true
     (catch IndexOutOfBoundsException ex false)))
 

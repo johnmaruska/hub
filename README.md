@@ -6,6 +6,47 @@ split into their own specific thing. Secondary motivation is to run
 everything as a single EC2 instance without bothering trying to set up
 dependencies between repos because ehhh...
 
+## Pre-Requisites / Tech Stack
+
+- Java (v1.8, others untested)
+```
+$ java -version
+openjdk version "1.8.0_272"
+OpenJDK Runtime Environment (build 1.8.0_272-b10)
+OpenJDK 64-Bit Server VM (build 25.272-b10, mixed mode)
+```
+
+- Leiningen (others untested)
+```
+$ lein -v
+Leiningen 2.9.1 on Java 1.8.0_272 OpenJDK 64-Bit Server VM
+```
+
+- Docker
+
+## Working Pieces / How to run
+
+Webserver and Discord bot
+```
+lein run server
+```
+
+Spotify artifact generators
+```
+lein run spotify
+```
+
+mp3 file metadata tag correction
+```
+lein run id3
+```
+
+Or any combination of above, e.g.
+```
+lein run server spotify id3
+```
+
+
 ## Components to add, written somewhere else already
 
 1. Pokemon utilities

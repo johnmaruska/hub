@@ -1,6 +1,13 @@
+# Intermediate data
+data/spotify/artists.edn
+data/spotify/related-artists.edn
+# Secrets
+.tokens/authorization-code.edn
+
 # Clojure files
 target/
 .lein-failures
+.lein-repl-history
 pom.xml
 
 # Emacs files
@@ -9,7 +16,8 @@ pom.xml
 .nrepl-port
 
 # imdb data -- large files
-resources/imdb/*
+data/imdb/*
 
-# Discord secrets
-data/settings/settings.json
+# Log files
+debug.log
+figwheel_server.log

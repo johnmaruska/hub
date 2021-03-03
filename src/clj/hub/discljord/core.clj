@@ -1,14 +1,36 @@
 (ns hub.discljord.core
   (:require
    [clojure.core.async :as a]
-   [clojure.pprint :as pprint]
    [discljord.connections :as c]
-   [discljord.events :as e]
+   [discljord.formatting :refer [mention-user]]
    [discljord.messaging :as m]
-   [hub.discljord.admin :as admin]
-   [hub.discljord.guess-that-sound :as guess-that-sound]
-   [hub.discljord.minesweeper :as minesweeper]
-   [hub.discljord.role :as role]))
+   [hub.discljord.commands :as commands]
+   [hub.discljord.util :as util]
+   [hub.util]))
+
+(defn sign-off [event-data]
+  (str "Will I dream, " (mention-user (:author event-data)) "?"))
+
+(defn remove-prefix [event-data prefix]
+  (update event-data :content
+          hub.util/remove-prefix prefix))
+
+(defn handle-event!
+  ([bot]
+   (handle-event! bot (a/<!! (:event-ch bot))))
+  ([bot [event-type event-data]]
+   (try
+     (when (= :message-create event-type)
+       (doseq [matching-prefix (commands/matching-prefixes event-data)]
+         (let [handler    (get commands/prefix matching-prefix)
+               event-data (remove-prefix event-data matching-prefix)]
+           ;; TODO: if multiple handlers allowed, modify here
+           (handler bot event-data))))
+     (catch Exception ex
+       (if (:manual-kill? (ex-data ex))
+         (util/reply bot event-data (sign-off event-data))
+         (util/reply bot event-data "Could not handle command. See logs."))
+       (throw ex)))))
 
 (defn start! []
   (let [event-ch (a/chan 100)
@@ -18,36 +40,9 @@
      :message-ch    (m/start-connection! token)}))
 
 (defmacro attempt [& body]
-  `(try ~@body (catch Exception ex nil)))
+  `(try ~@body (catch Exception ex# nil)))
 
 (defn stop! [bot]
   (attempt (m/stop-connection! (:message-ch bot)))
   (attempt (c/disconnect-bot!  (:connection-ch bot)))
   (attempt (a/close! (:event-ch bot))))
-
-(def ignored-events
-  #{;;; bot control events
-    :connected-all-shards
-    :ready
-    :guild-create  ; it's connected to a server
-    ;;; user action events
-    :presence-updated  ; also triggers on game/activity changes like spotify
-    :typing-started})
-
-(def message-create-handlers
-  [guess-that-sound/handle!
-   minesweeper/handle
-   admin/handle
-   role/handle])
-
-(defn handle-event! [bot [event-type event-data]]
-  (when (= :message-create event-type)
-    (doseq [h message-create-handlers]
-      (h bot event-data))))
-
-(defn spin-forever! [bot]
-  (try
-    (loop []
-      (handle-event! bot (a/<!! (:event-ch bot)))
-      (recur))
-    (finally (stop! bot))))

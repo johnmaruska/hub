@@ -24,14 +24,15 @@
 
 (defn parse [contents]
   (when-let [matches (->> contents
-                          (re-matcher #"!minesweeper (\d+)x(\d+) (\d+)")
+                          (re-matcher #"(\d+)x(\d+) (\d+)")
                           re-find)]
     (let [[_ width height bombs] matches]
       {:width  (Integer/parseInt width)
        :height (Integer/parseInt height)
        :bombs  (Integer/parseInt bombs)})))
 
-(defn handle [bot event]
-  (when-let [{:keys [height width bombs]} (parse (:content event))]
+(defn spit-board [bot event]
+  (if-let [{:keys [height width bombs]} (parse (:content event))]
     (let [grid (game/create height width bombs)]
-      (util/reply bot event (discord-fmt grid)))))
+      (util/reply bot event (discord-fmt grid)))
+    (util/reply bot event "Could not parse a board of format `WxH B`")))
