@@ -45,16 +45,32 @@
             {}
             (:ingredients recipe))))
 
-(defn raw-materials [part]
-  (reduce (fn [coll [ingredient amount]]
-            (if (part? ingredient)
-              (->> (raw-materials ingredient)
-                   (map (fn [[k v]]
-                          [k (* amount v)]))
-                   (into {})
-                   (merge-with + coll))
-              (assoc coll ingredient amount)))
-          {}
-          (:ingredients (parts-recipes part))))
+(defn update-keys [m f]
+  (reduce-kv (fn [coll k v] (assoc coll k (f v))) {} m))
 
-(raw-materials "rotor")
+(defn raw-materials [root-part]
+  (letfn [(add-mat [mats {:keys [name amount]}]
+            (update mats name (fnil + 0) amount))
+          (get-parent-parts [part]
+            (map (fn [[k v]]
+                   {:name   k
+                    :amount (get (consumption-ratio part) k)})
+                 (:ingredients (parts-recipes part))))])
+  (loop [curr-part   {:name root-part :amount 1}
+         raw-mats    {}
+         ingredients []]
+    (cond
+      (and (empty? ingredients) (not curr-part))
+      (update-keys raw-mats #(int (Math/ceil %)))
+
+      (part? (:name curr-part))
+      (let [parents (->> (get-parent-parts (:name curr-part))
+                         (map #(update % :amount * (:amount curr-part))))]
+        (recur (first parents)
+               raw-mats
+               (concat (rest parents) ingredients)))
+
+      :else
+      (recur (first ingredients)
+             (add-mat raw-mats curr-part)
+             (rest ingredients)))))
