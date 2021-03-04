@@ -31,12 +31,17 @@
 (defn part? [part-name]
   (boolean (get-in parts-recipes [part-name :ingredients])))
 
+(defn output [{:keys [output] :as recipe}]
+  (if (map? output)
+    (get output (:name recipe))
+    output))
+
 (defn consumption-ratio
   "Return ratios of Consumed ingredients per Generated parts"
   [part-name]
   (let [recipe (parts-recipes part-name)]
     (reduce (fn [coll [k v]]
-              (assoc coll k (/ v (:output recipe))))
+              (assoc coll k (/ v (output recipe))))
             {}
             (:ingredients recipe))))
 
