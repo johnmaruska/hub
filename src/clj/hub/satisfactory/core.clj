@@ -14,7 +14,7 @@
             matches)
     (Integer/parseInt column)))
 
-(defn parse-recipe [recipe]
+(defn coerce-recipe [recipe]
   (-> recipe
       (update :time #(Integer/parseInt %))
       (update :output parse-map-column)
@@ -23,7 +23,7 @@
 (def parts-recipes
   (->> (io/resource "satisfactory/ingredients.csv")
        data-file/load-csv
-       (map parse-recipe)
+       (map coerce-recipe)
        (reduce (fn [coll m] (assoc coll (:name m) m)) {})))
 
 ;;; these only work for parts, not raw ingredients
@@ -45,10 +45,12 @@
             {}
             (:ingredients recipe))))
 
-(defn update-keys [m f]
+(defn update-keys [f m]
   (reduce-kv (fn [coll k v] (assoc coll k (f v))) {} m))
 
-(defn raw-materials [root-part]
+(defn raw-materials
+  "Calculate total raw materials needed to craft one unit of a part."
+  [root-part]
   (letfn [(add-mat [mats {:keys [name amount]}]
             (update mats name (fnil + 0) amount))
           (get-parent-parts [part]
@@ -56,23 +58,26 @@
                    {:name   k
                     :amount (get (consumption-ratio part) k)})
                  (:ingredients (parts-recipes part))))]
-    (->
-     (loop [curr-part   {:name   (:name (parts-recipes root-part))
+    (->>
+     (loop [curr-part   {:name   root-part
                          :amount (:output (parts-recipes root-part))}
             raw-mats    {}
             ingredients []]
        (cond
          (and (empty? ingredients) (not curr-part))
+         ;; no more ingredients to check, return seen raw materials
          raw-mats
 
          (part? (:name curr-part))
          (let [parents (->> (get-parent-parts (:name curr-part))
                             (map #(update % :amount * (:amount curr-part))))]
+           ;; track parent ingredients, move on to next ingredient
            (recur (first parents)
                   raw-mats
                   (concat (rest parents) ingredients)))
 
          :else
+         ;; track raw material, move on to next ingredient
          (recur (first ingredients)
                 (add-mat raw-mats curr-part)
                 (rest ingredients))))
