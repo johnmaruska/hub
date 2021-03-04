@@ -7,15 +7,6 @@
   (:import
    (java.io PushbackReader)))
 
-(defn file [filename]
-  (str "data/" filename))
-
-(defn reader [filename]
-  (io/reader (file filename)))
-
-(defn writer [filename & opts]
-  (apply io/writer (file filename) opts))
-
 (defn csv-data->maps [csv-data]
   (map zipmap
        (->> (first csv-data) ;; First row is the header
@@ -25,13 +16,13 @@
 
 (defn load-csv
   "Read `filename` csv into a vector of maps."
-  [filename]
-  (with-open [f (reader filename)]
-    (vec (csv-data->maps (csv/read-csv f)))))
+  [f]
+  (with-open [fr (io/reader f)]
+    (vec (csv-data->maps (csv/read-csv fr)))))
 
 (defn write-csv
   [filename rows & opts]
-  (with-open [f (apply writer filename opts)]
+  (with-open [f (apply io/writer filename opts)]
     (csv/write-csv f rows)))
 
 (defn append-csv
@@ -39,8 +30,8 @@
   (write-csv filename rows :append true))
 
 (defn load-edn [filename]
-  (with-open [f (reader filename)]
+  (with-open [f (io/reader filename)]
     (edn/read (PushbackReader. f))))
 
 (defn write-edn [filename contents]
-  (pprint contents (writer filename)))
+  (pprint contents (io/writer filename)))

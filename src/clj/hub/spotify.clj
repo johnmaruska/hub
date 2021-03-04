@@ -9,8 +9,8 @@
 
 ;; TODO: move into a configuration
 (def playlists-to-sort #{"Discover Weekly" "Release Radar"})
-(def artists-file "spotify/artists.edn")
-(def related-artists-file "spotify/related-artists.edn")
+(def artists-file "data/spotify/artists.edn")
+(def related-artists-file "data/spotify/related-artists.edn")
 
 ;; TODO: play with values to see if we get better results
 (defn playlist-priority [{:keys [features]}]

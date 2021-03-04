@@ -8,8 +8,8 @@
 
 ;;;; IO operations
 
-(def twos-guide   "world_of_warcraft/the_guide_2v2.csv")
-(def threes-guide "world_of_warcraft/the_guide_3v3.csv")
+(def twos-guide   "data/world_of_warcraft/the_guide_2v2.csv")
+(def threes-guide "data/world_of_warcraft/the_guide_3v3.csv")
 
 (defn twos?   [match] (= 2 (count (match :enemies))))
 (defn threes? [match] (= 3 (count (match :enemies))))

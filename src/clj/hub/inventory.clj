@@ -1,7 +1,7 @@
 (ns hub.inventory
   (:require [hub.util.data-file :as data-file]))
 
-(def albums-csv "inventory/albums.csv")
+(def albums-csv "data/inventory/albums.csv")
 
 (defn albums
   "Vector of all albums in my inventory."
