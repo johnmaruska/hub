@@ -1,55 +1,55 @@
 (ns hub.satisfactory.core
-  (:require [hub.util :as util]))
+  (:require
+   [hub.util.data-file :as data-file]
+   [clojure.java.io :as io]))
+
+(defn parse-map-column
+  "columns in the csv which correspond to a map are of form `key=digit`.
+  If no match, assume form `digit`."
+  [column]
+  (if-let [matches (re-seq #"([a-z-]+)=(\d+)" column)]
+    (reduce (fn [m [_ k v]]
+              (assoc m k (Integer/parseInt v)))
+            {}
+            matches)
+    (Integer/parseInt column)))
+
+(defn parse-recipe [recipe]
+  (-> recipe
+      (update :time #(Integer/parseInt %))
+      (update :output parse-map-column)
+      (update :ingredients parse-map-column)))
 
 (def parts-recipes
-  (util/load-edn "satisfactory/ingredients.edn"))
+  (->> (io/resource "satisfactory/ingredients.csv")
+       data-file/load-csv
+       (map parse-recipe)
+       (reduce (fn [coll m] (assoc coll (:name m) m)) {})))
 
 ;;; these only work for parts, not raw ingredients
 
-(defn part? [recipe]
-  (boolean (get-in parts-recipes [recipe :ingredients])))
+(defn part? [part-name]
+  (boolean (get-in parts-recipes [part-name :ingredients])))
 
-(defn consumption-rate
-  [recipe ingredient]
-  (/ (get-in parts-recipes [recipe :ingredients ingredient])
-     (get-in parts-recipes [recipe :crafting-time])))
-
-(defn part-output-rate [recipe]
-  (let [{:keys [output crafting-time]} (get parts-recipes recipe)]
-    (/ output crafting-time)))
-
-(defn raw-ingredient-output-rate [recipe]
-  (or (get-in parts-recipes [recipe :output] 1/2)))
-
-(defn output-rate [recipe]
-  (if (part? recipe)
-    (part-output-rate recipe)
-    (raw-ingredient-output-rate recipe)))
-
-(defn equilibrium
-  "Ratio of equilibrium destination:source, i.e. 1/2 means source provides
-  enough for two copies of destination building."
-  [source destination]
-  (/ (consumption-rate destination source)
-     (output-rate source)))
-
-(declare requirements)
-
-(defn requirements*
-  [recipe ingredient]
-  (let [ratio  (equilibrium ingredient recipe)
-        base   {:ratio ratio}]
-    (if (part? ingredient)
-      (assoc base :requirements (requirements ingredient))
-      base)))
-
-(defn requirements
-  "Get the required ingredients to make a recipe.
-
-  Recursive and will drill down to raw ingredients, not just required parts."
-  [recipe]
-  (let [ingredients (keys (get-in parts-recipes [recipe :ingredients]))]
-    (reduce (fn [acc i]
-              (assoc acc i (requirements* recipe i)))
+(defn consumption-ratio
+  "Return ratios of Consumed ingredients per Generated parts"
+  [part-name]
+  (let [recipe (parts-recipes part-name)]
+    (reduce (fn [coll [k v]]
+              (assoc coll k (/ v (:output recipe))))
             {}
-            ingredients)))
+            (:ingredients recipe))))
+
+(defn raw-materials [part]
+  (reduce (fn [coll [ingredient amount]]
+            (if (part? ingredient)
+              (->> (raw-materials ingredient)
+                   (map (fn [[k v]]
+                          [k (* amount v)]))
+                   (into {})
+                   (merge-with + coll))
+              (assoc coll ingredient amount)))
+          {}
+          (:ingredients (parts-recipes part))))
+
+(raw-materials "rotor")
