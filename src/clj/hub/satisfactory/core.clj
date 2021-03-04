@@ -55,22 +55,22 @@
             (map (fn [[k v]]
                    {:name   k
                     :amount (get (consumption-ratio part) k)})
-                 (:ingredients (parts-recipes part))))])
-  (loop [curr-part   {:name root-part :amount 1}
-         raw-mats    {}
-         ingredients []]
-    (cond
-      (and (empty? ingredients) (not curr-part))
-      (update-keys raw-mats #(int (Math/ceil %)))
+                 (:ingredients (parts-recipes part))))]
+    (loop [curr-part   {:name root-part :amount 1}
+           raw-mats    {}
+           ingredients []]
+      (cond
+        (and (empty? ingredients) (not curr-part))
+        (update-keys raw-mats #(int (Math/ceil %)))
 
-      (part? (:name curr-part))
-      (let [parents (->> (get-parent-parts (:name curr-part))
-                         (map #(update % :amount * (:amount curr-part))))]
-        (recur (first parents)
-               raw-mats
-               (concat (rest parents) ingredients)))
+        (part? (:name curr-part))
+        (let [parents (->> (get-parent-parts (:name curr-part))
+                           (map #(update % :amount * (:amount curr-part))))]
+          (recur (first parents)
+                 raw-mats
+                 (concat (rest parents) ingredients)))
 
-      :else
-      (recur (first ingredients)
-             (add-mat raw-mats curr-part)
-             (rest ingredients)))))
+        :else
+        (recur (first ingredients)
+               (add-mat raw-mats curr-part)
+               (rest ingredients))))))
