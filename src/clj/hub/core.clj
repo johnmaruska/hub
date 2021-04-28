@@ -1,6 +1,7 @@
 (ns hub.core
   (:require
    [hub.cli.id3-fix :as id3]
+   [hub.dice :as dice]
    [hub.spotify :as spotify]
    [hub.discljord.core :as discord]
    [hub.server :as server]
@@ -39,6 +40,8 @@
          (discord/handle-event! discord-bot))))))
 
 (defn -main [& args]
+  (when (some #{"dice"} args)
+    (dice/task (System/getenv "DICE_INFILE") (System/getenv "DICE_OUTFILE")))
   (when (some #{"id3"} args)
     (id3/apply-fix!))
   (when (some #{"spotify"} args)
