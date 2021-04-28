@@ -54,5 +54,3 @@
          (map (comp roll-all parse))
          (#(with-out-str (json/pprint %)))
          (spit outfile))))
-
-(task "test.txt" "test.out")
