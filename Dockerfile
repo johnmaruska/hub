@@ -8,7 +8,5 @@ COPY project.clj /usr/src/app/
 ## Dependencies
 RUN lein deps
 COPY . /usr/src/app
-## Uberjar
-RUN mv "$(lein uberjar | sed -n 's/^Created \(.*standalone\.jar\)/\1/p')" app-standalone.jar
 # Execute that jar
-CMD ["java", "-jar", "app-standalone.jar"]
+CMD ["lein", "run", "server"]
