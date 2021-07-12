@@ -61,15 +61,15 @@
           [:tr
            ;; TODO: use CSS instead of :br
            [:th "Artist"  [:br]
-            [text-input {:id        "album--artist"
+            [text-input {:id "album--artist"
                          :on-change #(update! artist-filter %)}]]
            [:th "Release" [:br]
-            [text-input {:id        "album--name"
+            [text-input {:id "album--name"
                          :on-change #(update! album-filter %)}]]
            [:th "Format"  [:br]
-            [dropdown {:id        "album--format"
+            [dropdown {:id "album--format"
                        :on-change #(update! format-filter %)}
-             (conj FORMATS "")]]]]
+             (concat [""] FORMATS)]]]]
          [:tbody
           (doall
            (for [album (sort-by :artist shown-albums)]
