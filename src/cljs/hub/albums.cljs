@@ -99,7 +99,7 @@
 (rf/reg-event-fx
  ::fetch-failure
  (fn [{db :db} [_ resp]]
-   {:Db (assoc-in db [:inventory :albums :error] resp)}))
+   {:db (assoc-in db [:inventory :albums :error] resp)}))
 
 (rf/reg-sub
  ::albums
