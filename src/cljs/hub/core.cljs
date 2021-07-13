@@ -7,10 +7,7 @@
    [re-frame.core :as rf]))
 
 (defn current-page []
-  [:div
-   [:button {:on-click (fn [e] (rf/dispatch [::albums/fetch]))}
-    "Fetch albums"]
-   [albums/view]])
+  [albums/view])
 
 (defn ^:dev/after-load mount-root []
   (rf/clear-subscription-cache!)

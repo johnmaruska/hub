@@ -62,7 +62,7 @@ Small Stuff:
 
 ## Discord bot
 
-- Set up always-on server to run it. RaspberryPi? NAS? AWS?
+- Set up always-on server to run it. RaspberryPi? NAS? AWS? DigitalOcean?
 - interactions with Playing Cards
 - interaction with The Guide, retrievals
 

@@ -1,5 +1,9 @@
 # Web-Dev Environment
 
+## See in a browser
+
+Need to start a `mount/start`ed back-end server. Either through `lein
+run server` or a Clojure REPL and call `(mount/start)`.
 
 ## In a REPL
 
