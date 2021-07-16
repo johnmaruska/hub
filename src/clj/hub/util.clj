@@ -15,6 +15,10 @@
     (string/triml (string/replace-first s prefix ""))
     s))
 
+(defn insert-at [xs idx el]
+  (let [[lhs rhs] (split-at idx xs)]
+    (concat lhs [el] rhs)))
+
 (defmacro swallow-exception
   {:style/indent 1}
   [pred & body]
