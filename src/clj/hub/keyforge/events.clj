@@ -1,12 +1,13 @@
 (ns hub.keyforge.events
   (:require
    [hub.keyforge.player :as player]
-   [hub.keyforge.event-loop :as el :refer [set-default-event-sequence!
-                                           dispatch-event!
+   [hub.keyforge.event-loop :as el :refer [dispatch-event!
                                            defevent
                                            process-queue!]]
    [hub.keyforge.card :as card]
    [hub.util :as util]))
+
+(def KEYS-TO-WIN 3)
 
 ;; TODO: we'll deal with user interaction later
 (defn user-interaction [prompt choices]
@@ -18,7 +19,7 @@
 
 ;;; game setup
 
-(defevent setup-new-game [state alpha-identity omega-identity]
+(defevent setup-new-game [_ alpha-identity omega-identity]
   (-> {:turn           {:count 1}
        :current-player :player-alpha
        :player-alpha   (player/make-player alpha-identity)
@@ -30,14 +31,14 @@
 
 (defevent forge-key [game]
   (let [result (update game (:current-player game) player/forge-key)]
-    (if (= 3 (-> game current-player :forged-keys))
+    (if (= KEYS-TO-WIN (-> result current-player :forged-keys))
       {::el/state result ::el/dispatch [:end-game]}
       {::el/state result})))
 
 (defevent choose-house [game]
   (let [choices (player/available-houses (current-player game))]
     (assoc-in game [:turn :house]
-              "Logos" #_(user-interaction "Activate a House" choices))))
+              (user-interaction "Activate a House" choices))))
 
 (defn first-turn-restricted? [turn]
   (and (= 1 (:count turn))
@@ -47,13 +48,13 @@
 (defevent take-turn [game]
   (def GAME game)
   (let [current-house? (fn [card]
-                         (= (-> game :turn :house) (:house card)))
+                         (= (-> game :turn :house) (:house @card)))
         playable       (when-not (first-turn-restricted? (:turn game))
                          (map (fn [x] {:card x :actions #{:play :discard}})
                               (filter current-house? (-> game current-player :hand))))
         creatures      (map (fn [x] {:card x :actions #{:reap :fight :action}})
                             (filter current-house? (-> game current-player :battleline)))
-        choices        (concat playable [:end-turn])
+        choices        (concat playable creatures [:end-turn])
         #_#_choices    (concat (map (fn [x] {:card x :actions #{:play :discard}})
                                     (filter current-house? (-> game current-player :hand)))
                                (map (fn [x] {:card x :actions #{:reap :fight :action}})
@@ -78,35 +79,51 @@
                  :discard ::discard-card
                  :reap    ::reap-card
                  :fight   ::fight-card} action)]
-    {:state game :dispatch [event card]}))
+    {::el/state game ::el/dispatch [event card]}))
+
+(defevent discard-card [game card]
+  (-> game
+      (update-in [(:current-player game) :hand] card/remove-card card)
+      (update-in [(:current-player game) :discard] conj card)))
+
+(defevent reap-card [game card]
+  (card/exhaust! card)
+  (let [reap-effect (:or (:reap @card) identity)]
+    (-> game
+        (update-in [(:current-player game) :aember] inc)
+        reap-effect)))
+
+(defevent fight-card [game card]
+  ;; TODO: implement
+  game)
 
 (defevent play-card [game card]
-  (let [play-effect (or (:play card) identity)]
-    {:state (-> game
-                (update-in [:turn :cards-played] conj card)
-                (update (:current-player game) :hand card/remove-card card)
-                play-effect)
-     :dispatch (case (:type card)
-                 :artifact [::place-artifact card]
-                 :creature [::place-creature card]
-                 :action   [::place-action   card])}))
+  (let [play-effect (or (:play @card) identity)]
+    {::el/state    (-> game
+                       (update-in [:turn :cards-played] conj card)
+                       (update (:current-player game) :hand card/remove-card card)
+                       play-effect)
+     ::el/dispatch (case (:type @card)
+                     :artifact [::place-artifact card]
+                     :creature [::place-creature card]
+                     :action   [::place-action   card])}))
 
 (defn available-placements [game card]
   (let [total-creatures (count (-> game current-player :battlefield))
         left-flank      0
         right-flank     total-creatures]
-    (if (:deploy card)  ; TODO(CARD-EFFECT)
+    (if (:deploy @card)  ; TODO(CARD-EFFECT)
       (range (inc total-creatures))
       #{left-flank right-flank})))
 
 (defevent place-creature [game card]
-  (let [card (assoc card :ready? false)]  ; TODO(CARD-EFFECT)
-    (if (empty? (-> game current-player :battlefield))
-      (assoc-in game [(:current-player game) :battlefield] [card])
-      (let [choice (user-interaction "Place creature on which flank?"
-                                     (available-placements game card))]
-        (update-in game [(:current-player game) :battlefield]
-                   #(util/insert-at % choice card))))))
+  (swap! card assoc :ready? (:enters-ready @card))
+  (if (empty? (-> game current-player :battlefield))
+    (assoc-in game [(:current-player game) :battlefield] [card])
+    (let [choice (user-interaction "Place creature on which flank?"
+                                   (available-placements game card))]
+      (update-in game [(:current-player game) :battlefield]
+                 #(util/insert-at % choice card)))))
 
 (defevent place-artifact [game card]
   (update-in game [(:current-player game) :artifacts] conj card))
@@ -142,7 +159,7 @@
    ;; no default for take-turn
    ;; taken-turn choose between Card or End
    ;; chosen card, choose Play/Discard, or Use
-   ;; using card, choose beween Action/Omni, Reap/Fight/Action
+   ;; using card, choose beween Action/Omni, Reap/Fight/Actionan
    ::play-card    ::take-turn
    ::discard      ::take-turn
    ::use-card     ::take-turn
@@ -154,24 +171,3 @@
 
 (def following-event
   (merge game-setup turn-sequence))
-
-(def danova
-  {:name "Danova, Port Demolisher"
-   :houses ["Brobnar" "Shadows" "Logos"]
-   :decklist (take 20 (repeatedly card/escotera))})
-
-(def upbus
-  {:name "Upbus, the Madman of the Lighthouse"
-   :houses ["Shadows" "Logos" "Dis"]
-   :decklist (take 20 (repeatedly card/quixo))})
-
-(comment
-  (do
-    (set-default-event-sequence! following-event)
-    (dispatch-event! [::setup-new-game upbus danova])
-    (def END_GAME (process-queue!)))
-
-  GAME
-  (first (player/available-houses (current-player GAME)))
-
-  )

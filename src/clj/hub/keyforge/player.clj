@@ -9,6 +9,7 @@
    :hand                '()
    :discard             '()
    :aember              0
+   :forged-keys         0
    :battleline          []
    :artifacts           []
    ;; ----
@@ -50,7 +51,6 @@
   (+ FORGE-COST (or (:forge-cost-modifier player) 0)))
 
 (defn forge-key [player]
-  (def PLAYER player)
   (if (<= (forge-cost player) (:aember player))
     (-> player
         (update :aember #(- % (forge-cost player)))

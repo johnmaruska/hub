@@ -13,46 +13,39 @@
 (defmacro defevent [sy args & body]
   `(do (defn ~sy ~args
          (let [result# (do ~@body)]
-           (if (contains? result# ::state)
-             result#
-             {::state result#})))
+           result#))
        (swap! events-register
               assoc (keyword (str *ns*) (str '~sy))
               (var ~sy))))
 
-(def events-queue (atom (queue)))
+(def default-event-queue (atom (queue)))
+
 (defn ->event-vector [event]
   (if (keyword? event) [event] event))
-(defn dispatch-event! [event]
-  (swap! events-queue conj (->event-vector event)))
+(defn dispatch-event!
+  ([event] (dispatch-event! default-event-queue event))
+  ([event-queue event]
+   (swap! event-queue conj (->event-vector event))))
 
 (def default-events-sequence (atom {}))
-(defn set-default-event-sequence! [m]
-  (reset! default-events-sequence m))
 
-(defn handle-event!* [state {:keys [handler args] :as event}]
-  (println "Handling event" (:name event) args handler)
-  (try
-    (apply handler state args)
-    (catch clojure.lang.ArityException ex
-      (throw (ex-info "Exception when applying event handler." event ex)))))
-
-(defn handle-event! [state [event-name & args]]
+(defn handle-event! [event-queue state [event-name & args]]
   (let [handler    (or (get @events-register event-name)
-                       identity)
-        result     (handle-event!* state {:name    event-name
-                                          :handler handler
-                                          :args    args})
+                       (do
+                         (println "Event-name" event-name "has no handler -- using identity")
+                         identity))
+        result     (do (println "Handling event" event-name args handler)
+                       (apply handler state args))
         next-event (or (::dispatch result)
                        (get @default-events-sequence event-name))]
     (when next-event
-      (dispatch-event! next-event))
+      (dispatch-event! event-queue next-event))
     (or (::state result) result)))
 
 ;; TODO: this will stop when queue is empty. Use channels to do infinitely
 (defn process-queue! []
   (loop [state {}]
-    (if-let [event (peek @events-queue)]
-      (do (swap! events-queue pop)
-          (recur (handle-event! state event)))
+    (if-let [event (peek @default-event-queue)]
+      (do (swap! default-event-queue pop)
+          (recur (handle-event! default-event-queue state event)))
       state)))

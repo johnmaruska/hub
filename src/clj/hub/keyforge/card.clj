@@ -1,28 +1,31 @@
 (ns hub.keyforge.card)
 
 (defn remove-card [xs card]
-  (filter #(not= (:id card) (:id %)) xs))
+  (filter #(not= card %) xs))
 
-(let [counter (atom 0)]
-  (defn id [card]
-    (swap! counter inc)
-    (assoc card :id @counter)))
+(defn exhaust! [card]
+  (swap! card assoc :ready? false))
 
 
-(def example
-  {:id     1
-   :name   "FooBar"
-   :house  "Example"
+(def card-defaults
+  {;;; generic stats
    :ready? false
+   ;;; card abilities
+   :enters-ready false
    :play   nil
+   :fight  nil
+   :reap   nil
    :deploy false})
 
+(defn make-card [m]
+  (atom (merge card-defaults m)))
+
 (defn escotera []
-  (id
+  (atom
    {:name "Dr. Escotera"
     :house "Logos"}))
 
 (defn quixo []
-  (id
+  (atom
    {:name "Quixo the \"Adventurer\""
     :house "Logos"}))
