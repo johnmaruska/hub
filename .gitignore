@@ -1,4 +1,7 @@
 # Intermediate data
+data/transactions.csv
+data/prefixes.edn
+data/categories.edn
 data/spotify/artists.edn
 data/spotify/related-artists.edn
 # Secrets
@@ -21,3 +24,5 @@ data/imdb/*
 # Log files
 debug.log
 figwheel_server.log
+
+.DS_Store
