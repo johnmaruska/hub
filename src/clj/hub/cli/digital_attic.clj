@@ -110,17 +110,15 @@
          PRE-ENTRIES-SPACE (entries->string root)
          PRE-HEAD-SPACE (folders->string root))))
 
-
-;; ----- Main! ---------------------------------------------------------
-
 (defn import! [input-json output-markdown config-file]
   (binding [*CONFIG* (read-config config-file)]
     (let [bookmarks (json/read-str (slurp input-json) :key-fn keyword)]
       (->> (bookmarks->markdown bookmarks)
            (spit (str output-markdown ".raw.md"))))))
 
+;; ----- Main! ---------------------------------------------------------
+
 (def cli-options
-  ;; An option with a required argument
   [["-i" "--input FILE" "File to be operated on"
     :validate [#(.exists (io/file %)) "Must be an existing file"]]
    ["-o" "--output FILE" "Generated markdown file"
@@ -130,19 +128,13 @@
     :default "storage/"]
    ["-h" "--help"]])
 
-
-#_ (attic!
-    "/Users/maruska/digital_attic/bookmarks.json"
-    "/Users/maruska/digital_attic/bookmarks.md"
-    "/Users/maruska/digital_attic/storage/"
-    "/Users/maruska/digital_attic/ignore.txt")
-
-(let [{:keys [arguments options errors]} (parse-opts *command-line-args* cli-options)
-      {:keys [output input config dir]}  options]
-  (if errors
-    (println "ERROR -" errors)
-    (case (first arguments)
-      "import"   (import! input output config)
-      "localize" (localize! input output dir)
-      nil        (do (import! input output config)
-                     (localize! output output dir)))))
+(defn -main [& args]
+  (let [{:keys [arguments options errors]} (parse-opts *command-line-args* cli-options)
+        {:keys [output input config dir]}  options]
+    (if errors
+      (println "ERROR -" errors)
+      (case (first arguments)
+        "import"   (import! input output config)
+        "localize" (localize! input output dir)
+        nil        (do (import! input output config)
+                       (localize! output output dir))))))
