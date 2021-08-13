@@ -3,17 +3,24 @@
                  [org.clojure/core.match "1.0.0"]
                  [org.clojure/data.csv "1.0.0"]
                  [org.clojure/data.json "1.0.0"]
+                 [org.clojure/data.xml "0.0.8"]  ; required for tagsoup
                  ;;; Logging
                  [org.clojure/tools.logging "1.1.0"]
                  ;; work with mp3 id3 tags
                  ;; https://github.com/pandeiro/claudio
                  [claudio "0.1.3"]
+                 ;; URL encoding
+                 [com.cemerick/url "0.1.1"]
                  [clj-http "3.12.1"]
+                 ;; HTML/XML parsing
+                 [clj-tagsoup "0.3.0"]
                  ;; discord api wrapper
                  [org.suskalo/discljord "1.1.1"
                   :exclusions [org.eclipse.jetty.websocket/websocket-api
                                org.eclipse.jetty.websocket/websocket-common
                                org.eclipse.jetty/jetty-http]]
+                 ;; HTML rendering
+                 [hiccup "1.0.5"]
                  ;; context-free-grammar parsing
                  [instaparse "1.4.10"]
                  ;; retry management
