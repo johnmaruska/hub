@@ -6,11 +6,7 @@
    [hiccup.core :as hiccup]
    [pl.danieljanus.tagsoup :as html]
    [clojure.string :as string]
-   [clojure.java.io :as io])
-  (:import
-   (java.io ByteArrayInputStream)
-   (java.net URL)
-   (javax.imageio ImageIO)))
+   [clojure.java.io :as io]))
 
 ;; ----- Helpers -------------------------------------------------------
 
@@ -47,33 +43,21 @@
   (let [writer (if (byte-array? contents)
                  io/output-stream #(io/writer (io/file %)))]
     (with-open [w (writer filename)]
-      (try
-        (.write w contents)
-        (catch java.io.FileNotFoundException ex
-          (print "writer" writer "filename" filename))
-        (catch IllegalArgumentException ex
-          (print (type (type contents))))))))
+      (.write w contents))))
 
 (defn download-resource! [source target]
-  (println "download resource from" source "to" target)
   (try
     (let [opts (if (image? source)
                  {:as :byte-array}
                  {})]
-      (println "opts" opts "source" source "target" target)
       (write target (fetch source opts)))
     (catch clojure.lang.ExceptionInfo ex
       (println "ERROR" (ex-message ex) "from" source))))
 
-
 ;; ----- Localization --------------------------------------------------
 
-(def always-localized-extensions [".css" ".html"])
-(def image-extensions [".jpeg" ".jpg" ".png"])
-
 (defn localizable? [s]
-  (and s (or (image? s) (some #(string/ends-with? s %)
-                              always-localized-extensions))))
+  (and s (or (image? s) (string/ends-with? s ".css"))))
 
 (defn paths [target {:keys [uri dir] :as config}]
   (if (uri-str? target)
@@ -82,36 +66,29 @@
     {:remote (str (url (basename uri) target))
      :local  (str "./" (string/replace target #"\.\./" ""))}))
 
-(defn localize-node! [tag uri-key [node-tag attributes & children] config]
-  (assert (= tag node-tag))
-  (if (localizable? (uri-key attributes))
-    (let [{:keys [local remote]} (paths (uri-key attributes) config)
-          local-attrs (assoc attributes uri-key local)]
-      (download-resource! remote local)
-      (vec (concat [node-tag local-attrs] children)))
-    (vec (concat [node-tag attributes] children))))
+(defn localize-node! [tag uri-key node config]
+  (assert (= tag (html/tag node)))
+  (if (localizable? (uri-key (html/attributes node)))
+    (let [{:keys [local remote]} (paths (uri-key (html/attributes node)) config)
+          local-attrs (assoc (html/attributes node) uri-key local)]
+      (download-resource! remote (string/replace-first local #"./" (:dir config)))
+      (assoc node 1 local-attrs))
+    node))
 
-(def uri-key {:meta :content
-              :link :href
-              :img :src})
+(def uri-key {:meta :content, :link :href, :img :src})
 
 (defn localize! [node config]
-  (let [tag (and (vector? node) (first node))
-        f   (if-let [k (get uri-key tag)]
-              (partial localize-node! tag k)
-              (fn node-identity [a b] a))]
-    (f node config)))
+  (let [tag (and (vector? node) (first node))]
+    (if-let [k (get uri-key tag)]
+      (localize-node! tag k node config)
+      node)))
 
 ;; ----- Main ----------------------------------------------------------
 
-(let [uri "https://100r.co/site/home.html"
-      dir "/Users/maruska/digital_attic/storage"
-
-      contents (html/parse uri)
-      title    (page-title contents)
-      config   {:uri uri
-                :dir (str dir "/" (url-encode title))}
-
-      local-contents (w/postwalk #(localize! % config) contents)]
-  (write (str (:dir config) "/index.html")
+(let [uri            "https://100r.co/site/home.html"
+      contents       (html/parse uri)
+      dir            (str "/Users/maruska/digital_attic/storage/"
+                          (url-encode (page-title contents)))
+      local-contents (w/postwalk #(localize! % {:uri uri :dir dir}) contents)]
+  (write (str dir "/index.html")
          (hiccup/html local-contents)))
