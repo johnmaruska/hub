@@ -13,19 +13,36 @@
 (defn page-title [contents]
   (let [find-tag (fn [[_ _ & children] tag]
                    (first (filter #(= tag (first %)) children)))]
-    (-> contents (find-tag :head) (find-tag :title) (nth 2))))
+    (try
+      (-> contents (find-tag :head) (find-tag :title) (nth 2))
+      (catch IndexOutOfBoundsException ex
+        "PAGETITLE"))))
 
 (defn uri-str? [s]
   (= 2 (count (string/split s #"://"))))
 
+(defn website-name [uri]
+  (-> uri
+      (string/split #"://") last
+      (string/split #"/") first
+      (string/replace-first #"www." "")))
+
 (defn image? [filename]
-  (some #(string/ends-with? filename %) [".jpeg" ".jpg" ".png" ".svg"]))
+  (some #(string/ends-with? filename %)
+        [".jpeg" ".jpg" ".png" ".svg"]))
 
-(defn basename [filename] (string/replace filename #"/[^/]+\.[^/]+$" ""))
-(defn extension [filename] (when (string/includes? filename ".")
-                             (last (string/split filename #"\."))))
+(defn parent-dir [filename]
+  (string/replace filename #"/[^/]+\.[^/]+$" ""))
 
-(defn byte-array? [x] (= (Class/forName "[B") (.getClass x)))
+(defn basename [filename]
+  (last (string/split filename #"/")))
+
+(defn extension [filename]
+  (when (string/includes? filename ".")
+    (last (string/split filename #"\."))))
+
+(defn byte-array? [x]
+  (= (Class/forName "[B") (.getClass x)))
 
 ;; ----- Input/Output --------------------------------------------------
 
@@ -63,15 +80,18 @@
   (if (uri-str? target)
     {:remote target
      :local  (str "./" (url-encode target))}
-    {:remote (str (url (basename uri) target))
+    {:remote (str (url (parent-dir uri) target))
      :local  (str "./" (string/replace target #"\.\./" ""))}))
 
 (defn localize-node! [tag uri-key node config]
   (assert (= tag (html/tag node)))
   (if (localizable? (uri-key (html/attributes node)))
-    (let [{:keys [local remote]} (paths (uri-key (html/attributes node)) config)
-          local-attrs (assoc (html/attributes node) uri-key local)]
-      (download-resource! remote (string/replace-first local #"./" (:dir config)))
+    (let [{:keys [local remote]} (paths (uri-key (html/attributes node))
+                                        config)
+          local-attrs (assoc (html/attributes node) uri-key local)
+          target-file (string/replace-first local #"./"
+                                            (str (:dir config) "/"))]
+      (download-resource! remote target-file)
       (assoc node 1 local-attrs))
     node))
 
@@ -85,10 +105,30 @@
 
 ;; ----- Main ----------------------------------------------------------
 
-(let [uri            "https://100r.co/site/home.html"
-      contents       (html/parse uri)
-      dir            (str "/Users/maruska/digital_attic/storage/"
-                          (url-encode (page-title contents)))
-      local-contents (w/postwalk #(localize! % {:uri uri :dir dir}) contents)]
-  (write (str dir "/index.html")
-         (hiccup/html local-contents)))
+(defn download-pdf! [uri storage-dir]
+  (let [outfile (->> [storage-dir (website-name uri) (basename uri)]
+                     (string/join "/"))]
+    (write outfile uri)
+    outfile))
+
+#_
+(page-title (html/parse "https://tobyrush.com/theorypages/index.html"))
+
+(defn download-webpage! [uri storage-dir failed-files]
+  (try
+    (let [contents (html/parse uri)
+          outdir   (->> [storage-dir
+                         (website-name uri)
+                         (url-encode (page-title contents))]
+                        (string/join "/"))
+          outfile  (str outdir "/index.html")]
+      (->> contents
+           (w/walk #(localize! % {:uri uri :dir outdir})
+                   identity)
+           hiccup/html
+           (write outfile))
+      outfile)
+    (catch Exception ex
+      (swap! failed-files conj {:uri       uri
+                                :exception ex})
+      (println "DOWNLOAD ERROR - " (ex-message ex)))))

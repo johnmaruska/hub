@@ -13,7 +13,7 @@
                  [com.cemerick/url "0.1.1"]
                  [clj-http "3.12.1"]
                  ;; HTML/XML parsing
-                 [clj-tagsoup "0.3.0"]
+                 [clj-tagsoup "0.3.0" :exclusions [org.clojure/clojure]]
                  ;; discord api wrapper
                  [org.suskalo/discljord "1.1.1"
                   :exclusions [org.eclipse.jetty.websocket/websocket-api

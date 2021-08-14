@@ -66,7 +66,7 @@
        (group-by month)
        totals
        sort))
-
+#_
 (def txs
   (->> (load-csv "transactions.csv")
        #_(filter (comp empty? :Credit))  ; only care about spending

@@ -1,8 +1,11 @@
 (ns hub.cli.digital-attic
-  (:require [clojure.string :as string]
-            [clojure.java.io :as io]
-            [clojure.data.json :as json]
-            [clojure.tools.cli :refer [parse-opts]]))
+  (:require
+   [hub.cli.download-webpage :refer [download-webpage!
+                                     download-pdf!]]
+   [clojure.string :as string]
+   [clojure.java.io :as io]
+   [clojure.data.json :as json]
+   [clojure.tools.cli :refer [parse-opts]]))
 
 ;; ----- Configuration -------------------------------------------------
 
@@ -10,8 +13,8 @@
 
 (defn read-config [config-file]
   (when (.exists (io/file config-file))
-    (->> (string/split (slurp config-file) #"\n--\n")
-         (map #(string/split % #"\n"))
+    (->> (string/split (slurp config-file) #"(\n--\n)|(\r\n--\r\n)")
+         (map #(string/split % #"\r\n"))
          (reduce (fn [acc [category & entries]]
                    (cond
                      (= "Root:" category)
@@ -24,8 +27,6 @@
 
 ;; ----- Localize Remote Files -----------------------------------------
 
-;; TODO download remote files to local disk
-
 (def unlocalized-entry #"^- \[(.*)\]\((.*)\)$")
 
 (defn markdown-link [title uri]
@@ -36,17 +37,24 @@
        "][" (markdown-link "Remote" remote-uri)
        "] " title))
 
-(defn localize! [input-markdown output-markdown storage-dir]
+(defn localize! [input-markdown
+                 output-markdown
+                 storage-dir
+                 failed-files]
   (let [contents (with-open [reader (io/reader input-markdown)]
                    (vec (line-seq reader)))]
-    (with-open [writer (io/writer output-markdown)]
+    (with-open [writer (io/writer (io/file output-markdown))]
       (doseq [line contents]
+        (println line)
         (if-let [matches (re-find unlocalized-entry line)]
-          (let [[title uri] (rest matches)]
-            ;; download static files
-            (.write writer (str (updated-entry title "LOCAL" uri) "\n")))
-          (.write writer (str line "\n"))))))  )
-
+          (let [[title uri] (rest matches)
+                local-uri   (if (string/ends-with? uri ".pdf")
+                              (download-pdf! uri storage-dir)
+                              (download-webpage! uri
+                                                 storage-dir
+                                                 failed-files))]
+            (.write writer (str (updated-entry title local-uri uri) "\n")))
+          (.write writer (str line "\n")))))))
 
 ;; ----- Convert JSON --------------------------------------------------
 
@@ -114,7 +122,7 @@
   (binding [*CONFIG* (read-config config-file)]
     (let [bookmarks (json/read-str (slurp input-json) :key-fn keyword)]
       (->> (bookmarks->markdown bookmarks)
-           (spit (str output-markdown ".raw.md"))))))
+           (spit output-markdown)))))
 
 ;; ----- Main! ---------------------------------------------------------
 
@@ -138,3 +146,17 @@
         "localize" (localize! input output dir)
         nil        (do (import! input output config)
                        (localize! output output dir))))))
+
+#_
+(import! "c://Users/jackm/Documents/digital_attic/bookmarks-2021-08-14.json"
+         "c://Users/jackm/Documents/digital_attic/bookmarks-2021-08-14.md"
+         "c://Users/jackm/Documents/digital_attic/config.txt")
+(def failed-files (atom []))
+#_
+(let [input  "c://Users/jackm/Documents/digital_attic/bookmarks-2021-08-14.json"
+      output "c://Users/jackm/Documents/digital_attic/bookmarks-2021-08-14.md"
+      config "c://Users/jackm/Documents/digital_attic/config.txt"
+      storage "c://Users/jackm/Documents/digital_attic/storage"]
+  (import! input output config)
+  (reset! failed-files [])
+  (localize! output output storage failed-files))

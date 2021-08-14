@@ -36,11 +36,10 @@
                   :hand '(0 1 2 3 4 5)}]
       (is (= player (sut/fill-hand player)))))
   (testing "draws until hand is full from empty"
-    (let [player ]
-      (is (= (sut/fill-hand {:deck '(0 1 2 3 4 5 6 7 8)
-                             :hand '()})
-             {:deck '(6 7 8)
-              :hand '(0 1 2 3 4 5)})))))
+    (is (= (sut/fill-hand {:deck '(0 1 2 3 4 5 6 7 8)
+                           :hand '()})
+           {:deck '(6 7 8)
+            :hand '(0 1 2 3 4 5)}))))
 
 (deftest first-draw
   (testing "draws an additional card"
