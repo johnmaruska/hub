@@ -33,19 +33,19 @@
 (deftest fill-hand
   (testing "draws no cards when hand is full"
     (let [player {:deck '(6 7 8)
-                  :hand '(0 1 2 3 4 5)}]
+                  :hand '(5 4 3 2 1 0)}]
       (is (= player (sut/fill-hand player)))))
   (testing "draws until hand is full from empty"
     (is (= (sut/fill-hand {:deck '(0 1 2 3 4 5 6 7 8)
                            :hand '()})
            {:deck '(6 7 8)
-            :hand '(0 1 2 3 4 5)}))))
+            :hand '(5 4 3 2 1 0)}))))
 
 (deftest first-draw
   (testing "draws an additional card"
     (let [player {:deck '(0 1 2 3 4 5 6 7 8 9)}]
       (is (= (inc sut/*HAND-SIZE*)
-             (count (:hand (first-draw player))))))))
+             (count (:hand (sut/first-draw player))))))))
 
 (deftest available-houses
   (testing "returns the deck's houses from identity-card"
