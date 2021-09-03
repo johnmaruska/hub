@@ -8,7 +8,9 @@
   (first (filter #(= v (k %)) coll)))
 
 (defn parse-json [s]
-  (json/read-str s :key-fn keyword))
+  (if (instance? java.io.Reader s)
+    (json/read s :key-fn keyword)
+    (json/read-str s :key-fn keyword)))
 
 (defn remove-prefix [s prefix]
   (if (string/starts-with? s prefix)
@@ -21,6 +23,6 @@
   `(try
      ~@body
      (catch Exception ex#
-       (if (not (~pred (ex-data ex#)))
-         (throw ex#)
-         (log/error ex#)))))
+       (if (~pred ex#)
+         (log/error ex#)
+         (throw ex#)))))

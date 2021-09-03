@@ -1,4 +1,4 @@
-(ns hub.bio
+(ns hub.sketchbook.bio
   (:require [clojure.core.match :refer [match]]))
 
 (def invert
@@ -6,11 +6,6 @@
    \C \G
    \G \C
    \T \A})
-
-(defn foo [bases]
-  (match [(vec bases)]
-         [(:or [\A \G \T])] :T
-         [(:or [\A \G \C])] :C))
 
 (defn amino-acid [bases]
   (match [(vec bases)]
