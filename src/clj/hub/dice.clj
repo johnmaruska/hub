@@ -4,15 +4,20 @@
    [clojure.java.io :as io]
    [clojure.data.json :as json]))
 
-(defn max-roll [d] d)
-(defn min-roll [d] 1)
-(defn rand-roll [d]
+
+(defn max-value [{:keys [sign n d]}]
+  (if (= sign '+) d 1))
+
+(defn min-value [{:keys [sign n d]}]
+  (if (= sign '-) d 1))
+
+(defn rand-value [{:keys [sign n d]}]
   (+ 1 (rand-int d)))
 
 (defn roll-term
   "Perform rolls for an entire term using arbitrary `roll-fn`."
-  [roll-fn {:keys [n d sign]}]
-  (->> (repeatedly n #(roll-fn d))
+  [roll-fn {:keys [sign n] :as term}]
+  (->> (repeatedly n #(roll-fn term))
        (reduce (eval sign) 0)))
 
 (defn roll-terms
@@ -21,9 +26,9 @@
        (reduce + 0)))
 
 (defn roll-all [terms]
-  {:roll-result (roll-terms rand-roll terms)
-   :roll-min    (roll-terms min-roll terms)
-   :roll-max    (roll-terms max-roll terms)})
+  {:roll-result (roll-terms rand-value terms)
+   :roll-min    (roll-terms min-value terms)
+   :roll-max    (roll-terms max-value terms)})
 
 (defn parse-int
   "Parse an Integer, optionally providing a default if it cannot be parsed."
