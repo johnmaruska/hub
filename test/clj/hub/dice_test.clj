@@ -29,7 +29,7 @@
   (testing "C - negative modifier"
     (let [expression "1d6 - 2"]
       (is (= [{:sign '+ :n 1 :d 6}
-              {:sign '+ :n 3 :d 1}]
+              {:sign '- :n 2 :d 1}]
              (sut/parse expression)))))
   (testing "D - d character is not case sensitive"
     (let [expression "4D6"]
