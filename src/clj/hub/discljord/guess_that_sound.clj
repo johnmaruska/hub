@@ -26,14 +26,17 @@
 (defn game-started? [channel-id]
   (not (nil? (get @game channel-id))))
 
+(defn drop-first-word [s]
+  (string/join " " (rest (string/split s #" "))))
+
 (defn record-guess! [{:keys [author channel-id content]}]
-  (let [guess (util/drop-first-word content)]
+  (let [guess (drop-first-word content)]
     (swap! game
            update-in [channel-id :guesses]
            concat [{:author author :guess guess}])))
 
 (defn record-answer! [{:keys [channel-id content]}]
-  (let [answer (util/drop-first-word content)]
+  (let [answer (drop-first-word content)]
     (swap! game assoc-in [channel-id :answer] answer)))
 
 (defn display [channel-id]

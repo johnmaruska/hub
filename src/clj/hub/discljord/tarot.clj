@@ -25,8 +25,6 @@
     (str "**" (:name card) " - Reversed**" ":\n" (:meaning_rev card))
     (str "**" (:name card) "**"            ":\n" (:meaning_up  card))))
 
-(map card->human-readable (filter #(= "swords" (:suit %)) cards))
-
 (defn handle-event* [event]
   (let [results (string/join "\n\n" (map card->human-readable (get-spread 3)))]
     (str (mention-user (:author event)) " drew the spread:\n" results)))

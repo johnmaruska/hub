@@ -1,4 +1,4 @@
-(ns hub.kata.bowling)
+(ns hub.sketchbook.kata.bowling)
 
 (def standard-game
   (repeat 20 4))  ; 80
