@@ -5,8 +5,8 @@
   ([height width]
    (init height width (constantly nil)))
   ([height width value-fn]
-   (vec (for [x (range width)]
-          (vec (for [y (range height)]
+   (vec (for [_x (range width)]
+          (vec (for [_y (range height)]
                  (value-fn)))))))
 
 (defn get-coord [board [x y]]
@@ -21,7 +21,7 @@
   (try
     (get-coord grid coord)
     true
-    (catch IndexOutOfBoundsException ex false)))
+    (catch IndexOutOfBoundsException _ false)))
 
 (defn neighbor-coords
   "Get all coordinates surrounding a given coordinate"

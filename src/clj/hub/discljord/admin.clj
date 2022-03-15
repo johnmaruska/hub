@@ -1,8 +1,7 @@
 (ns hub.discljord.admin
-  (:require [hub.discljord.util :as util]
-            [clojure.string :as string]
-            [discljord.messaging :as m]
-            [clojure.core.async :as a]))
+  (:require
+   [hub.discljord.util :as util]
+   [discljord.messaging :as m]))
 
 (def canned-reply
   {:could-not-parse (str "Could not parse nickname change. Format must be"

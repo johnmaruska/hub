@@ -7,8 +7,7 @@
                  ;;; Logging
                  [org.clojure/tools.logging "1.1.0"]
                  ;; work with mp3 id3 tags
-                 ;; https://github.com/pandeiro/claudio
-                 [claudio "0.1.3"]
+                 [claudio "0.1.3"]  ; https://github.com/pandeiro/claudio
                  ;; URL encoding
                  [com.cemerick/url "0.1.1"]
                  [clj-http "3.12.1"]

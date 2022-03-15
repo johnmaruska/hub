@@ -2,7 +2,6 @@
   (:require
    [clojure.string :as string]
    [discljord.formatting :refer [mention-user]]
-   [discljord.messaging :as m]
    [hub.discljord.util :as util]))
 
 ;;;; Reply messages
@@ -33,7 +32,7 @@
            update-in [channel-id :guesses]
            concat [{:author author :guess guess}])))
 
-(defn record-answer! [{:keys [answer channel-id content]}]
+(defn record-answer! [{:keys [channel-id content]}]
   (let [answer (util/drop-first-word content)]
     (swap! game assoc-in [channel-id :answer] answer)))
 
@@ -77,7 +76,7 @@
                                  ", " (mention-user author))))
     (util/reply bot event (:no-game-started canned-reply))))
 
-(defn answer! [bot {:keys [channel-id content] :as event}]
+(defn answer! [bot {:keys [channel-id] :as event}]
   (if (game-started? channel-id)
     (do
       (record-answer! event)

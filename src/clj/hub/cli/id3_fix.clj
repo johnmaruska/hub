@@ -41,7 +41,7 @@
 
 ;;; tags helpers
 
-(defn all-present? [{:keys [album artist genre title] :as tags}]
+(defn all-present? [{:keys [album artist genre title]}]
   (not (or (str/starts-with? album "Unknown album")
            (= artist "Unknown artist")
            (= genre "Unknown genre")

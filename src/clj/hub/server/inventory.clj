@@ -2,7 +2,6 @@
   (:require
    [hub.inventory :as inventory]
    [hub.inventory.spec :as spec]
-   [malli.core :as m]
    [malli.util :as mu]))
 
 ;; TODO: what happens with comma-separated route vars? `artist=Abba,Mastodon`
@@ -31,8 +30,7 @@
   (inventory/add-album body)
   {:status 201})
 
-(defn print-all [args]
-  (def ARGS args)
+(defn print-all [_]
   {:status 200
    :body   [:div "repl"]})
 

@@ -5,13 +5,13 @@
    [clojure.data.json :as json]))
 
 
-(defn max-value [{:keys [sign n d]}]
+(defn max-value [{:keys [sign d]}]
   (if (= sign '+) d 1))
 
-(defn min-value [{:keys [sign n d]}]
+(defn min-value [{:keys [sign d]}]
   (if (= sign '-) d 1))
 
-(defn rand-value [{:keys [sign n d]}]
+(defn rand-value [{:keys [d]}]
   (+ 1 (rand-int d)))
 
 (defn roll-term

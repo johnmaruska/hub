@@ -1,8 +1,6 @@
 (ns hub.minesweeper
   "Create a Minesweeper gameboard."
-  (:require
-   [clojure.string :as string]
-   [hub.util.grid :as grid]))
+  (:require [hub.util.grid :as grid]))
 
 (def BOMB 'B)
 (defn bomb? [v] (= BOMB v))

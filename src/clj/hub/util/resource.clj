@@ -37,7 +37,7 @@
 
 (defn load-edn [filename]
   (with-open [f (reader filename)]
-    (edn/read (PushbackReader. reader))))
+    (edn/read (PushbackReader. f))))
 
 (defn spit [filename contents]
   (core-spit (io/resource filename)

@@ -37,7 +37,7 @@
 (defn card->str [card]
   (str (or (:name card)
            (str (:rank card) " of " (:suit card)))
-       (if (:reversed? card) " - Reversed")))
+       (when (:reversed? card) " - Reversed")))
 
 (def full-deck
   (concat major-arcana minor-arcana))

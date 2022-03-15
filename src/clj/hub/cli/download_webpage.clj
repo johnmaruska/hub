@@ -15,7 +15,7 @@
                    (first (filter #(= tag (first %)) children)))]
     (try
       (-> contents (find-tag :head) (find-tag :title) (nth 2))
-      (catch IndexOutOfBoundsException ex
+      (catch IndexOutOfBoundsException _
         "PAGETITLE"))))
 
 (defn uri-str? [s]
@@ -76,7 +76,7 @@
 (defn localizable? [s]
   (and s (or (image? s) (string/ends-with? s ".css"))))
 
-(defn paths [target {:keys [uri dir] :as config}]
+(defn paths [target {:keys [uri]}]
   (if (uri-str? target)
     {:remote target
      :local  (str "./" (url-encode target))}

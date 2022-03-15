@@ -5,7 +5,6 @@
    [quil.core :as q]
    [quil.middleware :as m]
    [hub.conway.game :as game]
-   [hub.conway.seed :as seed]
    [hub.util.grid :as grid]))
 
 ;;; colors
@@ -30,7 +29,7 @@
     (q/background dead)  ; clear sketch
     (->> (grid/coord-maps (:grid state))
          (filter (comp game/alive? :value))
-         (run! (fn [{:keys [row col value]}]
+         (run! (fn [{:keys [row col]}]
                  (q/rect (+ left-pixel (* col cell-size))
                          (+ top-pixel  (* row cell-size))
                          cell-size cell-size))))))

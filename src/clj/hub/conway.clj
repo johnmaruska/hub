@@ -1,6 +1,5 @@
 (ns hub.conway
   (:require
-   [clojure.core.async :refer [thread]]
    [hub.conway.game :as game]
    [hub.conway.output.sketch :as sketch]
    [hub.conway.output.terminal :as terminal]

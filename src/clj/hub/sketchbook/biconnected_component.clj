@@ -42,25 +42,6 @@
             (assoc-in acc [v :color] :white))
           {:time 0} (g :V)))
 
-(defn dfs-visit
-  "Depth-First-Search Visit a node. Ch22.3 pp604"
-  [g u state]
-  (manage-dfs-visit
-   u state
-   (doseq [v (adjacent g u)]
-     (when (= :white (get-in @state [v :color]))
-       (swap! state assoc-in [v :parent] u)
-       (dfs-visit g v state)))))
-
-(defn dfs
-  "Depth-First Search. Ch22.3 pp604"
-  [g]
-  (let [state   (atom (init-state g))
-        assign! (partial swap! state assoc-in)]
-    (doseq [v (g :V)]
-      (if (= :white (get-in @state [v :color]))
-        (dfs-visit g v state)))
-    @state))
 
 ;; https://codeforces.com/blog/entry/71146
 (defn articulation-points-dfs [g u state]
@@ -91,7 +72,7 @@
 (defn articulation-points [g]
   (let [state (atom (init-state g))]
     (doseq [v (g :V)]
-      (if (= :white (get-in @state [v :color]))
+      (when (= :white (get-in @state [v :color]))
         (swap! state assoc-in [v :ap] (< 1 (articulation-points-dfs g v state)))))
     (->> @state (filter #(:ap (second %))) (map first))))
 

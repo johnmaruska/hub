@@ -5,8 +5,7 @@
    [clj-http.client :as http]
    [hub.spotify.auth :as auth]
    [hub.spotify.token :as token]
-   [hub.util :refer [parse-json]]
-   [ring.util.codec :as codec]))
+   [hub.util :refer [parse-json]]))
 
 (def api (partial str "https://api.spotify.com"))
 
@@ -42,9 +41,6 @@
        (assoc :oauth-token (:access_token bearer-token))
        send-request!
        (update :body #(when %1 (parse-json %1))))))
-
-(defn delete! [url opts]
-  (request! (merge opts {:method :delete :url url})))
 
 (defn delete! [url opts]
   (request! (merge opts {:method :delete :url url})))

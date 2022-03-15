@@ -66,14 +66,14 @@
        (group-by month)
        totals
        sort))
-#_
-(def txs
-  (->> (load-csv "transactions.csv")
-       #_(filter (comp empty? :Credit))  ; only care about spending
-       (map remove-prefix)
-       (map categorize)))
+
 
 (comment
+  (def txs
+    (->> (load-csv "transactions.csv")
+         #_(filter (comp empty? :Credit))  ; only care about spending
+         (map remove-prefix)
+         (map categorize)))
   (let [mandatory-categories [:donation
                               :income
                               :groceries
