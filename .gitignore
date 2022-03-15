@@ -12,6 +12,7 @@ target/
 .lein-failures
 .lein-repl-history
 pom.xml
+.clj-kondo/.cache/
 
 # Emacs files
 *~

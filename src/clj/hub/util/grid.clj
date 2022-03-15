@@ -23,7 +23,7 @@
     true
     (catch IndexOutOfBoundsException _ false)))
 
-(defn neighbor
+(defn neighbors
   "Get all coordinates surrounding a given coordinate, within grid bounds."
   [grid [x y]]
   (->> (for [xp [(dec x) x (inc x)]

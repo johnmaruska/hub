@@ -9,18 +9,20 @@
 (def default-height 10)
 (def default-width 10)
 
-(defn animate
+(defn sketch-animate
   "Graphically display game animation."
   ([]
-   (animate (seed/random default-width default-height)))
+   (let [seed (seed/random default-width default-height)]
+     (sketch/animate seed game/play-round delay-ms)))
   ([seed]
    (sketch/animate seed game/play-round delay-ms)))
 
-(defn console-print
+(defn terminal-animate
   "Display game state in the terminal, ASCII animation.
   Blocking, wrap in thread to unblock."
   ([]
-   (console-print (seed/random default-width default-height)))
+   (let [seed (seed/random default-width default-height)]
+     (terminal/animate seed game/play-round delay-ms)))
   ([seed]
    (terminal/animate seed game/play-round delay-ms)))
 

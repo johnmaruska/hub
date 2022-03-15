@@ -1,6 +1,7 @@
 (ns hub.core
   (:require
    [hub.cli.id3-fix :as id3]
+   [hub.conway :as conway]
    [hub.dice :as dice]
    [hub.spotify :as spotify]
    [hub.discljord.core :as discord]
@@ -39,15 +40,16 @@
        (swallow-exception (comp not manual-kill?)
          (discord/handle-event! discord-bot))))))
 
-(defn -main [& args]
-  (when (some #{"dice"} args)
-    (dice/task (System/getenv "DICE_INFILE") (System/getenv "DICE_OUTFILE")))
-  (when (some #{"id3"} args)
-    (id3/apply-fix!))
-  (when (some #{"spotify"} args)
-    (spotify/generate-saved-artists)
-    (spotify/generate-related-artist-adjacency-list)
-    (spotify/generate-sorted-playlists))
-  (when (some #{"server"} args)
-    (mount/start)
-    (discord-run!)))
+;; TODO: proper monorepo doesn't just switch on command
+(defn -main [command & _args]
+  (case command
+    "conway"  (conway/sketch-animate)
+    "dice"    (dice/task (System/getenv "DICE_INFILE") (System/getenv "DICE_OUTFILE"))
+    "id3"     (id3/apply-fix!)
+    "spotify" (do
+                (spotify/generate-saved-artists)
+                (spotify/generate-related-artist-adjacency-list)
+                (spotify/generate-sorted-playlists))
+    "server"  (do
+                (mount/start)
+                (discord-run!))))
