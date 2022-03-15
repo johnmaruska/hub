@@ -1,4 +1,4 @@
-(ns hub.conway.output.terminal
+(ns hub.conway.terminal
   (:require
    [hub.conway.game :as game]
    [hub.util.grid :as grid]))

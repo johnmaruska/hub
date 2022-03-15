@@ -1,19 +1,25 @@
 (ns hub.conway
   (:require
+   [clojure.tools.logging :as log]
    [hub.conway.game :as game]
-   [hub.conway.output.sketch :as sketch]
-   [hub.conway.output.terminal :as terminal]
-   [hub.conway.seed :as seed]))
+   [hub.conway.sketch :as sketch]
+   [hub.conway.terminal :as terminal]
+   [hub.util.data-file :as data-file]))
 
 (def delay-ms 200)
 (def default-height 10)
 (def default-width 10)
 
+(defn random-seed []
+  (game/random-seed default-width default-height))
+
+(defn load-seed [seed-name]
+  (data-file/load-edn (str "conway/" seed-name ".edn")))
+
 (defn sketch-animate
   "Graphically display game animation."
   ([]
-   (let [seed (seed/random default-width default-height)]
-     (sketch/animate seed game/play-round delay-ms)))
+   (sketch/animate (random-seed) game/play-round delay-ms))
   ([seed]
    (sketch/animate seed game/play-round delay-ms)))
 
@@ -21,8 +27,7 @@
   "Display game state in the terminal, ASCII animation.
   Blocking, wrap in thread to unblock."
   ([]
-   (let [seed (seed/random default-width default-height)]
-     (terminal/animate seed game/play-round delay-ms)))
+   (terminal/animate (random-seed) game/play-round delay-ms))
   ([seed]
    (terminal/animate seed game/play-round delay-ms)))
 
@@ -30,6 +35,15 @@
   "Generate a lazy-sequence of game states from `seed`.
   If no `seed` provided, randomly generate an initial state."
   ([]
-   (autoplay (seed/random default-width default-height)))
+   (autoplay (random-seed)))
   ([seed]
    (iterate game/play-round seed)))
+
+(defn main [command & [seed-name]]
+  (let [seed (if seed-name
+               (load-seed seed-name)
+               (random-seed))]
+    (case command
+      "sketch" (sketch-animate seed)
+      "print"  (terminal-animate seed)
+      (log/error "conway subcommand must be one of [sketch print]"))))

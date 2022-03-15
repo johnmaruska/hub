@@ -9,6 +9,9 @@
 (def alive 1)
 (def dead  0)
 
+(defn random-seed [x y]
+  (grid/init x y #(rand-nth [alive dead])))
+
 (defn alive?
   ([cell] (= alive cell))
   ([grid [x y]]

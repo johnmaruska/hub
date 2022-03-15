@@ -7,7 +7,8 @@
    [hub.discljord.core :as discord]
    [hub.server :as server]
    [hub.util :refer [swallow-exception]]
-   [mount.core :as mount :refer [defstate]])
+   [mount.core :as mount :refer [defstate]]
+   [clojure.tools.logging :as log])
   (:gen-class))
 
 (defstate discord-bot
@@ -41,9 +42,9 @@
          (discord/handle-event! discord-bot))))))
 
 ;; TODO: proper monorepo doesn't just switch on command
-(defn -main [command & _args]
+(defn -main [command & args]
   (case command
-    "conway"  (conway/sketch-animate)
+    "conway"  (apply conway/main args)
     "dice"    (dice/task (System/getenv "DICE_INFILE") (System/getenv "DICE_OUTFILE"))
     "id3"     (id3/apply-fix!)
     "spotify" (do
@@ -52,4 +53,5 @@
                 (spotify/generate-sorted-playlists))
     "server"  (do
                 (mount/start)
-                (discord-run!))))
+                (discord-run!))
+    (log/error "command must be one of [conway dice id3 spotify server]")))
