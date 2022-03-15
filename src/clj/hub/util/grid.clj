@@ -23,17 +23,14 @@
     true
     (catch IndexOutOfBoundsException _ false)))
 
-(defn neighbor-coords
-  "Get all coordinates surrounding a given coordinate"
-  [[x y]]
-  (vec (for [xp [(dec x) x (inc x)]
+(defn neighbor
+  "Get all coordinates surrounding a given coordinate, within grid bounds."
+  [grid [x y]]
+  (->> (for [xp [(dec x) x (inc x)]
              yp [(dec y) y (inc y)]
              :when (not (and (= x xp) (= y yp)))]
-         [xp yp])))
-
-(defn neighbors [grid coord]
-  (filter #(within-bounds? grid %)
-          (neighbor-coords coord)))
+         [xp yp])
+       (filter #(within-bounds? grid %))))
 
 (defn coord-maps
   "Convert a grid into a list of {:row :col :value} maps.

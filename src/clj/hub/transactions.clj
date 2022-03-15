@@ -2,10 +2,14 @@
   (:require [hub.util.data-file :refer [load-csv load-edn]]
             [clojure.string :as string]))
 
-(defn desc-start? [tx substr]
+(defn desc-start?
+  "Does the `tx` have a description which starts with `substr`?"
+  [tx substr]
   (string/starts-with? (:Description tx) substr))
 
-(defn remove-prefix [tx]
+(defn remove-prefix
+  "Remove prefixes from `tx` description, loaded from `prefixes.edn`."
+  [tx]
   (let [strip-prefix (fn [s prefix]
                        (if (string/starts-with? s prefix)
                          (string/replace-first s (re-pattern prefix) "")
@@ -23,33 +27,49 @@
        (filter identity)
        first))
 
-(defn categorize [tx]
+(defn categorize
+  "Derive :Category for `tx`, matched by name as specified in `categories.edn`"
+  [tx]
   (assoc tx :Category (or (when (seq (:Credit tx)) :income)
                           (categorize* tx)
                           :uncategorized)))
 
-(defn total [txs]
+(defn total
+  "Get net change to account for transaction."
+  [txs]
   (let [net-change (fn [tx] (if (seq (:Debit tx))
                               (- (Float/parseFloat (:Debit tx)))
                               (+ (Float/parseFloat (:Credit tx)))))]
     (reduce + (map net-change txs))))
 
-(defn totals [categorized-txs]
+(defn totals
+  "Get totals for each `txs`' category."
+  [categorized-txs]
   (reduce (fn [acc [category txs]]
             (assoc acc category (total txs)))
           {}
           categorized-txs))
 
-(defn yearly-breakdown [txs]
+(defn yearly-breakdown
+  "We only get data for a year so just don't break down."
+  [txs]
   (totals (group-by :Category txs)))
 
-(defn leading-zero [s]
+
+(defn leading-zero
+  "Add a leading zero to force two digits."
+  [s]
   (if (= 1 (count s)) (str "0" s) s))
-(defn month [tx]
+
+(defn month
+  "Parse the `tx` date to YYYY-MM format."
+  [tx]
   (let [[month _ year] (string/split (:Date tx) #"/")]
     (str year "-" (leading-zero month))))
 
-(defn update-all [f m]
+(defn update-all
+  "Apply `f` to each value in `m`."
+  [f m]
   (reduce (fn [acc [k xs]]
             (assoc acc k (f xs)))
           {} m))

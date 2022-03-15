@@ -7,16 +7,17 @@
   (:import
    (java.io PushbackReader)))
 
-(defn file [filename]
-  (str "data/" filename))
-
 (defn reader [filename]
-  (io/reader (file filename)))
+  (io/reader (str "data/" filename)))
 
 (defn writer [filename & opts]
-  (apply io/writer (file filename) opts))
+  (apply io/writer (str "data/" filename) opts))
 
-(defn csv-data->maps [csv-data]
+(defn csv-data->maps
+  "Convert `csv-data` to maps.
+
+  Assumes first entry is headers."
+  [csv-data]
   (map zipmap
        (->> (first csv-data) ;; First row is the header
             (map keyword) ;; Drop if you want string keys instead
@@ -30,6 +31,7 @@
     (vec (csv-data->maps (csv/read-csv f)))))
 
 (defn write-csv
+  "Write `rows` to `filename` in csv format. Pass `opts` to `io/writer`."
   [filename rows & opts]
   (with-open [f (apply writer filename opts)]
     (csv/write-csv f rows)))

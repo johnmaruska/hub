@@ -10,7 +10,9 @@
 
 ;; ----- Helpers -------------------------------------------------------
 
-(defn page-title [contents]
+(defn page-title
+  "Extract page title from .head.title selector."
+  [contents]
   (let [find-tag (fn [[_ _ & children] tag]
                    (first (filter #(= tag (first %)) children)))]
     (try
@@ -31,6 +33,7 @@
   (some #(string/ends-with? filename %)
         [".jpeg" ".jpg" ".png" ".svg"]))
 
+;; TODO: is there a clearer way to do this than regex?
 (defn parent-dir [filename]
   (string/replace filename #"/[^/]+\.[^/]+$" ""))
 
@@ -105,7 +108,11 @@
 
 ;; ----- Main ----------------------------------------------------------
 
-(defn download-pdf! [uri storage-dir]
+(defn download-pdf!
+  "Download a PDF at `uri` to directory `storage-dir`.
+
+  Creates a directory for the base website, and maintains pdf name."
+  [uri storage-dir]
   (let [outfile (->> [storage-dir (website-name uri) (basename uri)]
                      (string/join "/"))]
     (write outfile uri)
@@ -114,7 +121,12 @@
 #_
 (page-title (html/parse "https://tobyrush.com/theorypages/index.html"))
 
-(defn download-webpage! [uri storage-dir failed-files]
+(defn download-webpage!
+  "Download contents of `uri` to directory `storage-dir`.
+
+  Creates a directory for the base website, and a file for that page title.
+  Tracks `failed-files` atom for handling any issues."
+  [uri storage-dir failed-files]
   (try
     (let [contents (html/parse uri)
           outdir   (->> [storage-dir
