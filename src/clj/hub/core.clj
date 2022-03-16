@@ -25,23 +25,21 @@
   :start (server/start!)
   :stop  (.stop webserver))
 
-(defmacro spin-forever!
-  "Repeat execution of a block of code indefinitely.
-  Breaks only on uncaught exception.
-  Mostly this is used for the Discord bot event-pump in the REPL since
-  it hasn't been deployed yet, and will be used with some form of async
-  when deployed."
-  [& body]
+(defmacro spin-forever [& body]
   `(loop [] ~@body (recur)))
 
+(def manual-kill? (comp :manual-kill? ex-data))
+
+(defmacro spin-until-manual-kill [& body]
+  `(swallow-exception?
+    manual-kill?
+    (spin-forever
+     (swallow-exception (comp not manual-kill?)
+       ~@body))))
+
 (defn discord-run! []
-  (let [manual-kill? (comp :manual-kill? ex-data)]
-    ;; end run but dont crash application
-    (swallow-exception manual-kill?
-      (spin-forever!
-       ;; most exceptions should just log and continue on
-       (swallow-exception (comp not manual-kill?)
-         (discord/handle-event! discord-bot))))))
+  (spin-until-manual-kill
+   (discord/handle-event! discord-bot)))
 
 ;; TODO: proper monorepo doesn't just switch on command
 (defn -main [command & args]
