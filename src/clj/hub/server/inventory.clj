@@ -30,15 +30,11 @@
   (inventory/add-album body)
   {:status 201})
 
-(defn print-all [_]
-  {:status 200
-   :body   [:div "repl"]})
-
 (def routes
   ["/inventory"
    ["/albums" {:get  {:handler    get-albums
                       :responses  {200 {:body (results (mu/optional-keys spec/album))}}
                       :parameters {:query (mu/optional-keys spec/album)}}
-               :post {:handler    print-all
+               :post {:handler    post-album
                       :responses  {201 nil}
                       :parameters {:form spec/album}}}]])
