@@ -11,6 +11,11 @@
    [clojure.tools.logging :as log])
   (:gen-class))
 
+(defn configure-logging []
+  ;; disable noisy verbose logger for claudio.id3
+  (.setLevel (java.util.logging.Logger/getLogger "org.jaudiotagger")
+             java.util.logging.Level/OFF))
+
 (defstate discord-bot
   :start (discord/start!)
   ;; TODO: thread management with event pump
@@ -19,9 +24,6 @@
 (defstate webserver
   :start (server/start!)
   :stop  (.stop webserver))
-
-(defn running? [th] (and th @(.closed th)))
-(defn stop! [th] (when (running? th) (.close! th)))
 
 (defmacro spin-forever!
   "Repeat execution of a block of code indefinitely.
@@ -43,6 +45,7 @@
 
 ;; TODO: proper monorepo doesn't just switch on command
 (defn -main [command & args]
+  (configure-logging)
   (case command
     "conway"  (apply conway/main args)
     "dice"    (dice/task (System/getenv "DICE_INFILE") (System/getenv "DICE_OUTFILE"))

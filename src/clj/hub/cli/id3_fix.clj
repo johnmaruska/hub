@@ -11,10 +11,6 @@
 (def HOME "c:\\Users\\jackm")
 (def ROOT-DIR (io/file HOME "Music" "Ripped CDs"))
 
-;; disable noisy verbose logger
-(.setLevel (java.util.logging.Logger/getLogger "org.jaudiotagger")
-           java.util.logging.Level/OFF)
-
 ;;; Clojure wrappers on java.io.File
 
 (defn get-name   [file] (.getName file))
