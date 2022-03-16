@@ -6,14 +6,11 @@
    [discljord.messaging :as m]
    [hub.discljord.commands :as commands]
    [hub.discljord.util :as util]
-   [hub.util]))
+   [hub.util :refer [remove-prefix]]))
 
 (defn sign-off [event-data]
   (str "Will I dream, " (mention-user (:author event-data)) "?"))
 
-(defn remove-prefix [event-data prefix]
-  (update event-data :content
-          hub.util/remove-prefix prefix))
 
 (defn handle-event!
   ([bot]
@@ -23,7 +20,7 @@
      (when (= :message-create event-type)
        (doseq [matching-prefix (commands/matching-prefixes event-data)]
          (let [handler    (get commands/prefix matching-prefix)
-               event-data (remove-prefix event-data matching-prefix)]
+               event-data (update event-data :content remove-prefix matching-prefix)]
            ;; TODO: if multiple handlers allowed, modify here
            (handler bot event-data))))
      (catch Exception ex
