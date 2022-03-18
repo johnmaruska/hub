@@ -13,8 +13,8 @@
 (defn page-title
   "Extract page title from .head.title selector."
   [contents]
-  (let [find-tag (fn [[_ _ & children] tag]
-                   (first (filter #(= tag (first %)) children)))]
+  (letfn [(find-tag [[_ _ & children] tag]
+            (first (filter #(= tag (first %)) children)))]
     (try
       (-> contents (find-tag :head) (find-tag :title) (nth 2))
       (catch IndexOutOfBoundsException _

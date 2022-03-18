@@ -40,12 +40,11 @@
     (swap! game assoc-in [channel-id :answer] answer)))
 
 (defn display [channel-id]
-  (let [guess-line  (fn [x] (str (mention-user (:author x))
-                                 " guessed "
-                                 (:guess x)))
-        answer-line (str "Answer: " (-> @game (get channel-id) :answer))
-        guess-lines (mapv guess-line (-> @game (get channel-id) :guesses))]
-    (string/join "\n" (concat [answer-line] guess-lines))))
+  (letfn [(guess-line [x]
+            (str (mention-user (:author x)) " guessed " (:guess x)))]
+    (let [answer-line (str "Answer: " (-> @game (get channel-id) :answer))
+          guess-lines (mapv guess-line (-> @game (get channel-id) :guesses))]
+      (string/join "\n" (concat [answer-line] guess-lines)))))
 
 ;;;; Game lifecycle
 

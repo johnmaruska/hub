@@ -57,9 +57,9 @@
    "eyr" #(between % 2020 2030)})
 
 (defn valid-rules? [passport]
-  (let [field-met? (fn [[k pred]]
-                     (when-let [v (get passport k)]
-                       (pred v)))]
+  (letfn [(field-met? [[k pred]]
+            (when-let [v (get passport k)]
+              (pred v)))]
     (every? field-met? rules)))
 
 (defn part2 [input]

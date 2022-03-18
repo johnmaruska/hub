@@ -28,16 +28,18 @@
 (defn categorize
   "Derive :Category for `tx`, matched by name as specified in `categories.edn`"
   [tx]
-  (assoc tx :Category (or (when (seq (:Credit tx)) :income)
-                          (categorize* tx)
-                          :uncategorized)))
+  (assoc tx :Category
+         (or (when (seq (:Credit tx)) :income)
+             (categorize* tx)
+             :uncategorized)))
 
 (defn total
   "Get net change to account for transaction."
   [txs]
-  (let [net-change (fn [tx] (if (seq (:Debit tx))
-                              (- (Float/parseFloat (:Debit tx)))
-                              (+ (Float/parseFloat (:Credit tx)))))]
+  (letfn [(net-change [tx]
+            (if (seq (:Debit tx))
+              (- (Float/parseFloat (:Debit tx)))
+              (+ (Float/parseFloat (:Credit tx)))))]
     (reduce + (map net-change txs))))
 
 (defn totals
