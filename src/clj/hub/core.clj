@@ -31,11 +31,10 @@
 (def manual-kill? (comp :manual-kill? ex-data))
 
 (defmacro spin-until-manual-kill [& body]
-  `(swallow-exception?
-    manual-kill?
-    (spin-forever
-     (swallow-exception (comp not manual-kill?)
-       ~@body))))
+  `(swallow-exception manual-kill?
+     (spin-forever
+      (swallow-exception (comp not manual-kill?)
+        ~@body))))
 
 (defn discord-run! []
   (spin-until-manual-kill
