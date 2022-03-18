@@ -1,4 +1,6 @@
-(ns hub.star-realms)
+(ns hub.star-realms
+  (:require
+   [hub.util :refer [uuid]]))
 
 (def viper-card
   {:name    "Viper"
@@ -21,9 +23,6 @@
    :cost    2})
 
 (def trade-deck [])
-
-(defn uuid []
-  (java.util.UUID/randomUUID))
 
 (defn deck [n card]
   (->> (repeat card)

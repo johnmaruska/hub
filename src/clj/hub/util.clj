@@ -2,7 +2,12 @@
   (:require
    [clojure.tools.logging :as log]
    [clojure.data.json :as json]
-   [clojure.string :as string]))
+   [clojure.string :as string])
+  (:import
+   (java.util UUID)))
+
+(defn uuid []
+  (UUID/randomUUID))
 
 (defn find-by [k v coll]
   (first (filter #(= v (k %)) coll)))
