@@ -1,6 +1,7 @@
 (ns hub.transactions
   (:require [hub.util.data-file :refer [load-csv load-edn]]
-            [clojure.string :as string]))
+            [clojure.string :as string]
+            [hub.util :as util]))
 
 (defn desc-start?
   "Does the `tx` have a description which starts with `substr`?"
@@ -10,13 +11,10 @@
 (defn remove-prefix
   "Remove prefixes from `tx` description, loaded from `prefixes.edn`."
   [tx]
-  (let [strip-prefix (fn [s prefix]
-                       (if (string/starts-with? s prefix)
-                         (string/replace-first s (re-pattern prefix) "")
-                         s))]
-    (reduce (fn [acc prefix]
-              (update acc :Description #(strip-prefix % (str prefix "  "))))
-            tx (load-edn "prefixes.edn"))))
+  (reduce (fn [acc prefix]
+            (update acc :Description
+                    #(util/remove-prefix % (str prefix "  "))))
+          tx (load-edn "prefixes.edn")))
 
 (defn categorize* [tx]
   (->> (for [[category members] (load-edn "categories.edn")]
