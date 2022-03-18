@@ -1,5 +1,6 @@
 (ns hub.star-realms
   (:require
+   [hub.card-games :refer [draw-n]]
    [hub.util :refer [uuid]]))
 
 (def viper-card
@@ -51,9 +52,6 @@
 
 ;;;; Play a card
 
-(defn remove-from-hand [hand card-id]
-  (update hand card-id rest))
-
 (defn activate-primary-ability
   [player card]
   (let [ability (:primary-ability card)]
@@ -73,30 +71,13 @@
 ;;; Discard Phase
 
 (defn discard-phase [player]
-  (merge player {:trade   0
-                 :combat  0
-                 :discard (concat (player :discard) (-> player :ships vals))
-                 :ships   {}}))
+  (-> player
+      (update :discard concat (-> player :ships vals))
+      (merge {:trade   0
+              :combat  0
+              :ships   {}})))
 
 ;;; Draw Phase
-
-(defn cycle-discard
-  [player]
-  (assoc player
-         :deck (shuffle (:discard player))
-         :discard []))
-
-(defn draw-1 [player]
-  (let [player (if (= 0 (count (:deck player)))
-                 (cycle-discard player)
-                 player)
-        card   (first (:deck player))]
-    (-> player
-        (assoc :deck (rest (:deck player)))
-        (assoc-in [:hand (:id card)] card))))
-
-(defn draw-n [player n]
-  (nth (iterate draw-1 player) n))
 
 (defn draw-phase [player]
   (draw-n player 5))

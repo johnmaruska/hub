@@ -1,27 +1,7 @@
 (ns hub.star-realms-test
-  (:require [hub.star-realms :as sut]
-            [clojure.test :as t :refer [deftest is testing]]))
-
-(deftest draw
-  (testing "single draw works"
-    (let [card {:id :test-card}]
-      (is (= {:hand {(:id card) card}
-              :deck []}
-             (sut/draw-1 {:hand {}
-                          :deck [card]})))))
-  (testing "draw-n cycles discard"
-    (let [player  {:deck    []
-                   :discard [{:id :discarded} {:id :not-drawn}]
-                   :hand    {}}
-          results (sut/draw-n player 1)]
-      (is (= 1 (count (:deck results))))
-      (is (= 1 (count (:hand results))))
-      (is (not= (:deck results) (vals (:hand results))))))
-  (testing "draw-n ... draws n"
-    (let [player  {:deck [{:id 1} {:id 2} {:id 3}]}
-          results (sut/draw-n player 2)]
-      (is (= [{:id 3}] (:deck results)))
-      (is (= {1 {:id 1} 2 {:id 2}} (:hand results))))))
+  (:require
+   [hub.star-realms :as sut]
+   [clojure.test :refer [deftest is testing]]))
 
 (deftest activate-primary-ability
   (testing "adds trade"
@@ -62,7 +42,6 @@
           result (sut/play-card {:hand {(:id ship) ship}} :card-id)]
       (is (= {} (:hand result)))
       (is (= 5 (:combat result))))))
-
 
 (deftest discard-phase
   (testing "clears trade pool"
