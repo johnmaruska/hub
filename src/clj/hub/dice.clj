@@ -11,20 +11,22 @@
 (s/def ::term
   (s/keys :req [::sign ::d ::n]))
 
-(defn max-value [{:keys [::sign ::d]}]
-  (if (= sign '+) d 1))
+(defn max-value [term]
+  (if (= (::sign term) '+) (::d term) 1))
 
-(defn min-value [{:keys [::sign ::d]}]
-  (if (= sign '-) d 1))
+(defn min-value [term]
+  (if (= (::sign term) '-) (::d term) 1))
 
-(defn rand-value [{:keys [::d]}]
-  (+ 1 (rand-int d)))
+(defn rand-value [term]
+  (+ 1 (rand-int (::d term))))
 
 (defn roll-term
   "Perform rolls for an entire term using arbitrary `roll-fn`."
-  [roll-fn {:keys [::sign ::n] :as term}]
-  (->> (repeatedly n #(roll-fn term))
-       (reduce (eval sign) 0)))
+  [roll-fn term]
+  {:pre  [(s/valid? ::term term)]
+   :post [(s/valid? int? %)]}
+  (->> (repeatedly (::n term) #(roll-fn term))
+       (reduce (eval (::sign term)) 0)))
 
 (defn roll-terms
   [roll-fn terms]
@@ -45,6 +47,7 @@
       default-val)))
 
 (defn ->term [groups]
+  {:post [(s/valid? ::term %)]}
   (let [[n d] (string/split (nth groups 2) #"[dD]")]
     {::sign (symbol (or (nth groups 1) "+"))
      ::n    (parse-int n 1)
@@ -56,8 +59,7 @@
        (remove (comp empty? first))
        (map ->term)))
 
-
-(defn task
+(defn main
   "Complete full task from input file to output file."
   [infile outfile]
   (with-open [in (io/reader infile)]

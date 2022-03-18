@@ -46,7 +46,7 @@
   (configure-logging)
   (case command
     "conway"  (apply conway/main args)
-    "dice"    (dice/task (System/getenv "DICE_INFILE") (System/getenv "DICE_OUTFILE"))
+    "dice"    (apply dice/main args)  ;; in-file then out-file
     "id3"     (id3/apply-fix!)
     "spotify" (do
                 (spotify/generate-saved-artists)
