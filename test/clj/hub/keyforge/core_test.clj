@@ -12,39 +12,33 @@
                 {:name "Bad Penny" :house "Shadows"}]
    :artifacts [{:name "Gauntlet of Command" :house "Brobnar"}]})
 
-(deftest cycle-discard
-  (testing "shuffles discard pile into deck"
-    (let [shuffled? (atom false)
-          player {:deck '()
-                  :discard '(0 1 2)}]
-      (with-redefs [shuffle (fn [xs]
-                              (reset! shuffled? true)
-                              xs)]
-        (is (= (sut/cycle-discard {:deck '()
-                                   :discard '(0 1 2)})
-               {:deck '(0 1 2)
-                :discard '()}))))))
-
-(deftest draw
-  (testing "moves first card from deck to hand"
-    (is (= (sut/draw {:deck '(0 1 2) :hand '()})
-           {:deck '(1 2) :hand '(0)}))))
-
 (deftest fill-hand
   (testing "draws no cards when hand is full"
-    (let [player {:deck '(6 7 8)
-                  :hand '(5 4 3 2 1 0)}]
+    (let [player {:deck '({:id 6} {:id 7} {:id 8})
+                  :hand {0 {:id 0}
+                         1 {:id 1}
+                         2 {:id 2}
+                         3 {:id 3}
+                         4 {:id 4}
+                         5 {:id 5}}}]
       (is (= player (sut/fill-hand player)))))
   (testing "draws until hand is full from empty"
-    (is (= (sut/fill-hand {:deck '(0 1 2 3 4 5 6 7 8)
-                           :hand '()})
-           {:deck '(6 7 8)
-            :hand '(5 4 3 2 1 0)}))))
+    (is (= (sut/fill-hand {:deck '({:id 0} {:id 1} {:id 2} {:id 3} {:id 4}
+                                   {:id 5} {:id 6} {:id 7} {:id 8} {:id 9})
+                           :hand {}})
+           {:deck '({:id 6} {:id 7} {:id 8} {:id 9})
+            :hand {0 {:id 0}
+                   1 {:id 1}
+                   2 {:id 2}
+                   3 {:id 3}
+                   4 {:id 4}
+                   5 {:id 5}}}))))
 
 (deftest first-draw
   (testing "draws an additional card"
-    (let [player {:deck '(0 1 2 3 4 5 6 7 8 9)}]
-      (is (= (inc sut/*HAND-SIZE*)
+    (let [player  {:deck '({:id 0} {:id 1} {:id 2} {:id 3} {:id 4}
+                           {:id 5} {:id 6} {:id 7} {:id 8} {:id 9})}]
+      (is (= sut/FIRST-DRAW-HAND-SIZE
              (count (:hand (sut/first-draw player))))))))
 
 (deftest available-houses

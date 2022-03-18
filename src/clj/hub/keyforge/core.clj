@@ -1,6 +1,9 @@
-(ns hub.keyforge.core)
+(ns hub.keyforge.core
+  (:require [hub.card-games :refer [draw-n]]))
 
-(def ^:dynamic *HAND-SIZE* 6)
+(def STANDARD-HAND-SIZE 6)
+(def FIRST-DRAW-HAND-SIZE 7)
+(def ^:dynamic *HAND-SIZE* STANDARD-HAND-SIZE)
 (def FORGE-COST 6)
 
 (def danova
@@ -11,7 +14,7 @@
 (defn make-player [identity-card]
   {:identity-card       identity-card
    :deck                (shuffle (:decklist identity-card))
-   :hand                '()
+   :hand                {}
    :discard             '()
    :aember              0
    :battleline          []
@@ -20,26 +23,11 @@
    :forge-cost-modifier 0
    })
 
-(defn cycle-discard [player]
-  (if (empty? (:deck player))
-    (assoc player
-           :deck (shuffle (:discard player))
-           :discard '())
-    player))
-
-
-(defn draw [player]
-  (-> player
-      (update :hand #(conj % (first (:deck player))))
-      (update :deck rest)
-      cycle-discard))
-
 (defn fill-hand [player]
-  (nth (iterate draw player)
-       (- *HAND-SIZE* (count (:hand player)))))
+  (draw-n player (- *HAND-SIZE* (count (:hand player)))))
 
 (defn first-draw [player]
-  (binding [*HAND-SIZE* (inc *HAND-SIZE*)]
+  (binding [*HAND-SIZE* FIRST-DRAW-HAND-SIZE]
     (fill-hand player)))
 
 ;; first player draws 7
