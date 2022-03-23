@@ -9,12 +9,11 @@
   (string/starts-with? (:Description tx) substr))
 
 (defn remove-prefix
-  "Remove prefixes from `tx` description, loaded from `prefixes.edn`."
-  [tx {:keys [prefixes]}]
+  "Remove all prefixes from string, in order."
+  [s {:keys [prefixes]}]
   (reduce (fn [acc prefix]
-            (update acc :Description
-                    #(util/remove-prefix % prefix)))
-          tx prefixes))
+            (util/remove-prefix acc prefix))
+          s prefixes))
 
 (defn categorize* [tx {:keys [categories]}]
   (->> (for [[category members] categories]
@@ -36,7 +35,9 @@
 (defn process-tx
   "Format existing values and derive new values for `tx` map"
   [tx config]
-  (-> tx (remove-prefix config) (categorize config)))
+  (-> tx
+      (update :Description #(remove-prefix % config))
+      (categorize config)))
 
 (defn total
   "Get net change to account for transaction."
@@ -88,7 +89,7 @@
 
 (comment
   (def config {:categories (load-edn "categories.edn")
-               :prefixes   (load-edn "prefixes.edn")})
+               :prefixes   (sort-by count > (load-edn "prefixes.edn"))})
   (def txs
     (->> (load-csv "transactions.csv")
          #_(filter (comp empty? :Credit))  ; only care about spending
