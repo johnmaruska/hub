@@ -15,20 +15,15 @@
             (util/remove-prefix acc prefix))
           s prefixes))
 
-(defn categorize* [tx {:keys [categories]}]
-  (->> (for [[category members] categories]
-         (for [member members]
-           (when (string/starts-with? (:Description tx) member)
-             category)))
-       flatten
-       (filter identity)
-       first))
-
 (defn category
   "Determine category for `tx` as specified by groupings in config."
-  [tx config]
+  [tx {:keys [categories]}]
   (or (when (seq (:Credit tx)) :income)
-      (categorize* tx config)
+      (->> (for [[category members] categories]
+             (for [member members]
+               (when (string/starts-with? (:Description tx) member)
+                 category)))
+           flatten (filter identity) first)
       :uncategorized))
 
 (defn process-tx
