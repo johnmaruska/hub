@@ -22,6 +22,13 @@
     (string/triml (string/replace-first s prefix ""))
     s))
 
+(defn update-vals
+  "Apply `f` to each value in `m`."
+  [f m]
+  (reduce (fn [acc [k xs]]
+            (assoc acc k (f xs)))
+          {} m))
+
 (defmacro swallow-exception
   {:style/indent 1}
   [pred & body]

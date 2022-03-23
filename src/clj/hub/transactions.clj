@@ -67,18 +67,11 @@
   (let [[month _ year] (string/split (:Date tx) #"/")]
     (str year "-" (leading-zero month))))
 
-(defn update-all
-  "Apply `f` to each value in `m`."
-  [f m]
-  (reduce (fn [acc [k xs]]
-            (assoc acc k (f xs)))
-          {} m))
-
 (defn monthly-breakdown [txs]
   (->> txs
        (group-by month)
-       (update-all #(group-by :Category %))
-       (update-all totals)))
+       (util/update-vals #(group-by :Category %))
+       (util/update-vals totals)))
 
 (defn category-over-time [txs category]
   (->> txs
@@ -102,9 +95,9 @@
                               :home
                               :car]]
     (->> (monthly-breakdown txs)
-         (update-all (fn [xs]
-                       (->> (map #(get xs % 0) mandatory-categories)
-                            (reduce +))))
+         (util/update-vals (fn [xs]
+                             (->> (map #(get xs % 0) mandatory-categories)
+                                  (reduce +))))
          sort))
 
   (-> (monthly-breakdown txs)
