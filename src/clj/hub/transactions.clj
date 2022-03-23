@@ -10,14 +10,14 @@
 
 (defn remove-prefix
   "Remove prefixes from `tx` description, loaded from `prefixes.edn`."
-  [tx]
+  [tx {:keys [prefixes]}]
   (reduce (fn [acc prefix]
             (update acc :Description
-                    #(util/remove-prefix % (str prefix "  "))))
-          tx (load-edn "prefixes.edn")))
+                    #(util/remove-prefix % prefix)))
+          tx prefixes))
 
-(defn categorize* [tx]
-  (->> (for [[category members] (load-edn "categories.edn")]
+(defn categorize* [tx {:keys [categories]}]
+  (->> (for [[category members] categories]
          (for [member members]
            (when (string/starts-with? (:Description tx) member)
              category)))
@@ -27,11 +27,16 @@
 
 (defn categorize
   "Derive :Category for `tx`, matched by name as specified in `categories.edn`"
-  [tx]
+  [tx config]
   (assoc tx :Category
          (or (when (seq (:Credit tx)) :income)
-             (categorize* tx)
+             (categorize* tx config)
              :uncategorized)))
+
+(defn process-tx
+  "Format existing values and derive new values for `tx` map"
+  [tx config]
+  (-> tx (remove-prefix config) (categorize config)))
 
 (defn total
   "Get net change to account for transaction."
@@ -82,11 +87,12 @@
 
 
 (comment
+  (def config {:categories (load-edn "categories.edn")
+               :prefixes   (load-edn "prefixes.edn")})
   (def txs
     (->> (load-csv "transactions.csv")
          #_(filter (comp empty? :Credit))  ; only care about spending
-         (map remove-prefix)
-         (map categorize)))
+         (map #(process-tx % config))))
   (let [mandatory-categories [:donation
                               :income
                               :groceries
