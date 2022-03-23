@@ -15,6 +15,15 @@
             (util/remove-prefix acc prefix))
           s prefixes))
 
+(defn leading-zero
+  "Add a leading zero to force two digits."
+  [s]
+  (if (= 1 (count s)) (str "0" s) s))
+
+(defn date->iso8061 [date]
+  (let [[month day year] (string/split date #"/")]
+    (str year "-" (leading-zero month) "-" (leading-zero day))))
+
 (defn category
   "Determine category for `tx` as specified by groupings in config."
   [tx {:keys [categories]}]
@@ -29,7 +38,9 @@
 (defn process-tx
   "Format existing values and derive new values for `tx` map"
   [tx config]
-  (let [formatted (update tx :Description #(remove-prefix % config))]
+  (let [formatted (-> tx
+                      (update :Description #(remove-prefix % config))
+                      (update :Date date->iso8061))]
     (assoc formatted :Category (category formatted config))))
 
 (defn total
@@ -55,15 +66,10 @@
   (totals (group-by :Category txs)))
 
 
-(defn leading-zero
-  "Add a leading zero to force two digits."
-  [s]
-  (if (= 1 (count s)) (str "0" s) s))
-
 (defn month
   "Parse the `tx` date to YYYY-MM format."
   [tx]
-  (let [[month _ year] (string/split (:Date tx) #"/")]
+  (let [[year month _] (string/split (:Date tx) #"-")]
     (str year "-" (leading-zero month))))
 
 (defn monthly-breakdown [txs]
