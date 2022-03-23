@@ -24,20 +24,18 @@
        (filter identity)
        first))
 
-(defn categorize
-  "Derive :Category for `tx`, matched by name as specified in `categories.edn`"
+(defn category
+  "Determine category for `tx` as specified by groupings in config."
   [tx config]
-  (assoc tx :Category
-         (or (when (seq (:Credit tx)) :income)
-             (categorize* tx config)
-             :uncategorized)))
+  (or (when (seq (:Credit tx)) :income)
+      (categorize* tx config)
+      :uncategorized))
 
 (defn process-tx
   "Format existing values and derive new values for `tx` map"
   [tx config]
-  (-> tx
-      (update :Description #(remove-prefix % config))
-      (categorize config)))
+  (let [formatted (update tx :Description #(remove-prefix % config))]
+    (assoc formatted :Category (category formatted config))))
 
 (defn total
   "Get net change to account for transaction."
