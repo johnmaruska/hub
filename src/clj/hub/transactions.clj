@@ -27,12 +27,20 @@
     (str year "-" (leading-zero month) "-" (leading-zero day))))
 
 (defn category
-  "Determine category for `tx` as specified by groupings in config."
+  "Determine category for `tx` as specified by groupings in config.
+
+  Entries in config must be either a string prefix, or a parse-able regex.
+  Regexes will apply to the beginning of the string (no need for ^ )
+
+  I had issues with escaping whitespace, e.g. \s, in the regex. This gave a
+  parse error because s is not a valid escape character. \\s gives a different
+  error in that it just shows as a literal? Not sure what that's about. I just
+  avoided it."
   [tx {:keys [categories]}]
-  (or (when (seq (:Credit tx)) :income)
-      (->> (for [[category members] categories]
+  (or (->> (for [[category members] categories]
              (for [member members]
-               (when (string/starts-with? (:Description tx) member)
+               (when (or (string/starts-with? (:Description tx) member)
+                         (re-find (re-pattern (str "^" member)) (:Description tx)))
                  category)))
            flatten (filter identity) first)
       :uncategorized))

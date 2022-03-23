@@ -9,6 +9,14 @@
 (def base-description "gas station")
 (def description (str prefix base-description))
 
+(deftest category
+  (testing "returns first member that matches starting of tx string"
+    (is (= :expected (sut/category {:Description "an expected value"}
+                                   {:categories {:expected #{"an expected"}}}))))
+  (testing "works with regular expressions. Matches only beginning"
+    (is (= :expected (sut/category {:Description "0123 expected"}
+                                   {:categories {:expected #{"[0-3]* expected"}}})))))
+
 (deftest process-tx
   (testing "removes prefix"
     (let [result (sut/process-tx {:Description description :Date unformatted-date}
