@@ -3,6 +3,8 @@
             [clojure.string :as string]
             [hub.util :as util]))
 
+;;; Transformations on the original CSV
+
 (defn desc-start?
   "Does the `tx` have a description which starts with `substr`?"
   [tx substr]
@@ -42,6 +44,9 @@
                       (update :Description #(remove-prefix % config))
                       (update :Date date->iso8061))]
     (assoc formatted :Category (category formatted config))))
+
+
+;;;; Mostly helpful for crawling on my own
 
 (defn total
   "Get net change to account for transaction."
@@ -85,31 +90,43 @@
        totals
        sort))
 
+;;; Merging checking and savings
+
+(defn remove-categories
+  [txs & categories]
+  (->> categories
+       (apply dissoc (group-by :Category txs))
+       vals
+       (apply concat)))
+
+(defn amounts-match [sender recipient]
+  (= (:Debit sender) (:Credit recipient)))
+
+(defn remove-shared-transactions
+  "Remove all transactions which take place checking<-->savings."
+  [checking savings]
+  (let [from-savings-by-date    (->> checking
+                                     (group-by :Category)
+                                     :transfers-from-savings
+                                     (group-by :Date))
+        transfers-not-shared    (->> savings
+                                     (group-by :Category)
+                                     :=transfers-out-of-savings
+                                     (remove (fn [tx-s]
+                                               (some (fn [tx-c] (amounts-match tx-s tx-c))
+                                                     (get from-savings-by-date (:Date tx-s))))))]
+    {:savings  (->> (remove-categories savings :transfers-out-of-savings :transfers-from-checking)
+                    (concat transfers-not-shared))
+     :checking (remove-categories checking :transfers-from-savings :transfers-to-savings)}))
+
+(defn merge-histories
+  "Create one large list of transactions, removing both sides of a transfer between the two accounts."
+  [checking savings]
+  (let [{:keys [checking savings]} (remove-shared-transactions checking savings)]
+    (concat (map #(assoc % :account :savings) savings)
+            (map #(assoc % :account :checking) checking))))
 
 (comment
   (def config {:categories (load-edn "categories.edn")
                :prefixes   (sort-by count > (load-edn "prefixes.edn"))})
-  (def txs
-    (->> (load-csv "transactions.csv")
-         #_(filter (comp empty? :Credit))  ; only care about spending
-         (map #(process-tx % config))))
-  (let [mandatory-categories [:donation
-                              :income
-                              :groceries
-                              :donation
-                              :bills
-                              :home
-                              :car]]
-    (->> (monthly-breakdown txs)
-         (util/update-vals (fn [xs]
-                             (->> (map #(get xs % 0) mandatory-categories)
-                                  (reduce +))))
-         sort))
-
-  (-> (monthly-breakdown txs)
-      (get "2021-08"))
-
-  (->> txs
-       (filter #(= "2021-08" (month %)))
-       (filter #(= :home (:Category %))))
   )
