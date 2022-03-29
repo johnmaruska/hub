@@ -94,7 +94,7 @@ committed here because yuck. Three files are needed:
 
 source: https://datasets.imdbws.com/
 
-Each of these extracted tsv files should be in `./resources/imdb/`
+Each of these extracted tsv files should be in `./data/imdb/`
 
 This is still in here because I planned on doing it in Clojure
 originally but had problems with reading the
