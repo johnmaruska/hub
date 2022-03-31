@@ -1,6 +1,6 @@
-(ns hub.star-realms
+(ns hub.sketchbook.star-realms
   (:require
-   [hub.card-games :refer [draw-n]]
+   [hub.sketchbook.card-games :refer [draw-n]]
    [hub.util :refer [uuid]]))
 
 (def viper-card

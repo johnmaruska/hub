@@ -1,5 +1,5 @@
-(ns hub.keyforge.core
-  (:require [hub.card-games :refer [draw-n]]))
+(ns hub.sketchbook.keyforge.core
+  (:require [hub.sketchbook.card-games :refer [draw-n]]))
 
 (def STANDARD-HAND-SIZE 6)
 (def FIRST-DRAW-HAND-SIZE 7)
