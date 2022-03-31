@@ -10,10 +10,6 @@
    [clojure.tools.logging :as log])
   (:gen-class))
 
-(defstate webserver
-  :start (server/start!)
-  :stop  (.stop webserver))
-
 ;; TODO: proper monorepo doesn't just switch on command
 (defn -main [command & args]
   (case command
@@ -21,6 +17,6 @@
     "dice"    (apply dice/main args)  ;; in-file then out-file
     "id3"     (apply id3/main args)
     "spotify" (apply spotify/main args)
-    "server"  (mount/start)
+    "server"  (apply server/main args)
     "discord" (apply discord/main args)
     (log/error "command must be one of [conway dice id3 spotify server]")))
