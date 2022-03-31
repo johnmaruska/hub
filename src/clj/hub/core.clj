@@ -47,10 +47,7 @@
     "conway"  (apply conway/main args)
     "dice"    (apply dice/main args)  ;; in-file then out-file
     "id3"     (id3/apply-fix!)
-    "spotify" (do
-                (spotify/generate-saved-artists)
-                (spotify/generate-related-artist-adjacency-list)
-                (spotify/generate-sorted-playlists))
+    "spotify" (apply spotify/main args)
     "server"  (do
                 (mount/start)
                 (discord-run!))
