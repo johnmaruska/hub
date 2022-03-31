@@ -1,6 +1,6 @@
-(ns hub.keyforge.core-test
+(ns hub.sketchbook.keyforge.core-test
   (:require
-   [hub.keyforge.core :as sut]
+   [hub.sketchbook.keyforge.core :as sut]
    [clojure.test :as t :refer [deftest is testing]]))
 
 (def sample-player

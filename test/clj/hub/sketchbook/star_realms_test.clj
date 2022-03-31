@@ -1,6 +1,6 @@
-(ns hub.star-realms-test
+(ns hub.sketchbook.star-realms-test
   (:require
-   [hub.star-realms :as sut]
+   [hub.sketchbook.star-realms :as sut]
    [clojure.test :refer [deftest is testing]]))
 
 (deftest activate-primary-ability

@@ -68,6 +68,16 @@
         (assoc-in [area card-id] card)
         (activate-primary-ability card))))
 
+(defn main-phase [player]
+  (loop [player player]
+    (let [actions (conj (map #(vec [:play %]) (:hand player))
+                        [:pass nil])
+          ;; select action arbitrarily
+          [action card] (first (shuffle actions))]
+      (case action
+        :play (recur (play-card player (:id card)))
+        :pass player))))
+
 ;;; Discard Phase
 
 (defn discard-phase [player]
@@ -81,3 +91,9 @@
 
 (defn draw-phase [player]
   (draw-n player 5))
+
+
+;;; Full turn
+
+(defn full-turn [player]
+  (-> player main-phase discard-phase draw-phase))

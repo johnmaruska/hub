@@ -88,4 +88,4 @@
                    "G ||-----|--A--|-----|--B--|--C--|-----|--D--|-----|--E--|--F--|-----|--G--|"
                    "C ||-----|--D--|-----|--E--|--F--|-----|--G--|-----|--A--|-----|--B--|--C--|"]
           expected (string/join "\n" strings)]
-      (is (= expected (sut/tuning->str sut/drop-c 12 :full))))))
+      (is (= expected (sut/tuning->str ["C" "G" "C" "F"] 12 :full))))))

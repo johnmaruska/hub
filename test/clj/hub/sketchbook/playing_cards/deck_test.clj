@@ -1,6 +1,6 @@
-(ns hub.playing-cards.deck-test
+(ns hub.sketchbook.playing-cards.deck-test
   (:require
-   [hub.playing-cards.deck :as sut]
+   [hub.sketchbook.playing-cards.deck :as sut]
    [clojure.test :as t :refer [deftest is testing]])
   (:refer-clojure :exclude [peek]))
 
