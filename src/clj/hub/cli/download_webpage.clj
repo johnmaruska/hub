@@ -23,7 +23,11 @@
 (defn uri-str? [s]
   (= 2 (count (string/split s #"://"))))
 
-(defn website-name [uri]
+(defn website-name
+  "Extract the domain from a URI.
+
+  e.g. protocol://{domain}/endpoint/path.extension will return {domain}"
+  [uri]
   (-> uri
       (string/split #"://") last
       (string/split #"/") first
