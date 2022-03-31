@@ -11,11 +11,6 @@
    [clojure.tools.logging :as log])
   (:gen-class))
 
-(defstate discord-bot
-  :start (discord/start!)
-  ;; TODO: thread management with event pump
-  :stop  (discord/stop! discord-bot))
-
 (defstate webserver
   :start (server/start!)
   :stop  (.stop webserver))
@@ -32,8 +27,12 @@
         ~@body))))
 
 (defn discord-run! []
-  (spin-until-manual-kill
-   (discord/handle-event! discord-bot)))
+  (let [discord-bot (discord/start!)]
+    (try
+      (spin-until-manual-kill
+       (discord/handle-event! discord-bot))
+      (finally
+        (discord/stop! discord-bot)))))
 
 ;; TODO: proper monorepo doesn't just switch on command
 (defn -main [command & args]
@@ -42,7 +41,6 @@
     "dice"    (apply dice/main args)  ;; in-file then out-file
     "id3"     (apply id3/main args)
     "spotify" (apply spotify/main args)
-    "server"  (do
-                (mount/start)
-                (discord-run!))
+    "server"  (mount/start)
+    "discord" (discord-run!)
     (log/error "command must be one of [conway dice id3 spotify server]")))
