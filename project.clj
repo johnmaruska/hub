@@ -1,4 +1,5 @@
 (defproject hub "0.1.0-SNAPSHOT"
+  :description "Playground Clojure app for all the things I want but am too lazy to make a dedicated project for."
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/core.match "1.0.0"]
                  [org.clojure/data.csv "1.0.0"]
@@ -16,6 +17,8 @@
                  ;; discord api wrapper
                  ;; https://github.com/discljord/discljord
                  [com.github.discljord/discljord "1.3.1"]
+                 ;; environ is in the Heroku example. Do we need it?
+                 [environ "1.1.0"]
                  ;; HTML rendering
                  [hiccup "1.0.5"]
                  ;; context-free-grammar parsing
@@ -39,7 +42,9 @@
   :source-paths   ["src/clj" "src/cljs" "src/cljc"]
   :test-paths     ["test/clj" "test/cljs" "test/cljc"]
 
-  :profiles {:dev {:dependencies  [[binaryage/devtools "1.0.2"]
+  :profiles {:profiles {:production {:env {:production true}}}
+             :uberjar {:aot :all}
+             :dev {:dependencies  [[binaryage/devtools "1.0.2"]
                                    [com.bhauman/figwheel-main "0.2.12"
                                     :exclusions [args4j]]
                                    [com.bhauman/rebel-readline-cljs "0.1.4"
@@ -59,6 +64,11 @@
                                                      :target-path]}}
 
   :main hub.core
+  :aot [hub.core]
+  :uberjar-name "hub.jar"
+  :min-lein-version "2.0.0"
+  :hooks [environ.leiningen.hooks]
+  :plugins [[environ/environ.lein "0.3.1"]]
 
   :aliases {"cljs-repl"     ["trampoline" "run" "-m" "figwheel.main"]
             "cljs-dev-repl" ["trampoline" "run" "-m" "figwheel.main" "--build" "dev" "--repl"]})
