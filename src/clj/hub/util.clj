@@ -22,6 +22,10 @@
     (string/triml (string/replace-first s prefix ""))
     s))
 
+(defn insert-at [xs idx el]
+  (let [[lhs rhs] (split-at idx xs)]
+    (concat lhs [el] rhs)))
+
 (defn update-keys
   "Apply `f` to each key in `m`."
   [f m]
