@@ -4,6 +4,7 @@
    [discljord.connections :as c]
    [discljord.formatting :refer [mention-user]]
    [discljord.messaging :as m]
+   [environ.core :refer [env]]
    [hub.discljord.commands :as commands]
    [hub.discljord.util :as util]
    [hub.util :refer [remove-prefix swallow-exception]]))
@@ -30,7 +31,8 @@
 
 (defn start! []
   (let [event-ch (a/chan 100)
-        token    (System/getenv "DISCORD_TOKEN")
+        token    (or (env :discord-token)
+                     (throw (ex-info "Could not find auth token for discord" {})))
         intents  #{:guilds :guild-messages}]
     {:event-ch      event-ch
      :connection-ch (c/connect-bot! token event-ch :intents intents)
