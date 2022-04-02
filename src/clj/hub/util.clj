@@ -22,12 +22,15 @@
     (string/triml (string/replace-first s prefix ""))
     s))
 
+(defn update-keys
+  "Apply `f` to each key in `m`."
+  [f m]
+  (reduce (fn [coll [k v]] (assoc coll (f k) v)) {} m))
+
 (defn update-vals
   "Apply `f` to each value in `m`."
   [f m]
-  (reduce (fn [acc [k xs]]
-            (assoc acc k (f xs)))
-          {} m))
+  (reduce (fn [acc [k v]] (assoc acc k (f v))) {} m))
 
 (defmacro swallow-exception
   {:style/indent 1}

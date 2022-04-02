@@ -1,0 +1,39 @@
+name,building,time,output,ingredients
+biomass-(mycelia),constructor,4,10,mycelia=10
+biomass-(alien-carapace),constructor,4,100,alien-carapace=1
+biomass-(alien-organs),constructor,8,200,alien-organs=1
+biomass-(leaves),constructor,5,5,leaves=10
+biomass-(wood),constructor,4,20,wood=4
+cable,constructor,2,1,wire=2
+concrete,constructor,4,1,limestone=3
+copper-ingot,smelter,2,1,copper-ore=1
+iron-ingot,smelter,2,1,iron-ore=1
+iron-plate,constructor,6,2,iron-ingot=3
+iron-rod,constructor,4,1,iron-ingot=1
+reinforced-iron-plate,assembler,12,1,screw=12 iron-plate=6
+screw,constructor,6,4,iron-rod=1
+wire,constructor,4,2,copper-ingot=1
+copper-sheet,constructor,6,1,copper-ingot=2
+solid-biofuel,constructor,4,4,biomass=8
+modular-frame,assembler,60,2,reinforced-iron-plate=3 iron-rod=12
+rotor,assembler,15,1,iron-rod=5 screw=25
+steel-beam,constructor,4,1,steel-ingot=4
+steel-ingot,foundry,4,3,iron-ore=3 coal=3
+steel-pipe,constructor,6,2,steel-ingot=3
+encased-industrial-beam,assembler,10,1,steel-beam=4 concrete=5
+heavy-modular-frame,manufacturer,30,1,modular-frame=5 steel-pipe=15 encased-industrial-beam=5 screw=100
+motor,assembler,12,1,rotor=2 stator=2
+stator,assembler,12,1,steel-pipe=3 wire=8
+circuit-board,assembler,8,1,copper-sheet=2 plastic=4
+computer,manufacturer,24,1,circuit-board=10 cable=9 plastic=18 screw=52
+empty-canister,constructor,4,4,plastic=2
+fuel,refinery,6,fuel=4 polymer-resin=3,crude-oil=6
+packaged-fuel,packager,3,2,fuel=2 empty-canister=2
+packaged-heavy-oil-residue,packager,4,2,heavy-oil-residue=2 empty-canister=2
+liquid-biofuel,refinery,4,4,solid-biofuel=6 water=3
+packaged-liquid-biofuel,packager,3,2,liquid-biofuel=2 empty-canister=2
+petroleum-coke,refinery,6,12,heavy-oil-residue=4
+plastic,refinery,6,plastic=2 heavy-oil-residue=1,crude-oil=3
+residual-plastic,refinery,6,2,polymer-resin=6 water=2
+polymer-resin,refinery,6,fuel=4 polymer-resin=3,crude-oil=6
+rubber,refinery,6,rubber=2 heavy-oil-residue=2,crude-oil=3
