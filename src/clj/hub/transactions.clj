@@ -103,7 +103,7 @@
                                      (group-by :Date))
         transfers-not-shared    (->> savings
                                      (group-by :Category)
-                                     :=transfers-out-of-savings
+                                     :transfers-out-of-savings
                                      (remove (fn [tx-s]
                                                (some (fn [tx-c] (amounts-match tx-s tx-c))
                                                      (get from-savings-by-date (:Date tx-s))))))]
@@ -119,12 +119,14 @@
             (map #(assoc % :account :checking) checking))))
 
 (def base-config
-  {:categories (data/load-edn "categories.edn")
-   :prefixes   (sort-by count > (data/load-edn "prefixes.edn"))})
+  (memoize
+   (fn []
+     {:categories (data/load-edn "categories.edn")
+      :prefixes   (sort-by count > (data/load-edn "prefixes.edn"))})))
 
 (defn load-csv
   ([csv]
-   (load-csv csv base-config))
+   (load-csv csv (base-config)))
   ([csv config]
    (map #(process-tx % config) (data/load-csv csv))))
 
