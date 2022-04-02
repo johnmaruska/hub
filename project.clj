@@ -37,13 +37,10 @@
                  [quil "3.1.0"]
                  ;; Ring web-server
                  [ring "1.8.2"]]
-
-  :resource-paths ["target" "resources"]
   :source-paths   ["src/clj" "src/cljs" "src/cljc"]
   :test-paths     ["test/clj" "test/cljs" "test/cljc"]
 
   :profiles {:profiles {:production {:env {:production true}}}
-             :uberjar {:aot :all}
              :dev {:dependencies  [[binaryage/devtools "1.0.2"]
                                    [com.bhauman/figwheel-main "0.2.12"
                                     :exclusions [args4j]]
