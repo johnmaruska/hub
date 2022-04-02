@@ -1,4 +1,4 @@
-(ns hub.card-games
+(ns hub.sketchbook.card-games
   "Most card games share basic mechanics. This is their home.
 
   Most functions operate as if they're updating an entity. They typically refer

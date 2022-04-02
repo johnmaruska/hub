@@ -6,11 +6,10 @@
    [discljord.messaging :as m]
    [hub.discljord.commands :as commands]
    [hub.discljord.util :as util]
-   [hub.util :refer [remove-prefix]]))
+   [hub.util :refer [remove-prefix swallow-exception]]))
 
 (defn sign-off [event-data]
   (str "Will I dream, " (mention-user (:author event-data)) "?"))
-
 
 (defn handle-event!
   ([bot]
@@ -43,3 +42,22 @@
   (attempt (m/stop-connection! (:message-ch bot)))
   (attempt (c/disconnect-bot!  (:connection-ch bot)))
   (attempt (a/close! (:event-ch bot))))
+
+(defmacro spin-forever [& body]
+  `(loop [] ~@body (recur)))
+
+(def manual-kill? (comp :manual-kill? ex-data))
+
+(defmacro spin-until-manual-kill [& body]
+  `(swallow-exception manual-kill?
+     (spin-forever
+      (swallow-exception (comp not manual-kill?)
+        ~@body))))
+
+(defn main [& _args]
+  (let [discord-bot (start!)]
+    (try
+      (spin-until-manual-kill
+       (handle-event! discord-bot))
+      (finally
+        (stop! discord-bot)))))

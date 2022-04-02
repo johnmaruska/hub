@@ -1,6 +1,6 @@
-(ns hub.card-games-test
+(ns hub.sketchbook.card-games-test
   (:require
-   [hub.card-games :as sut]
+   [hub.sketchbook.card-games :as sut]
    [clojure.test :refer [deftest is testing]]))
 
 (deftest cycle-discard

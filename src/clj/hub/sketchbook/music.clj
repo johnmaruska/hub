@@ -86,9 +86,6 @@
 
 ;;; tunings
 
-(def e-standard [E A D G])
-(def drop-c [C G C F])
-
 (defn tuning->str [tuning frets display-type]
   (-> tuning
       (tuning->fretboard frets)

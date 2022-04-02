@@ -68,3 +68,8 @@
          artist/related-adjacency-list
          (merge prev-adj-list)
          (data-file/write-edn related-artists-file))))
+
+(defn main [& _args]
+  (generate-saved-artists)
+  (generate-related-artist-adjacency-list)
+  (generate-sorted-playlists))

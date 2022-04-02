@@ -1,8 +1,8 @@
-(ns hub.playing-cards.deck
+(ns hub.sketchbook.playing-cards.deck
   "Collection of functions for dealing with a deck of standard playing cards.
   This would be a good candidate for a protocol but unless I branch out to other
   types of cards, that's probably overkill."
-  (:require [hub.playing-cards.card :as card])
+  (:require [hub.sketchbook.playing-cards.card :as card])
   (:refer-clojure :exclude [peek]))
 
 

@@ -1,0 +1,6 @@
+{
+    "name": "Personal Hub - Heroku",
+    "description": "Catch-all Clojure project for everything I want to do",
+    "image": "heroku/clojure",
+    "addons": []
+}
