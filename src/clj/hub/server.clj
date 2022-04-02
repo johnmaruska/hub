@@ -1,5 +1,6 @@
 (ns hub.server
   (:require
+   [environ.core :refer [env]]
    [hiccup.page :refer [html5 include-js include-css]]
    [hub.server.inventory :as inventory]
    [hub.server.spotify :as spotify]
@@ -47,15 +48,15 @@
 
 (defn start!
   "non(?)-blocking call to start web-server."
-  []
-  (run-jetty #'app {:port 4000 :join? false}))
+  [& [port]]
+  (run-jetty #'app {:port  (Integer. (or port (env :port) 4000))
+                    :join? false}))
 
 (defn stop! [webserver]
   (.stop webserver))
 
-(defn main [& _args]
+(defn main [& args]
   (defstate webserver
-    :start (start!)
+    :start (apply start! args)
     :stop  (stop! webserver))
-
   (mount/start))
