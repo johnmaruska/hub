@@ -1,6 +1,5 @@
 (ns hub.spotify.me
-  (:require
-   [hub.spotify.util :refer [api crawl! get!]]))
+  (:require [hub.spotify.util :refer [api crawl!]]))
 
 (def all-my
   (memoize

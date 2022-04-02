@@ -1,4 +1,7 @@
 # Intermediate data
+data/transactions.csv
+data/prefixes.edn
+data/categories.edn
 data/spotify/artists.edn
 data/spotify/related-artists.edn
 # Secrets
@@ -9,6 +12,7 @@ target/
 .lein-failures
 .lein-repl-history
 pom.xml
+.clj-kondo/.cache/
 
 # Emacs files
 *~
@@ -21,3 +25,5 @@ data/imdb/*
 # Log files
 debug.log
 figwheel_server.log
+
+.DS_Store

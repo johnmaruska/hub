@@ -13,7 +13,9 @@
 (def related-artists-file "spotify/related-artists.edn")
 
 ;; TODO: play with values to see if we get better results
-(defn playlist-priority [{:keys [features]}]
+(defn playlist-priority
+  "How to prioritize playlists -- currently by danceability and energy."
+  [{:keys [features]}]
   (* -1
      (:danceability features)
      (:energy features)))
@@ -49,7 +51,9 @@
   (let [artists (map #(select-keys % [:id :name]) (my/artists))]
     (data-file/write-edn artists-file artists)))
 
-(defn new-artists [prev-adj-list all-artists]
+(defn new-artists
+  "Filter `all-artists` down, removing any that appear in `prev-adj-list`."
+  [prev-adj-list all-artists]
   (let [old-artists (into #{} (keys prev-adj-list))
         old-artist? #(contains? old-artists (:name %))]
     (remove old-artist? all-artists)))
@@ -64,3 +68,8 @@
          artist/related-adjacency-list
          (merge prev-adj-list)
          (data-file/write-edn related-artists-file))))
+
+(defn main [& _args]
+  (generate-saved-artists)
+  (generate-related-artist-adjacency-list)
+  (generate-sorted-playlists))

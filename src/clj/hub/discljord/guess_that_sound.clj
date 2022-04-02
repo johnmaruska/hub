@@ -2,7 +2,6 @@
   (:require
    [clojure.string :as string]
    [discljord.formatting :refer [mention-user]]
-   [discljord.messaging :as m]
    [hub.discljord.util :as util]))
 
 ;;;; Reply messages
@@ -27,23 +26,25 @@
 (defn game-started? [channel-id]
   (not (nil? (get @game channel-id))))
 
+(defn drop-first-word [s]
+  (string/join " " (rest (string/split s #" "))))
+
 (defn record-guess! [{:keys [author channel-id content]}]
-  (let [guess (util/drop-first-word content)]
+  (let [guess (drop-first-word content)]
     (swap! game
            update-in [channel-id :guesses]
            concat [{:author author :guess guess}])))
 
-(defn record-answer! [{:keys [answer channel-id content]}]
-  (let [answer (util/drop-first-word content)]
+(defn record-answer! [{:keys [channel-id content]}]
+  (let [answer (drop-first-word content)]
     (swap! game assoc-in [channel-id :answer] answer)))
 
 (defn display [channel-id]
-  (let [guess-line  (fn [x] (str (mention-user (:author x))
-                                 " guessed "
-                                 (:guess x)))
-        answer-line (str "Answer: " (-> @game (get channel-id) :answer))
-        guess-lines (mapv guess-line (-> @game (get channel-id) :guesses))]
-    (string/join "\n" (concat [answer-line] guess-lines))))
+  (letfn [(guess-line [x]
+            (str (mention-user (:author x)) " guessed " (:guess x)))]
+    (let [answer-line (str "Answer: " (-> @game (get channel-id) :answer))
+          guess-lines (mapv guess-line (-> @game (get channel-id) :guesses))]
+      (string/join "\n" (concat [answer-line] guess-lines)))))
 
 ;;;; Game lifecycle
 
@@ -77,7 +78,7 @@
                                  ", " (mention-user author))))
     (util/reply bot event (:no-game-started canned-reply))))
 
-(defn answer! [bot {:keys [channel-id content] :as event}]
+(defn answer! [bot {:keys [channel-id] :as event}]
   (if (game-started? channel-id)
     (do
       (record-answer! event)

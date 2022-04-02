@@ -5,8 +5,8 @@
   ([height width]
    (init height width (constantly nil)))
   ([height width value-fn]
-   (vec (for [x (range width)]
-          (vec (for [y (range height)]
+   (vec (for [_x (range width)]
+          (vec (for [_y (range height)]
                  (value-fn)))))))
 
 (defn get-coord [board [x y]]
@@ -21,19 +21,16 @@
   (try
     (get-coord grid coord)
     true
-    (catch IndexOutOfBoundsException ex false)))
+    (catch IndexOutOfBoundsException _ false)))
 
-(defn neighbor-coords
-  "Get all coordinates surrounding a given coordinate"
-  [[x y]]
-  (vec (for [xp [(dec x) x (inc x)]
+(defn neighbors
+  "Get all coordinates surrounding a given coordinate, within grid bounds."
+  [grid [x y]]
+  (->> (for [xp [(dec x) x (inc x)]
              yp [(dec y) y (inc y)]
              :when (not (and (= x xp) (= y yp)))]
-         [xp yp])))
-
-(defn neighbors [grid coord]
-  (filter #(within-bounds? grid %)
-          (neighbor-coords coord)))
+         [xp yp])
+       (filter #(within-bounds? grid %))))
 
 (defn coord-maps
   "Convert a grid into a list of {:row :col :value} maps.

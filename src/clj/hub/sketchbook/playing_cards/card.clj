@@ -1,4 +1,4 @@
-(ns hub.playing-cards.card
+(ns hub.sketchbook.playing-cards.card
   (:require [clojure.set :refer [union]]))
 
 (def red-suits (set ["Hearts" "Diamonds"]))

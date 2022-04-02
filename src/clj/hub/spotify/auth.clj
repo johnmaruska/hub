@@ -67,7 +67,7 @@
 (defn expired-token? [ex]
   (try
     (= "The access token expired" (error-message ex))
-    (catch NullPointerException ex
+    (catch NullPointerException _
       false)))
 
 (defmacro with-refresh-token [& body]
@@ -83,7 +83,7 @@
 (defn authorization-code
   "Request an access token via the authorization code flow using the code
   provided by the /authorize endpoint."
-  [auth-code & [state]]
+  [auth-code]
   (token/persist!
    (post-basic-auth {:grant_type   "authorization_code"
                      :code         auth-code
