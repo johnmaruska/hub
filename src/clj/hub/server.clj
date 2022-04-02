@@ -4,6 +4,7 @@
    [hiccup.page :refer [html5 include-js include-css]]
    [hub.server.inventory :as inventory]
    [hub.server.spotify :as spotify]
+   [mount.core :as mount :refer [defstate]]
    [muuntaja.core :as m]
    [reitit.coercion.malli]
    [reitit.ring :as ring]
@@ -13,7 +14,6 @@
    [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn index-html [_request]
-  (println "Custom handler -- index")
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    (html5
@@ -44,8 +44,7 @@
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware]}})
    (ring/create-default-handler
-    {:not-found #(do (println "Default handler -- not found")
-                     {:status 404 :body "Not found"})})))
+    {:not-found (constantly {:status 404 :body "Not found"})})))
 
 (defn start!
   "non(?)-blocking call to start web-server."
@@ -57,4 +56,7 @@
   (.stop webserver))
 
 (defn main [& args]
-  (apply start! args))
+  (defstate webserver
+    :start (apply start! args)
+    :stop  (stop! webserver))
+  (mount/start))
