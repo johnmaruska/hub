@@ -1,5 +1,6 @@
 (ns hub.server
   (:require
+   [environ.core :refer [env]]
    [hiccup.page :refer [html5 include-js include-css]]
    [hub.server.inventory :as inventory]
    [hub.server.spotify :as spotify]
@@ -12,6 +13,7 @@
    [ring.adapter.jetty :refer [run-jetty]]))
 
 (defn index-html [_request]
+  (println "Custom handler -- index")
   {:status  200
    :headers {"Content-Type" "text/html"}
    :body    (html5
@@ -42,16 +44,17 @@
                          rrc/coerce-request-middleware
                          rrc/coerce-response-middleware]}})
    (ring/create-default-handler
-    {:not-found (constantly {:status 404 :body "Not found"})})))
+    {:not-found #(do (println "Default handler -- not found")
+                     {:status 404 :body "Not found"})})))
 
 (defn start!
   "non(?)-blocking call to start web-server."
-  []
-  (run-jetty #'app {:port  (System/getenv "PORT")  ; or 4000
+  [& [port]]
+  (run-jetty #'app {:port  (Integer. (or port (env :port) 4000))
                     :join? false}))
 
 (defn stop! [webserver]
   (.stop webserver))
 
-(defn main [& _args]
-  (start!))
+(defn main [& args]
+  (apply start! args))
