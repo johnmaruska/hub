@@ -1,4 +1,4 @@
-(ns hub.keyforge.card)
+(ns hub.sketchbook.keyforge.card)
 
 (defn remove-card [xs card]
   (filter #(not= card %) xs))

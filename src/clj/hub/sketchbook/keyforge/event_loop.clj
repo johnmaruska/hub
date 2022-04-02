@@ -1,4 +1,4 @@
-(ns hub.keyforge.event-loop)
+(ns hub.sketchbook.keyforge.event-loop)
 
 ;;;; ---- Queue --------------------------------------------------------
 

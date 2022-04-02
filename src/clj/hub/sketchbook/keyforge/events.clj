@@ -1,10 +1,8 @@
-(ns hub.keyforge.events
+(ns hub.sketchbook.keyforge.events
   (:require
-   [hub.keyforge.player :as player]
-   [hub.keyforge.event-loop :as el :refer [dispatch-event!
-                                           defevent
-                                           process-queue!]]
-   [hub.keyforge.card :as card]
+   [hub.sketchbook.keyforge.player :as player]
+   [hub.sketchbook.keyforge.event-loop :as el :refer [defevent]]
+   [hub.sketchbook.keyforge.card :as card]
    [hub.util :as util]))
 
 (def KEYS-TO-WIN 3)
@@ -46,7 +44,6 @@
                 (-> turn :cards-discarded count)))))
 
 (defevent take-turn [game]
-  (def GAME game)
   (let [current-house? (fn [card]
                          (= (-> game :turn :house) (:house @card)))
         playable       (when-not (first-turn-restricted? (:turn game))

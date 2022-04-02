@@ -1,4 +1,4 @@
-(ns hub.keyforge.player)
+(ns hub.sketchbook.keyforge.player)
 
 (def ^:dynamic *HAND-SIZE* 6)
 (def FORGE-COST 6)

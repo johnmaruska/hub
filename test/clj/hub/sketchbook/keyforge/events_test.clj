@@ -1,9 +1,9 @@
-(ns hub.keyforge.events-test
-  (:require [hub.keyforge.events :as sut]
+(ns hub.sketchbook.keyforge.events-test
+  (:require [hub.sketchbook.keyforge.events :as sut]
             [clojure.test :as t :refer [deftest is testing]]
-            [hub.keyforge.card :as card]
-            [hub.keyforge.player :as player]
-            [hub.keyforge.event-loop :as el]))
+            [hub.sketchbook.keyforge.card :as card]
+            [hub.sketchbook.keyforge.player :as player]
+            [hub.sketchbook.keyforge.event-loop :as el]))
 
 (def danova
   {:name "Danova, Port Demolisher"
@@ -14,12 +14,6 @@
   {:name "Upbus, the Madman of the Lighthouse"
    :houses ["Shadows" "Logos" "Dis"]
    :decklist (take 20 (repeatedly card/quixo))})
-
-(comment
-  (do
-    (set-default-event-sequence! following-event)
-    (dispatch-event! [::setup-new-game upbus danova])
-    (def END_GAME (process-queue!))))
 
 (def test-player
   (player/make-player danova))
