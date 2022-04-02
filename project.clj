@@ -5,8 +5,8 @@
                  [org.clojure/data.csv "1.0.0"]
                  [org.clojure/data.json "1.0.0"]
                  [org.clojure/data.xml "0.0.8"]  ; required for tagsoup
-                 ;;; Logging
                  [org.clojure/tools.logging "1.1.0"]
+                 [org.clojure/tools.cli "1.0.206"]
                  ;; work with mp3 id3 tags
                  [claudio "0.1.3"]  ; https://github.com/pandeiro/claudio
                  ;; URL encoding
