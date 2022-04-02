@@ -30,9 +30,10 @@
 
 (defn start! []
   (let [event-ch (a/chan 100)
-        token    (System/getenv "DISCORD_TOKEN")]
+        token    (System/getenv "DISCORD_TOKEN")
+        intents  #{:guilds :guild-messages}]
     {:event-ch      event-ch
-     :connection-ch (c/connect-bot! token event-ch)
+     :connection-ch (c/connect-bot! token event-ch :intents intents)
      :message-ch    (m/start-connection! token)}))
 
 (defmacro attempt [& body]
@@ -48,11 +49,12 @@
 
 (def manual-kill? (comp :manual-kill? ex-data))
 
-(defmacro spin-until-manual-kill [& body]
-  `(swallow-exception manual-kill?
-     (spin-forever
-      (swallow-exception (comp not manual-kill?)
-        ~@body))))
+(defmacro spin-until-manual-kill
+  "Spins forever, ignoring any exception that does not meet manual-kill criteria"
+  [& body]
+  `(spin-forever
+    (swallow-exception (comp not manual-kill?)
+      ~@body)))
 
 (defn main [& _args]
   (let [discord-bot (start!)]

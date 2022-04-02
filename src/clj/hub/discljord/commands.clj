@@ -7,6 +7,7 @@
    [hub.discljord.util :as util]))
 
 (defn manual-kill [& _]
+  ;; this works but why does it label itself a syntax error?
   (throw (ex-info "ManualKill" {:manual-kill? true})))
 
 (defn working [bot event]
