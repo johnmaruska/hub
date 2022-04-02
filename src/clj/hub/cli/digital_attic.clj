@@ -11,7 +11,26 @@
 
 (def ^:dynamic *CONFIG*)
 
-(defn read-config [config-file]
+(defn read-config
+  "Config file expected to be following format
+
+  Root:
+  unfiled
+  Articles
+  --
+  Ignored Folders:
+  menu
+  toolbar
+  Products
+  Tools
+  Local Resources
+  Paid Books
+  --
+  Ignored URLs:
+  feeder.co
+
+  Headers expected to be one of 'Root', 'Ignored Folders' 'Ignored URLs'"
+  [config-file]
   (when (.exists (io/file config-file))
     (->> (string/split (slurp config-file) #"(\n--\n)|(\r\n--\r\n)")
          (map #(string/split % #"\r\n"))
@@ -32,12 +51,20 @@
 (defn markdown-link [title uri]
   (str "[" title "](" uri ")"))
 
-(defn updated-entry [title local-path remote-uri]
+(defn updated-entry
+  "Rewritten line for an entry, with Local path, Remote path, and title."
+  [title local-path remote-uri]
   (str "- [" (markdown-link "Local" local-path)
        "][" (markdown-link "Remote" remote-uri)
        "] " title))
 
 (defn localize!
+  "Download and replace non-local links in a digital attic markdown.
+
+  input-markdown  : filename which contains expected format for digital attic
+  output-markdown : filename to write results
+  storage-dir     : location to store downloaded files
+  failed-files    : atom for tracking downloads which failed"
   [input-markdown output-markdown storage-dir failed-files]
   (let [contents (with-open [reader (io/reader input-markdown)]
                    (vec (line-seq reader)))]
@@ -132,7 +159,7 @@
     :default "storage/"]
    ["-h" "--help"]])
 
-(defn -main [& _]
+(defn main [& _]
   (let [{:keys [arguments options errors]} (parse-opts *command-line-args* cli-options)
         {:keys [output input config dir]}  options
         failed-files (atom [])]
