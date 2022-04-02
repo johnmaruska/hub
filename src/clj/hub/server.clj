@@ -3,7 +3,6 @@
    [hiccup.page :refer [html5 include-js include-css]]
    [hub.server.inventory :as inventory]
    [hub.server.spotify :as spotify]
-   [mount.core :as mount :refer [defstate]]
    [muuntaja.core :as m]
    [reitit.coercion.malli]
    [reitit.ring :as ring]
@@ -48,14 +47,11 @@
 (defn start!
   "non(?)-blocking call to start web-server."
   []
-  (run-jetty #'app {:port 4000 :join? false}))
+  (run-jetty #'app {:port  (System/getenv "PORT")  ; or 4000
+                    :join? false}))
 
 (defn stop! [webserver]
   (.stop webserver))
 
 (defn main [& _args]
-  (defstate webserver
-    :start (start!)
-    :stop  (stop! webserver))
-
-  (mount/start))
+  (start!))
