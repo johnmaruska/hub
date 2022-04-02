@@ -25,6 +25,8 @@
                  [instaparse "1.4.10"]
                  ;; retry management
                  [listora/again "1.0.0"]
+                 ;; Component lifecycle management
+                 [mount "0.1.16"]
                  ;; data-driven schemas that aren't clojure.spec
                  [metosin/malli "0.2.1"]
                  ;; http format negotiation
