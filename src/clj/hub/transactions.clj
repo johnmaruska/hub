@@ -1,18 +1,16 @@
 (ns hub.transactions
-  (:require [hub.util.data-file :refer [load-csv load-edn]]
+  "Functions for inspecting bank transactions in CSV format.
+
+  Hopefully build this out into a visualization component later?"
+  (:require [hub.util.data-file :as data]
             [clojure.string :as string]
             [hub.util :as util]))
 
 ;;; Transformations on the original CSV
 
-(defn desc-start?
-  "Does the `tx` have a description which starts with `substr`?"
-  [tx substr]
-  (string/starts-with? (:Description tx) substr))
-
 (defn remove-prefix
-  "Remove all prefixes from string, in order."
-  [s {:keys [prefixes]}]
+  "Remove prefixes from `tx` description, loaded from `prefixes.edn`."
+  [s prefixes]
   (reduce (fn [acc prefix]
             (util/remove-prefix acc prefix))
           s prefixes))
@@ -32,10 +30,9 @@
   Entries in config must be either a string prefix, or a parse-able regex.
   Regexes will apply to the beginning of the string (no need for ^ )
 
-  I had issues with escaping whitespace, e.g. \s, in the regex. This gave a
-  parse error because s is not a valid escape character. \\s gives a different
-  error in that it just shows as a literal? Not sure what that's about. I just
-  avoided it."
+  I had issues with escaping whitespace in the regex. This gave a parse error
+  because s is not a valid escape character. \\s gives a different error in that
+  it just shows as a literal? Not sure what that's about. I just avoided it."
   [tx {:keys [categories]}]
   (or (->> (for [[category members] categories]
              (for [member members]
@@ -49,7 +46,7 @@
   "Format existing values and derive new values for `tx` map"
   [tx config]
   (let [formatted (-> tx
-                      (update :Description #(remove-prefix % config))
+                      (update :Description #(remove-prefix % (:prefixes config)))
                       (update :Date date->iso8061))]
     (assoc formatted :Category (category formatted config))))
 
@@ -65,38 +62,25 @@
               (+ (Float/parseFloat (:Credit tx)))))]
     (reduce + (map net-change txs))))
 
+
+(defn match-keys [m k]
+  (if (keyword? (first (keys m))) k (name k)))
+
 (defn totals
   "Get totals for each `txs`' category."
   [categorized-txs]
-  (reduce (fn [acc [category txs]]
-            (assoc acc category (total txs)))
-          {}
-          categorized-txs))
-
-(defn yearly-breakdown
-  "We only get data for a year so just don't break down."
-  [txs]
-  (totals (group-by :Category txs)))
-
+  (let [results (reduce (fn [acc [category txs]]
+                          (assoc acc category (total txs)))
+                        {}
+                        categorized-txs)
+        net     (reduce + (vals results))]
+    (assoc results (match-keys results :net) net)))
 
 (defn month
   "Parse the `tx` date to YYYY-MM format."
   [tx]
   (let [[year month _] (string/split (:Date tx) #"-")]
     (str year "-" (leading-zero month))))
-
-(defn monthly-breakdown [txs]
-  (->> txs
-       (group-by month)
-       (util/update-vals #(group-by :Category %))
-       (util/update-vals totals)))
-
-(defn category-over-time [txs category]
-  (->> txs
-       (filter #(= category (:Category %)))
-       (group-by month)
-       totals
-       sort))
 
 ;;; Merging checking and savings
 
@@ -134,7 +118,20 @@
     (concat (map #(assoc % :account :savings) savings)
             (map #(assoc % :account :checking) checking))))
 
+(def base-config
+  {:categories (data/load-edn "categories.edn")
+   :prefixes   (sort-by count > (data/load-edn "prefixes.edn"))})
+
+(defn load-csv
+  ([csv]
+   (load-csv csv base-config))
+  ([csv config]
+   (map #(process-tx % config) (data/load-csv csv))))
+
 (comment
-  (def config {:categories (load-edn "categories.edn")
-               :prefixes   (sort-by count > (load-edn "prefixes.edn"))})
-  )
+  (do
+    (def savings  (load-csv "savings.csv"))
+    (def checking (load-csv "checking.csv")))
+
+  (->> (merge-histories checking savings)
+       (group-by :Category)))
