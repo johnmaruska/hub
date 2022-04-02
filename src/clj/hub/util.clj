@@ -29,5 +29,5 @@
      ~@body
      (catch Exception ex#
        (if (~pred ex#)
-         (log/error ex#)
+         (log/error ex# "Swallowed exception")
          (throw ex#)))))

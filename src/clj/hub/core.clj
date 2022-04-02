@@ -10,12 +10,15 @@
   (:gen-class))
 
 (def main-fn
-  {"conway"  conway/main
-   "dice"    dice/main  ;; in-file then out-file
-   "id3"     id3/main
-   "spotify" spotify/main
-   "server"  server/main
-   "discord" discord/main})
+  {"conway"    conway/main
+   "dice"      dice/main ;; in-file then out-file
+   "id3"       id3/main
+   "spotify"   spotify/main
+   "webserver" server/main
+   "discord"   discord/main
+   "server"    (fn [& args]
+                 (apply server/main args)
+                 (apply discord/main args))})
 
 ;; TODO: proper monorepo doesn't just switch on command
 (defn -main [command & args]
