@@ -2,15 +2,11 @@
   (:require
    [clojure.core.async :as a]
    [discljord.connections :as c]
-   [discljord.formatting :refer [mention-user]]
    [discljord.messaging :as m]
    [environ.core :refer [env]]
    [hub.discljord.commands :as commands]
    [hub.discljord.util :as util]
    [hub.util :refer [remove-prefix swallow-exception]]))
-
-(defn sign-off [event-data]
-  (str "Will I dream, " (mention-user (:author event-data)) "?"))
 
 (defn handle-event!
   ([bot]
@@ -24,8 +20,7 @@
            ;; TODO: if multiple handlers allowed, modify here
            (handler bot event-data))))
      (catch Exception ex
-       (if (:manual-kill? (ex-data ex))
-         (util/reply bot event-data (sign-off event-data))
+       (when-not (:manual-kill? (ex-data ex))
          (util/reply bot event-data "Could not handle command. See logs."))
        (throw ex)))))
 

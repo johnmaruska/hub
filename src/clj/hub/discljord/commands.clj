@@ -6,8 +6,9 @@
    [hub.discljord.tarot :as tarot]
    [hub.discljord.util :as util]))
 
-(defn manual-kill [& _]
+(defn manual-kill [bot [_event-type event-data]]
   ;; this works but why does it label itself a syntax error?
+  (util/reply bot event-data "https://c.tenor.com/7crdHrZL5dsAAAAd/po-dies.gif")
   (throw (ex-info "ManualKill" {:manual-kill? true})))
 
 (defn working [bot event]
