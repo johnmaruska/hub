@@ -3,6 +3,7 @@
   (:require
    [clj-http.client :as http]
    [clojure.string :as string]
+   [hiccup.page :refer [html5]]
    [hub.spotify.token :as token]
    [hub.util :refer [parse-json]]
    [ring.util.codec :as codec]))
@@ -88,3 +89,21 @@
    (post-basic-auth {:grant_type   "authorization_code"
                      :code         auth-code
                      :redirect_uri redirect-uri})))
+
+
+;;; Manual Step
+
+(defn authorize-handler [_]
+  {:status  303
+   :headers {"Content-Type" "text/html"
+             "Location"     auth-url}})
+
+(defn callback-handler [req]
+  (authorization-code (get-in req [:params "code"]))
+  {:status 200
+   :body   (html5 [:h1 "Authorized!"])})
+
+(def routes
+  ["/en/spotify"
+   ["/authorize" {:handler #'authorize-handler}]
+   ["/callback"  {:handler #'callback-handler}]])
