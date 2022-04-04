@@ -7,18 +7,17 @@
    [hub.discljord.util :as util]))
 
 (def cards
-  (:cards (parse-json (reader "tarot.json"))))
+  (memoize
+   #(:cards (parse-json (reader "tarot.json")))))
 
 (defn flip-coin []
   (zero? (rand-int 2)))
 
 (defn mix [deck]
-  (map (fn [card]
-         (assoc card :reversed? (flip-coin)))
-       (shuffle deck)))
+  (map #(assoc % :reversed? (flip-coin)) (shuffle deck)))
 
 (defn get-spread [n]
-  (take n (mix cards)))
+  (take n (mix (cards))))
 
 (defn card->human-readable [card]
   (if (:reversed? card)
