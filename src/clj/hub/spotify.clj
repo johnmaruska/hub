@@ -34,17 +34,17 @@
   "Create sorted version of specified playlists into new playlists named
   format `HUB - <name>`."
   []
-  (let [all       (my/playlists)
-        target-id (fn [playlist]
-                    (let [target-name (str "HUB - " (:name playlist))]
-                      (:id (find-by :name target-name all))))
-        generate  (fn [source]
-                    (->> (sort-playlist source)
-                         (map (comp :uri :track))
-                         (playlist/replace-contents (target-id source))))]
-    (->> all
-         (filter #(contains? playlists-to-sort (:name %)))
-         (run! generate))))
+  (let [all (my/playlists)]
+    (letfn [(target-id [playlist]
+              (let [target-name (str "HUB - " (:name playlist))]
+                (:id (find-by :name target-name all))))
+            (generate [source]
+              (->> (sort-playlist source)
+                   (map (comp :uri :track))
+                   (playlist/replace-contents (target-id source))))]
+      (->> all
+           (filter #(contains? playlists-to-sort (:name %)))
+           (run! generate)))))
 
 (defn generate-saved-artists
   "Pull all saved artists from Spotify for currently authorized user and
