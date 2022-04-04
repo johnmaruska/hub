@@ -64,7 +64,10 @@
   "Requests related artists from Spotify for all artists in `artists-file`.
   `artists-file` must be generated before the adjacency list."
   []
-  (let [prev-adj-list (data-file/load-edn related-artists-file)]
+  (let [prev-adj-list (if (data-file/exists? related-artists-file)
+                        (data-file/load-edn related-artists-file)
+                        {})]
+    ;; TODO: load and stream instead of storing in memory and writing at the end
     (->> (data-file/load-edn artists-file)
          (new-artists prev-adj-list)
          artist/related-adjacency-list

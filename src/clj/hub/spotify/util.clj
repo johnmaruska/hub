@@ -5,7 +5,8 @@
    [clj-http.client :as http]
    [hub.spotify.auth :as auth]
    [hub.spotify.token :as token]
-   [hub.util :refer [parse-json]]))
+   [hub.util :refer [parse-json]]
+   [clojure.tools.logging :as log]))
 
 (def api (partial str "https://api.spotify.com"))
 
@@ -28,9 +29,12 @@
       ::again/strategy (repeat 0)}
      ~@body))
 
-(defn send-request! [req]
+(defn send-request!
+  "Sends a request with all overhead managed, e.g. rate limiting."
+  [req]
   (with-rate-limiting
     (auth/with-refresh-token
+      (log/debug "Sending request" req)
       (http/request req))))
 
 (defn request!
