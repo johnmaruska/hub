@@ -5,7 +5,8 @@
    [clj-http.client :as http]
    [hub.spotify.auth :as auth]
    [hub.spotify.token :as token]
-   [hub.util :refer [parse-json]]))
+   [hub.util :refer [parse-json]]
+   [clojure.tools.logging :as log]))
 
 (def api (partial str "https://api.spotify.com"))
 
@@ -28,9 +29,12 @@
       ::again/strategy (repeat 0)}
      ~@body))
 
-(defn send-request! [req]
+(defn send-request!
+  "Sends a request with all overhead managed, e.g. rate limiting."
+  [req]
   (with-rate-limiting
     (auth/with-refresh-token
+      (log/debug "Sending request" req)
       (http/request req))))
 
 (defn request!
@@ -45,8 +49,10 @@
 (defn delete! [url opts]
   (request! (merge opts {:method :delete :url url})))
 
-(defn get! [url]
-  (:body (request! {:method :get :url url})))
+(defn get!
+  ([url] (get! url {}))
+  ([url opts]
+   (:body (request! (merge opts {:method :get :url url})))))
 
 (defn post! [url opts]
   (request! (merge opts {:method :post :url url})))
@@ -63,9 +69,11 @@
 (defn crawl!
   "Crawl a paginated GET request, building lazyseq of results.
   Query parameters must be encoded into the url"
-  [url]
-  (loop [acc [] url url]
-    (let [{:keys [items next]} (results (get! url))]
-      (if next
-        (recur (concat acc items) next)
-        (concat acc items)))))
+  ([url]
+   (crawl! url {}))
+  ([url opts]
+   (loop [acc [] url url]
+     (let [{:keys [items next]} (results (get! url opts))]
+       (if next
+         (recur (concat acc items) next)
+         (concat acc items))))))

@@ -20,6 +20,15 @@
 (defn api-token []
   (or @token (fetch!)))
 
+(defn refresh-token?
+  "Check that the token has a refresh_token field.
+
+  There are two types of tokens we can get depending on authorization flow. One
+  has a refresh_token field, and is the more permissive token. The other does
+  not and is more restricted in its uses. We need to check this in a couple
+  spots."[]
+  (boolean (:refresh_token (api-token))))
+
 (defn persist!
   "Stores token in local atom and in `filename`, returns passed value."
   [new-token]

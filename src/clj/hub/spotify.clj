@@ -1,7 +1,9 @@
 (ns hub.spotify
   (:require
+   [environ.core :refer [env]]
    [hub.spotify.me :as my]
    [hub.spotify.artist :as artist]
+   [hub.spotify.auth :as auth]
    [hub.spotify.playlist :as playlist]
    [hub.spotify.tracks :as tracks]
    [hub.util :refer [find-by]]
@@ -32,17 +34,17 @@
   "Create sorted version of specified playlists into new playlists named
   format `HUB - <name>`."
   []
-  (let [all       (my/playlists)
-        target-id (fn [playlist]
-                    (let [target-name (str "HUB - " (:name playlist))]
-                      (:id (find-by :name target-name all))))
-        generate  (fn [source]
-                    (->> (sort-playlist source)
-                         (map (comp :uri :track))
-                         (playlist/replace-contents (target-id source))))]
-    (->> all
-         (filter #(contains? playlists-to-sort (:name %)))
-         (run! generate))))
+  (let [all (my/playlists)]
+    (letfn [(target-id [playlist]
+              (let [target-name (str "HUB - " (:name playlist))]
+                (:id (find-by :name target-name all))))
+            (generate [source]
+              (->> (sort-playlist source)
+                   (map (comp :uri :track))
+                   (playlist/replace-contents (target-id source))))]
+      (->> all
+           (filter #(contains? playlists-to-sort (:name %)))
+           (run! generate)))))
 
 (defn generate-saved-artists
   "Pull all saved artists from Spotify for currently authorized user and
@@ -62,7 +64,10 @@
   "Requests related artists from Spotify for all artists in `artists-file`.
   `artists-file` must be generated before the adjacency list."
   []
-  (let [prev-adj-list (data-file/load-edn related-artists-file)]
+  (let [prev-adj-list (if (data-file/exists? related-artists-file)
+                        (data-file/load-edn related-artists-file)
+                        {})]
+    ;; TODO: load and stream instead of storing in memory and writing at the end
     (->> (data-file/load-edn artists-file)
          (new-artists prev-adj-list)
          artist/related-adjacency-list
@@ -70,6 +75,7 @@
          (data-file/write-edn related-artists-file))))
 
 (defn main [& _args]
+  (auth/manual-auth (or (env :port) 4000))
   (generate-saved-artists)
   (generate-related-artist-adjacency-list)
   (generate-sorted-playlists))

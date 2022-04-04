@@ -7,6 +7,9 @@
   (:import
    (java.io PushbackReader)))
 
+(defn exists? [filename]
+  (.exists (io/file filename)))
+
 (defn reader [filename]
   (io/reader (str "data/" filename)))
 
