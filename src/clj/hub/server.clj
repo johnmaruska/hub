@@ -2,16 +2,10 @@
   (:require
    [environ.core :refer [env]]
    [hiccup.page :refer [html5 include-js include-css]]
+   [hub.util.server :refer [default-app-setup start! stop!]]
    [hub.server.inventory :as inventory]
-   [hub.server.spotify :as spotify]
-   [mount.core :as mount :refer [defstate]]
-   [muuntaja.core :as m]
-   [reitit.coercion.malli]
-   [reitit.ring :as ring]
-   [reitit.ring.coercion :as rrc]
-   [reitit.ring.middleware.muuntaja :as muuntaja]
-   [reitit.ring.middleware.parameters :as parameters]
-   [ring.adapter.jetty :refer [run-jetty]]))
+   [hub.spotify.server :as spotify]
+   [mount.core :as mount :refer [defstate]]))
 
 (defn index-html [_request]
   {:status  200
@@ -29,34 +23,12 @@
               (include-js "/cljs-out/dev-main.js")])})
 
 (def app
-  (ring/ring-handler
-   (ring/router
-    [["/" {:handler #'index-html}]
-     inventory/routes
-     spotify/routes]
-    {:data {:coercion   reitit.coercion.malli/coercion
-            :muuntaja   m/instance
-            :middleware [parameters/parameters-middleware
-                         muuntaja/format-negotiate-middleware
-                         muuntaja/format-response-middleware
-                         rrc/coerce-exceptions-middleware
-                         muuntaja/format-request-middleware
-                         rrc/coerce-request-middleware
-                         rrc/coerce-response-middleware]}})
-   (ring/create-default-handler
-    {:not-found (constantly {:status 404 :body "Not found"})})))
+  (default-app-setup
+   [["/" {:handler #'index-html}]
+    inventory/routes]))
 
-(defn start!
-  "non(?)-blocking call to start web-server."
-  [& [port]]
-  (run-jetty #'app {:port  (Integer. (or port (env :port) 4000))
-                    :join? false}))
-
-(defn stop! [webserver]
-  (.stop webserver))
-
-(defn main [& args]
+(defn main [& _args]
   (defstate webserver
-    :start (apply start! args)
+    :start (start! #'app (or (env :port) 4000))
     :stop  (stop! webserver))
   (mount/start))
