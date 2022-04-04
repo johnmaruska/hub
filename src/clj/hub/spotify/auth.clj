@@ -2,10 +2,12 @@
   "https://developer.spotify.com/documentation/general/guides/authorization-guide/"
   (:require
    [clj-http.client :as http]
+   [clojure.java.shell :refer [sh]]
    [clojure.string :as string]
    [hiccup.page :refer [html5]]
    [hub.spotify.token :as token]
    [hub.util :refer [parse-json]]
+   [hub.util.webserver :as webserver]
    [ring.util.codec :as codec]))
 
 ;; TODO: from more secure location than local envvars
@@ -14,6 +16,7 @@
 ;; TODO: pull from config depending on deploy location
 ;; TODO: pull path from a bidirectional library instead of hard code
 (def redirect-uri "http://127.0.0.1:4000/en/spotify/callback")
+(def manual-auth-uri "http://127.0.0.1:4000/en/spotify/authorize")
 
 (def scope
   ["user-library-read"
@@ -54,6 +57,7 @@
 (defn refresh-token!
   "Refresh the stored API token"
   [api-token]
+  {:pre [(:refresh_token api-token)]}
   (token/persist!
    (post-basic-auth {:grant_type "refresh_token"
                      :refresh_token (:refresh_token api-token)})))
@@ -90,9 +94,6 @@
                      :code         auth-code
                      :redirect_uri redirect-uri})))
 
-
-;;; Manual Step
-
 (defn authorize-handler [_]
   {:status  303
    :headers {"Content-Type" "text/html"
@@ -107,3 +108,35 @@
   ["/en/spotify"
    ["/authorize" {:handler #'authorize-handler}]
    ["/callback"  {:handler #'callback-handler}]])
+
+
+(defn wait-for-auth
+  "Poll+sleep until we see manual authentication token present.
+
+  To get this token you have to start this server, open one of its endpoints in
+  the browser, and go through the Spotify login process. This will just park
+  until we see that value come through. Options for polling interval and
+  timeout. If the timeout is exceeded, throw an exception.
+
+  Both interval and timeout values are in seconds"
+  [poll-interval timeout]
+  (loop [seconds-slept 0]
+    (cond
+      (token/refresh-token?)
+      nil
+
+      (< timeout seconds-slept)
+      (throw (ex-info "wait-for-auth timed out"
+                      {:poll-interval poll-interval
+                       :timeout  timeout}))
+
+      :else (do (Thread/sleep (* 1000 poll-interval))
+                (recur (+ seconds-slept poll-interval))))))
+
+(defn manual-auth []
+  (when-not (token/refresh-token?)
+    (let [server (webserver/start! (webserver/default-app-setup routes) 4000)]
+      (sh "open" manual-auth-uri)
+      (try
+        (wait-for-auth 1000 300)
+        (finally (webserver/stop! server))))))

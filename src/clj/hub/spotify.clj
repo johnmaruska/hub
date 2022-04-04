@@ -2,6 +2,7 @@
   (:require
    [hub.spotify.me :as my]
    [hub.spotify.artist :as artist]
+   [hub.spotify.auth :as auth]
    [hub.spotify.playlist :as playlist]
    [hub.spotify.tracks :as tracks]
    [hub.util :refer [find-by]]
@@ -70,6 +71,7 @@
          (data-file/write-edn related-artists-file))))
 
 (defn main [& _args]
+  (auth/manual-auth)
   (generate-saved-artists)
   (generate-related-artist-adjacency-list)
   (generate-sorted-playlists))

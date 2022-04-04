@@ -2,9 +2,8 @@
   (:require
    [environ.core :refer [env]]
    [hiccup.page :refer [html5 include-js include-css]]
-   [hub.util.server :refer [default-app-setup start! stop!]]
+   [hub.util.webserver :refer [default-app-setup start! stop!]]
    [hub.server.inventory :as inventory]
-   [hub.spotify.server :as spotify]
    [mount.core :as mount :refer [defstate]]))
 
 (defn index-html [_request]
