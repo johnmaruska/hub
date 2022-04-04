@@ -49,8 +49,10 @@
 (defn delete! [url opts]
   (request! (merge opts {:method :delete :url url})))
 
-(defn get! [url]
-  (:body (request! {:method :get :url url})))
+(defn get!
+  ([url] (get! url {}))
+  ([url opts]
+   (:body (request! (merge opts {:method :get :url url})))))
 
 (defn post! [url opts]
   (request! (merge opts {:method :post :url url})))
@@ -67,9 +69,11 @@
 (defn crawl!
   "Crawl a paginated GET request, building lazyseq of results.
   Query parameters must be encoded into the url"
-  [url]
-  (loop [acc [] url url]
-    (let [{:keys [items next]} (results (get! url))]
-      (if next
-        (recur (concat acc items) next)
-        (concat acc items)))))
+  ([url]
+   (crawl! url {}))
+  ([url opts]
+   (loop [acc [] url url]
+     (let [{:keys [items next]} (results (get! url opts))]
+       (if next
+         (recur (concat acc items) next)
+         (concat acc items))))))
