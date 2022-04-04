@@ -1,5 +1,6 @@
 (ns hub.spotify
   (:require
+   [environ.core :refer [env]]
    [hub.spotify.me :as my]
    [hub.spotify.artist :as artist]
    [hub.spotify.auth :as auth]
@@ -71,7 +72,7 @@
          (data-file/write-edn related-artists-file))))
 
 (defn main [& _args]
-  (auth/manual-auth)
+  (auth/manual-auth (or (env :port) 4000))
   (generate-saved-artists)
   (generate-related-artist-adjacency-list)
   (generate-sorted-playlists))

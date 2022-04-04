@@ -13,10 +13,6 @@
 ;; TODO: from more secure location than local envvars
 (def client-secret (System/getenv "SPOTIFY_SECRET"))
 (def client-id (System/getenv "SPOTIFY_ID"))
-;; TODO: pull from config depending on deploy location
-;; TODO: pull path from a bidirectional library instead of hard code
-(def redirect-uri "http://127.0.0.1:4000/en/spotify/callback")
-(def manual-auth-uri "http://127.0.0.1:4000/en/spotify/authorize")
 
 (def scope
   ["user-library-read"
@@ -26,20 +22,8 @@
    "playlist-modify-public"
    "playlist-modify-private"])
 
-(def url (partial str "https://accounts.spotify.com"))
-
-(def auth-url
-  (url "/authorize?"
-       (codec/form-encode
-        {:response_type "code"
-         :client_id     client-id
-         :redirect_uri  redirect-uri
-         ;; TODO: supply a `state` for CSRF protection
-         })
-       "&scope=" (string/join " " scope)))
-
 (defn post-basic-auth [form-params]
-  (:body (http/post (url "/api/token")
+  (:body (http/post "https://accounts.spotify.com/api/token"
                     {:form-params form-params
                      :basic-auth [client-id client-secret]
                      :as :json})))
@@ -85,22 +69,27 @@
            ~@body)
          (throw ex#)))))
 
-(defn authorization-code
-  "Request an access token via the authorization code flow using the code
-  provided by the /authorize endpoint."
-  [auth-code]
-  (token/persist!
-   (post-basic-auth {:grant_type   "authorization_code"
-                     :code         auth-code
-                     :redirect_uri redirect-uri})))
+(def ^:dynamic *PORT* 4000)
+(defn redirect-uri []
+  (str "http://127.0.0.1:" *PORT* "/en/spotify/callback"))
 
 (defn authorize-handler [_]
   {:status  303
    :headers {"Content-Type" "text/html"
-             "Location"     auth-url}})
+             "Location"     (str "https://accounts.spotify.com/authorize?"
+                                 (codec/form-encode
+                                  {:response_type "code"
+                                   :client_id     client-id
+                                   :redirect_uri  (redirect-uri)
+                                   ;; TODO: supply a `state` for CSRF protection
+                                   })
+                                 "&scope=" (string/join " " scope))}})
 
 (defn callback-handler [req]
-  (authorization-code (get-in req [:params "code"]))
+  (token/persist!
+   (post-basic-auth {:grant_type   "authorization_code"
+                     :code         (get-in req [:params "code"])
+                     :redirect_uri (redirect-uri)}))
   {:status 200
    :body   (html5 [:h1 "Authorized!"])})
 
@@ -108,7 +97,6 @@
   ["/en/spotify"
    ["/authorize" {:handler #'authorize-handler}]
    ["/callback"  {:handler #'callback-handler}]])
-
 
 (defn wait-for-auth
   "Poll+sleep until we see manual authentication token present.
@@ -133,10 +121,11 @@
       :else (do (Thread/sleep (* 1000 poll-interval))
                 (recur (+ seconds-slept poll-interval))))))
 
-(defn manual-auth []
-  (when-not (token/refresh-token?)
-    (let [server (webserver/start! (webserver/default-app-setup routes) 4000)]
-      (sh "open" manual-auth-uri)
-      (try
-        (wait-for-auth 1000 300)
-        (finally (webserver/stop! server))))))
+(defn manual-auth [port]
+  (binding [*PORT* port]
+    (when-not (token/refresh-token?)
+      (let [server  (webserver/start! (webserver/default-app-setup routes) 4000)]
+        (sh "open" (str "http://127.0.0.1:" *PORT* "/en/spotify/authorize"))
+        (try
+          (wait-for-auth 1000 300)
+          (finally (webserver/stop! server)))))))
