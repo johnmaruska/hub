@@ -1,30 +1,16 @@
 (ns hub.server
   (:require
    [environ.core :refer [env]]
-   [hiccup.page :refer [html5 include-js include-css]]
    [hub.util.webserver :refer [default-app-setup start! stop!]]
    [hub.server.inventory :as inventory]
-   [mount.core :as mount :refer [defstate]]))
-
-(defn index-html [_request]
-  {:status  200
-   :headers {"Content-Type" "text/html"}
-   :body    (html5
-             [:head
-              [:title "Maruska Hub"]
-              [:meta {:charset "UTF-8"}]
-              [:meta {:name    "viewport"
-                      :content "width=device-width, initial-scale=1"}]
-              (include-css "/css/style.css")]
-             [:body
-              [:h2 "Clojure Function!"]
-              [:div {:id "app"}]
-              (include-js "/cljs-out/dev-main.js")])})
+   [mount.core :as mount :refer [defstate]]
+   [reitit.ring :as ring]))
 
 (def app
   (default-app-setup
-   [["/" {:handler #'index-html}]
-    inventory/routes]))
+   [inventory/routes
+    ["/*" (ring/create-resource-handler)]]
+   {:conflicts nil}))
 
 (defn main [& _args]
   (defstate webserver
