@@ -8,7 +8,7 @@
    (java.io PushbackReader)))
 
 (defn exists? [filename]
-  (.exists (io/file filename)))
+  (.exists (io/file (str "data/" filename))))
 
 (defn reader [filename]
   (io/reader (str "data/" filename)))

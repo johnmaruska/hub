@@ -7,7 +7,8 @@
    [hub.spotify.playlist :as playlist]
    [hub.spotify.tracks :as tracks]
    [hub.util :refer [find-by]]
-   [hub.util.data-file :as data-file]))
+   [hub.util.data-file :as data-file]
+   [clojure.tools.logging :as log]))
 
 ;; TODO: move into a configuration
 (def playlists-to-sort #{"Discover Weekly" "Release Radar"})
@@ -53,6 +54,12 @@
   (let [artists (map #(select-keys % [:id :name]) (my/artists))]
     (data-file/write-edn artists-file artists)))
 
+(defn read-adjacency-list [filename]
+  (data-file/load-edn filename))
+
+(defn write-adjacency-list [filename contents]
+  (data-file/write-edn filename contents))
+
 (defn new-artists
   "Filter `all-artists` down, removing any that appear in `prev-adj-list`."
   [prev-adj-list all-artists]
@@ -65,17 +72,26 @@
   `artists-file` must be generated before the adjacency list."
   []
   (let [prev-adj-list (if (data-file/exists? related-artists-file)
-                        (data-file/load-edn related-artists-file)
+                        (read-adjacency-list related-artists-file)
                         {})]
     ;; TODO: load and stream instead of storing in memory and writing at the end
-    (->> (data-file/load-edn artists-file)
+    (->> (read-adjacency-list artists-file)
          (new-artists prev-adj-list)
          artist/related-adjacency-list
          (merge prev-adj-list)
-         (data-file/write-edn related-artists-file))))
+         (write-adjacency-list related-artists-file))))
 
-(defn main [& _args]
-  (auth/manual-auth (or (env :port) 4000))
-  (generate-saved-artists)
-  (generate-related-artist-adjacency-list)
-  (generate-sorted-playlists))
+(defn main [& [subcommand & _args]]
+  (when (#{"artists" "artists+adjacency" "all"} subcommand)
+    (log/info "Generating saved artists")
+    (auth/manual-auth (or (env :port) 4000))
+    (generate-saved-artists))
+  (when (#{"adjacency" "artists+adjacency" "all"} subcommand)
+    (log/info "Generated related artists adjacency list")
+    (generate-related-artist-adjacency-list))
+  (when (#{"playlists" "all"} subcommand)
+    (log/info "Generating sorted playlists")
+    (auth/manual-auth (or (env :port) 4000))
+    (generate-sorted-playlists))
+  (when (nil? subcommand)
+    (log/error "Expected subcommand to be one of [artists, adjacency, artists+adjacency, playlists, all]")))

@@ -24,7 +24,10 @@
                                     rrc/coerce-request-middleware
                                     rrc/coerce-response-middleware]}}))
 
-(def minimal-setup (comp ring/ring-handler default-router))
+(defn minimal-setup [routes]
+  (ring/ring-handler
+   (default-router routes)
+   default-handler))
 
 (defn start! [app port]
   (run-jetty app {:port (Integer. port) :join? false}))

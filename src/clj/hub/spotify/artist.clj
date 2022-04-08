@@ -9,6 +9,6 @@
   [artists]
   (->> artists
        (map (fn [artist]
-              (log/info "Requesting artist" (:name artist))
+              (log/debug "Requesting artist" (:name artist))
               [(:name artist) (map :name (related (:id artist)))]))
        (into {})))
