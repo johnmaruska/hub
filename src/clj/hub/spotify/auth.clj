@@ -124,7 +124,7 @@
 (defn manual-auth [port]
   (binding [*PORT* port]
     (when-not (token/refresh-token?)
-      (let [server  (webserver/start! (webserver/default-app-setup routes) 4000)]
+      (let [server  (webserver/start! (webserver/minimal-setup routes) 4000)]
         (sh "open" (str "http://127.0.0.1:" *PORT* "/en/spotify/authorize"))
         (try
           (wait-for-auth 1000 300)

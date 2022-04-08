@@ -37,7 +37,7 @@
                  [quil "3.1.0"]
                  ;; Ring web-server
                  [ring "1.8.2"]]
-  :resource-paths ["target"]
+  :resource-paths ["target" "resources"]
   :source-paths   ["src/clj" "src/cljs" "src/cljc"]
   :test-paths     ["test/clj" "test/cljs" "test/cljc"]
 
@@ -56,7 +56,8 @@
                                    [re-frame "1.1.2"]]
                    :plugins       [[lein-ancient "0.6.15"]
                                    [venantius/yagni "0.1.7"]]
-                   :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
+                   :repl-options {:init-ns user
+                                  :nrepl-middleware [cider.piggieback/wrap-cljs-repl]}
                    ;; need to add dev source path here to get user.clj loaded
                    :source-paths  ["dev"]
                    ;; need to add the compiled assets to the :clean-targets
