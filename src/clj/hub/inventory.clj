@@ -44,19 +44,3 @@
 (defn release
   [albums release-name]
   (sieve albums :release release-name))
-
-;;; helper functions for easier readability
-
-(defn vinyl
-  "Lazy sequence of albums owned on Vinyl format."
-  ([]
-   (vinyl (albums)))
-  ([albums]
-   (ownership albums "Vinyl")))
-
-(defn cds
-  "Lazy sequence of albums owned on CD format."
-  ([]
-   (cds (albums)))
-  ([albums]
-   (ownership albums "CD")))

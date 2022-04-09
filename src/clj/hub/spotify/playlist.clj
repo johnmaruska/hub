@@ -1,6 +1,6 @@
 (ns hub.spotify.playlist
   (:require
-   [hub.spotify.util :refer [api crawl! delete! get! post!]]))
+   [hub.spotify.util :refer [api crawl! delete! post!]]))
 
 (defn create-playlist [user-id list-name]
   (post! (api "/v1/users/" user-id "/playlists")

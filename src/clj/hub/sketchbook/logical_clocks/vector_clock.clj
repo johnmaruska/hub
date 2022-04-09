@@ -29,6 +29,6 @@
 (defn descendant? [ancestor-clock descendant-clock]
   (reduce (fn [prev [node-id par-node]]
             (or prev
-                (if-let [desc-node (get descendant-clock node-id)]
+                (when-let [desc-node (get descendant-clock node-id)]
                   (<= (:counter desc-node) (:counter par-node)))))
           true ancestor-clock))

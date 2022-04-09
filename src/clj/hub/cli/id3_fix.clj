@@ -6,14 +6,12 @@
   (:require
    [claudio.id3 :as id3]
    [clojure.java.io :as io]
-   [clojure.string :as str]))
+   [clojure.string :as str])
+  (:import
+   (java.util.logging Level Logger)))
 
 (def HOME "c:\\Users\\jackm")
 (def ROOT-DIR (io/file HOME "Music" "Ripped CDs"))
-
-;; disable noisy verbose logger
-(.setLevel (java.util.logging.Logger/getLogger "org.jaudiotagger")
-           java.util.logging.Level/OFF)
 
 ;;; Clojure wrappers on java.io.File
 
@@ -41,7 +39,7 @@
 
 ;;; tags helpers
 
-(defn all-present? [{:keys [album artist genre title] :as tags}]
+(defn all-present? [{:keys [album artist genre title]}]
   (not (or (str/starts-with? album "Unknown album")
            (= artist "Unknown artist")
            (= genre "Unknown genre")
@@ -109,3 +107,11 @@
   Applies across all directories within the root."
   []
   (run! correct-tracks! (disc-dirs ROOT-DIR)))
+
+(defn configure-logging []
+  ;; disable noisy verbose logger for claudio.id3
+  (.setLevel (Logger/getLogger "org.jaudiotagger") Level/OFF))
+
+(defn main [& _args]
+  (configure-logging)
+  (apply-fix!))

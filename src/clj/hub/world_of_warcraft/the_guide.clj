@@ -47,7 +47,7 @@
        (into #{})))
 
 ;;; have to use (into #{} ...) so duplicates dont throw exception
-(defn enemy-set [match] (into #{} (match :enemies)))
+(defn enemy-set [match] (into #{} (->> match :enemies)))
 (defn class-set [match] (into #{} (->> match :enemies (map :class))))
 (defn spec-set  [match] (into #{} (->> match :enemies (map :spec))))
 
@@ -60,24 +60,29 @@
   (map (fn [row] (assoc row :enemies (enemies row))) csv))
 
 (def match-history (atom {}))
-(defn the-guide [mode]
+(defn the-guide
+  "Retrieve match history, from memory if loaded or from CSV otherwise."
+  [mode]
   (or (get @match-history mode)
       (swap! match-history assoc mode
              (-> mode filename data-file/load-csv parse))))
 
 
-(defn format-row [row]
-  (->> [(:arena row)
-        (map enemy->string (:enemies row))
-        (:result row)
-        (format "\"%s\"" (:target-note row))
-        (format "\"%s\"" (:misc-note row))]
+(defn match->row
+  [match]
+  (->> [(:arena match)
+        (map enemy->string (:enemies match))
+        (:result match)
+        (format "\"%s\"" (:target-note match))
+        (format "\"%s\"" (:misc-note match))]
        (apply concat)
        (str/join ",")))
 
-(defn log-match! [match]
+(defn log-match!
+  "Save match to in-memory history and CSV."
+  [match]
   (swap! match-history #(concat % [match]))
-  (let [row  (format-row match)
+  (let [row  (match->row match)
         file (filename (mode match))]
     (data-file/append-csv file [row])))
 

@@ -2,7 +2,6 @@
   (:require
    [hub.inventory :as inventory]
    [hub.inventory.spec :as spec]
-   [malli.core :as m]
    [malli.util :as mu]))
 
 ;; TODO: what happens with comma-separated route vars? `artist=Abba,Mastodon`
@@ -31,16 +30,11 @@
   (inventory/add-album body)
   {:status 201})
 
-(defn print-all [args]
-  (def ARGS args)
-  {:status 200
-   :body   [:div "repl"]})
-
 (def routes
   ["/inventory"
    ["/albums" {:get  {:handler    get-albums
                       :responses  {200 {:body (results (mu/optional-keys spec/album))}}
                       :parameters {:query (mu/optional-keys spec/album)}}
-               :post {:handler    print-all
+               :post {:handler    post-album
                       :responses  {201 nil}
                       :parameters {:form spec/album}}}]])

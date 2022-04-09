@@ -1,8 +1,6 @@
 (ns hub.advent-of-code.2020.day01
   "https://adventofcode.com/2020/day/1"
-  (:require
-   [clojure.java.io :as io]
-   [hub.advent-of-code.util :as util]))
+  (:require [hub.advent-of-code.util :as util]))
 
 (defn parse [reader]
   (map #(Integer/parseInt %) (line-seq reader)))

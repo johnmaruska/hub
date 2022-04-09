@@ -1,11 +1,11 @@
 (ns hub.spotify.me
-  (:require
-   [hub.spotify.util :refer [api crawl! get!]]))
+  (:require [hub.spotify.util :refer [api crawl!]]))
 
 (def all-my
   (memoize
    (fn all-my* [entity]
-     (crawl! (api "/v1/me/" entity "?limit=50")))))
+     (crawl! (api "/v1/me/" entity "?limit=50")
+             {:socket-timeout 2000}))))
 
 (def playlists (partial all-my "playlists"))
 (def tracks    (partial all-my "tracks"))

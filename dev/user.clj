@@ -1,18 +1,8 @@
 (ns user
-  (:require [hub.server :as server]))
+  (:require
+   [mount.core :as mount]
+   [clojure.java.io :as io]))
 
-(def webserver (atom nil))
-
-(defn stop-jetty! []
-  (when @webserver
-    (println "Stopping Jetty server" @webserver)
-    (.stop @webserver)
-    (reset! webserver nil)))
-
-(defn start-jetty! []
-  (when (nil? @webserver)
-    (reset! webserver (server/start!))))
-
-(defn restart-jetty! []
-  (do (stop-jetty!)
-      (start-jetty!)))
+(defn mount-restart []
+  (mount/stop)
+  (mount/start))

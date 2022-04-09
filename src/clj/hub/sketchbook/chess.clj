@@ -25,9 +25,9 @@
 
 (defn valid-space? [piece board position]
   (and (on-board? position)
-       (let [occupant (piece-at board position)])
-       (or (nil? occupant)
-           (enemy? piece occupant))))
+       (let [occupant (piece-at board position)]
+         (or (nil? occupant)
+             (enemy? piece occupant)))))
 
 (defn up-from [n] (range (inc n) (inc 8)))
 (defn down-from [n] (range (dec n) 0 -1))
@@ -50,7 +50,7 @@
    (map list (repeat rank)    (up-from file))
    (map list (repeat rank)    (down-from file))])
 
-(defn pawn-moves [piece board]
+(defn pawn-moves [piece _board]
   (let [side           (get sides (:color piece))
         forward        (:forward side)
         [rank file]    (:position piece)
@@ -66,7 +66,7 @@
       (concat standard-moves double-start)
       standard-moves)))
 
-(defn rook-moves [{:keys [position]} piece board]
+(defn rook-moves [{:keys [position]} board]
   (->> (straights-from position)
        (map (partial until-blocked board))
        (apply concat)))
@@ -76,8 +76,8 @@
        (map (partial until-blocked board))
        (apply concat)))
 
-(defn knight-moves [piece board]
-  (let [[rank file] (:position piece)]
+(defn knight-moves [{:keys [position]} _board]
+  (let [[rank file] position]
     (->> (for [rank-dir [+ -]
                file-dir [+ -]]
            [[(rank-dir rank 2) (file-dir file 1)] ; go tall
@@ -87,12 +87,12 @@
 
 (defn queen-moves [{:keys [position]} board]
   (->> (concat (straights-from position)
-               (diagonals-from board position))
+               (diagonals-from position))
        (map (partial until-blocked board))
        (apply concat)))
 
-(defn king-moves [piece board]
-  (let [[rank file] (:position piece)]
+(defn king-moves [{:keys [position]} _board]
+  (let [[rank file] position]
     (->> (for [rank-dir [dec inc identity]
                file-dir [dec inc identity]]
            [(rank-dir rank) (file-dir file)]))))
@@ -106,11 +106,11 @@
    :king   king-moves})
 
 (defn moves [board piece]
-  ((move-fn (:type piece)) piece board))
+  ((moves-fn (:type piece)) piece board))
 
-(defn valid-moves [{:keys [position] :as piece} board]
+(defn valid-moves [piece board]
   ;; TODO: add castling
-  (->> (moves piece board position)
+  (->> (moves piece board)
        (filter #(valid-space? piece board %))
        ;; (filter #(checked? board piece %))
        ))
@@ -118,7 +118,7 @@
 (defn threatened-by [piece board]
   (let [enemy-pieces      (->> (apply concat board)
                                (remove nil?)
-                               (filter #(enemy? piece)))
+                               (filter #(enemy? piece %)))
         threatened-spaces (->> enemy-pieces
                                (mapcat #(moves board %))
                                (into #{}))]
