@@ -38,13 +38,10 @@
           (recur q (rest s) score))))))
 
 (defn fuzzy-search
-  [xs query & {:keys [limit key-fn]
-               :or   {limit  20
-                      key-fn identity}}]
+  [xs query & {:keys [key-fn] :or {key-fn identity}}]
   (->> (for [s xs]
          {:data  s
           :score (fuzzy-score query (key-fn s))})
        (filter #(< 0 (:score %)))
        (sort-by :score (comp - compare))
-       (take limit)
        (map :data)))
