@@ -9,6 +9,11 @@
 (def alive 1)
 (def dead  0)
 
+(defn toggle-cell
+  [grid coord]
+  (grid/update-coord grid coord {alive dead
+                                 dead  alive}))
+
 (defn random-seed [x y]
   (grid/init x y #(rand-nth [alive dead])))
 
@@ -26,12 +31,12 @@
     (if ( = 3 (count (alive-neighbors grid coord)))   alive dead)))
 
 (defn- step-row [grid y row]
-  (map-indexed (fn [x _] (step-cell grid [x y])) row))
+  (vec (map-indexed (fn [x _] (step-cell grid [x y])) row)))
 
 (defn- step-grid
   "Expects a `grid` whose cells are all either `alive` or `dead`, and whose
   dimensions match those in `m` and `n` via `set-dimensions!`."
   [grid]
-  (map-indexed (partial step-row grid) grid))
+  (vec (map-indexed (partial step-row grid) grid)))
 
 (def play-round step-grid)
