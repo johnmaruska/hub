@@ -6,7 +6,8 @@
 (defn albums
   "Vector of all albums in my inventory."
   []
-  (data-file/load-csv albums-csv))
+  (->> (data-file/load-csv albums-csv)
+       (filter #(every? not-empty (vals %)))))
 
 (defn album->vec
   [{:keys [artist release ownership]}]
