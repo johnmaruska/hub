@@ -19,8 +19,8 @@
   [query full-str]
   (let [query    (string/lower-case query)
         full-str (string/lower-case full-str)]
-    (loop [q     (seq (char-array query))
-           s     (seq (char-array full-str))
+    (loop [q     (seq query)
+           s     (seq full-str)
            score 0]
       (cond
         (empty? q) ; full match on query!
@@ -38,10 +38,12 @@
           (recur q (rest s) score))))))
 
 (defn fuzzy-search
-  [xs query & {:keys [limit] :or {limit 20}}]
+  [xs query & {:keys [limit key-fn]
+               :or   {limit  20
+                      key-fn identity}}]
   (->> (for [s xs]
-         {:data s
-          :score (fuzzy-score query s)})
+         {:data  s
+          :score (fuzzy-score query (key-fn s))})
        (filter #(< 0 (:score %)))
        (sort-by :score (comp - compare))
        (take limit)

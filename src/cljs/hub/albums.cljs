@@ -2,6 +2,7 @@
   (:require
    [ajax.edn :as ajax]
    [clojure.string :as string]
+   [hub.fuzzy-search :refer [fuzzy-search]]
    [reagent.core :as r]
    [re-frame.core :as rf]))
 
@@ -48,10 +49,10 @@
         format-filter (r/atom "")
         update!       #(reset! %1 (.. %2 -target -value))]
     (fn []
-      (let [shown-albums (->> albums
-                              (filter #(lower-includes? (:artist %) @artist-filter))
-                              (filter #(lower-includes? (:release %) @album-filter))
-                              (filter #(lower-includes? (:ownership %) @format-filter)))]
+      (let [shown-albums (-> albums
+                             (fuzzy-search @artist-filter :key-fn :artist)
+                             (fuzzy-search @album-filter :key-fn :release)
+                             (fuzzy-search @format-filter :key-fn :ownership))]
         [:table
          [:thead
           [:tr
