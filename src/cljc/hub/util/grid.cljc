@@ -15,13 +15,17 @@
 (defn set-coord [board [x y] value]
   (assoc-in board [y x] value))
 
+(defn update-coord [board [x y] fn & args]
+  (apply update-in board [y x] fn args))
+
 (defn within-bounds?
   "Test that coordinate is without bounds of the grid."
   [grid coord]
   (try
     (get-coord grid coord)
     true
-    (catch IndexOutOfBoundsException _ false)))
+    (catch #?(:clj IndexOutOfBoundsException :cljs :default) _
+      false)))
 
 (defn neighbors
   "Get all coordinates surrounding a given coordinate, within grid bounds."
@@ -56,5 +60,5 @@
    (let [{:keys [x y]} (dimensions grid)]
      (corner? y x coord)))
   ([height width [x y]]
-   (and (or (= x width)  (zero? x))
-        (or (= y height) (zero? y)))))
+   (and (or (= x (dec width))  (zero? x))
+        (or (= y (dec height)) (zero? y)))))
