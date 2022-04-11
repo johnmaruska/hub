@@ -57,7 +57,7 @@
  (fn [{db :db} _]
    (if (::autoplay db)
      {:fx [[:dispatch [::step-game]]]
-      ::sleep-then-dispatch [#(rf/dispatch [::autoplay]) delay-ms]}
+      ::sleep-then-run [#(rf/dispatch [::autoplay]) delay-ms]}
      {:fx [[:dispatch [::step-game]]]})))
 
 ;; this is that side effect

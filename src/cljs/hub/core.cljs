@@ -7,7 +7,7 @@
    [re-frame.core :as rf]))
 
 (defn current-page []
-  [conway/view])
+  [albums/view])
 
 (rf/reg-event-db
  :initialize-db
