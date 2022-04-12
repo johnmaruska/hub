@@ -1,9 +1,5 @@
 # Intermediate data
-data/transactions.csv
-data/prefixes.edn
-data/categories.edn
-data/spotify/artists.edn
-data/spotify/related-artists.edn
+data/*
 # Secrets
 .tokens/authorization-code.edn
 

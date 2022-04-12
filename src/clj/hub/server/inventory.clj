@@ -25,7 +25,7 @@
   {:status  200
    :headers {"Access-Control-Allow-Origin"  "*"
              "Access-Control-Allow-Headers" "Content-Type"}
-   :body    {:results (inventory/albums)}})
+   :body    {:results (albums)}})
 
 (def routes
   ["/inventory"
