@@ -1,4 +1,34 @@
 /* some style */
 body {
-    background-color: #D3D3D3;
+    background-color: #C0C0C0;
+}
+
+
+table {
+    border-collapse: collapse;
+    border: 1px solid black;
+    table-layout: fixed;
+}
+
+table.inventory {
+    width: 100%;
+}
+
+table.inventory th {
+    font-size: 1.5em;
+}
+table.inventory th > * {
+    margin: 0 0 0 1em;
+}
+/* the actual entries */
+table.inventory th, table.inventory td {
+    border: 1px solid black;
+    padding: 3px;
+    background-color: #F0F0F0;
+}
+
+
+table.conway .cell {
+    width: 1em;
+    height: 1em;
 }

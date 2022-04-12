@@ -27,19 +27,16 @@
                              (fuzzy-search @artist-filter :key-fn :artist)
                              (fuzzy-search @album-filter :key-fn :release)
                              (fuzzy-search @format-filter :key-fn :ownership))]
-        [:table
+        [:table {:class "inventory"}
          [:thead
           [:tr
-           [:th "Artist"  [:br]
-            [text-input {:id "album--artist"
-                         :on-change #(update! artist-filter %)}]]
-           [:th "Release" [:br]
-            [text-input {:id "album--name"
-                         :on-change #(update! album-filter %)}]]
-           [:th "Format"  [:br]
-            [dropdown {:id "album--format"
-                       :on-change #(update! format-filter %)}
-             (concat [""] FORMATS)]]]]
+           [:th "Artist" [text-input {:id "album--artist"
+                                      :on-change #(update! artist-filter %)}]]
+           [:th "Release" [text-input {:id "album--name"
+                                       :on-change #(update! album-filter %)}]]
+           [:th "Format" [dropdown {:id "album--format"
+                                    :on-change #(update! format-filter %)}
+                          (concat [""] FORMATS)]]]]
          [:tbody
           (doall
            (for [album (sort-by :artist shown-albums)]
@@ -55,9 +52,8 @@
 
 (rf/reg-event-fx
  ::fetch
- (fn [_ [_ query-params]]
+ (fn [_ _]
    {:http-xhrio {:uri     BACKEND_URL
-                 :params  (or query-params {})
                  :method  :get
                  :timeout 10000
                  :on-success [::fetch-success]

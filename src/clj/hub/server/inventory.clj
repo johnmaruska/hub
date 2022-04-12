@@ -21,7 +21,7 @@
 (defn results [entity]
   [:map [:results [:vector entity]]])
 
-(defn get-albums []
+(defn get-albums [_request]
   {:status  200
    :headers {"Access-Control-Allow-Origin"  "*"
              "Access-Control-Allow-Headers" "Content-Type"}

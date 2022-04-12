@@ -6,10 +6,9 @@
 (def delay-ms 200)
 (def default-height 15)
 (def default-width 15)
-(def default-db {::game     (game/random-seed default-height default-width)
-                 ::autoplay false})
-
-(def display-size "1em")
+(def default-db
+  {::game     (game/random-seed default-height default-width)
+   ::autoplay false})
 
 (defn enumerate [xs]
   (map-indexed (fn [idx elem] [idx elem]) xs))
@@ -20,13 +19,12 @@
    (update db ::game game/toggle-cell coord)))
 
 (defn cell [coord val]
-  [:div {:on-click #(rf/dispatch [::toggle-cell coord])
-         :style {:background-color (if (game/alive? val) "black" "white")
-                 :width display-size
-                 :height display-size}}])
+  [:div {:class "cell"
+         :on-click #(rf/dispatch [::toggle-cell coord])
+         :style {:background-color (if (game/alive? val) "black" "white")}}])
 
 (defn grid [game]
-  [:table
+  [:table {:class "conway"}
    [:tbody
     (doall
      (for [[y row] (enumerate game)]
