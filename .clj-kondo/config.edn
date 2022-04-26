@@ -1,2 +1,2 @@
 {:lint-as {mount.core/defstate clojure.core/def
-           hub.sketchbook.keyforge.event/defevent clojure.core/def}}
+           hub.sketchbook.keyforge.event-loop/defevent clojure.core/defn}}

@@ -1,4 +1,6 @@
 (ns hub.util
+  ;; these don't actually exist in Clojure but clj-kondo thinks they do
+  (:refer-clojure :exclude [update-keys update-vals])
   (:require
    [clojure.tools.logging :as log]
    [clojure.data.json :as json]

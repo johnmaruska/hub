@@ -41,7 +41,7 @@
   :source-paths   ["src/clj" "src/cljs" "src/cljc"]
   :test-paths     ["test/clj" "test/cljs" "test/cljc"]
 
-  :profiles {:profiles {:production {:env {:production true}}}
+  :profiles {:production {:env {:production true}}
              :dev {:dependencies  [[binaryage/devtools "1.0.2"]
                                    [com.bhauman/figwheel-main "0.2.12"
                                     :exclusions [args4j]]
@@ -55,6 +55,7 @@
                                    [reagent "1.0.0-alpha2"]
                                    [re-frame "1.1.2"]]
                    :plugins       [[lein-ancient "0.6.15"]
+                                   [com.github.clj-kondo/lein-clj-kondo "0.1.3"]
                                    [venantius/yagni "0.1.7"]]
                    :repl-options {:init-ns user
                                   :nrepl-middleware [cider.piggieback/wrap-cljs-repl]}

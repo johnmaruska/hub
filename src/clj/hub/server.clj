@@ -14,8 +14,9 @@
     (ring/create-resource-handler {:path "/"})
     webserver/default-handler)))
 
+(defstate webserver
+  :start (webserver/start! #'app (or (env :port) 4000))
+  :stop  (webserver/stop! webserver))
+
 (defn main [& _args]
-  (defstate webserver
-    :start (webserver/start! #'app (or (env :port) 4000))
-    :stop  (webserver/stop! webserver))
-  (mount/start))
+  (mount/start #'webserver))

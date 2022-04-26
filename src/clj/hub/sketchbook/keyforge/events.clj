@@ -90,7 +90,7 @@
         (update-in [(:current-player game) :aember] inc)
         reap-effect)))
 
-(defevent fight-card [game card]
+(defevent fight-card [game _card]
   ;; TODO: implement
   game)
 
