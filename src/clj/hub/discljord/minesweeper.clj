@@ -17,12 +17,9 @@
    0 ":zero:"
    game/BOMB ":burn:"})
 
-(defn spoiler [s]
-  (str "||" s "||"))
-
 (defn discord-fmt [grid]
   (letfn [(fmt-row [row]
-            (apply str (map #(spoiler (get output %)) row)))]
+            (apply str (map #(util/spoiler (get output %)) row)))]
     (string/join "\n" (vec (map fmt-row grid)))))
 
 (defn parse [contents]

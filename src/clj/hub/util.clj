@@ -11,8 +11,7 @@
 (defn uuid []
   (UUID/randomUUID))
 
-(defn find-by [k v coll]
-  (first (filter #(= v (k %)) coll)))
+;;; string utils
 
 (defn parse-json [s]
   (if (instance? java.io.Reader s)
@@ -28,6 +27,11 @@
   (let [[lhs rhs] (split-at idx xs)]
     (concat lhs [el] rhs)))
 
+;;; map utils
+
+(defn find-by [k v coll]
+  (first (filter #(= v (k %)) coll)))
+
 (defn update-keys
   "Apply `f` to each key in `m`."
   [f m]
@@ -37,6 +41,14 @@
   "Apply `f` to each value in `m`."
   [f m]
   (reduce (fn [acc [k v]] (assoc acc k (f v))) {} m))
+
+;;; macro utils
+
+(defmacro attempt [& body]
+  `(try ~@body (catch Exception ex# nil)))
+
+(defmacro spin-forever [& body]
+  `(loop [] ~@body (recur)))
 
 (defmacro swallow-exception
   {:style/indent 1}

@@ -20,23 +20,31 @@
 (defn rand-value [term]
   (+ 1 (rand-int (::d term))))
 
+(def sum (partial reduce + 0))
+
 (defn roll-term
   "Perform rolls for an entire term using arbitrary `roll-fn`."
   [roll-fn term]
   {:pre  [(s/valid? ::term term)]
-   :post [(s/valid? int? %)]}
-  (->> (repeatedly (::n term) #(roll-fn term))
-       (reduce (eval (::sign term)) 0)))
+   :post [(s/valid? ::term term)]}
+  (let [rolls (repeatedly (::n term) #(roll-fn term))]
+    (assoc term ::rolls rolls)))
 
 (defn roll-terms
-  [roll-fn terms]
-  (->> (map (partial roll-term roll-fn) terms)
-       (reduce + 0)))
+  ([terms]
+   (roll-terms rand-value terms))
+  ([roll-fn terms]
+   (map (partial roll-term roll-fn) terms)))
 
-(defn roll-all [terms]
-  {:roll-result (roll-terms rand-value terms)
-   :roll-min    (roll-terms min-value terms)
-   :roll-max    (roll-terms max-value terms)})
+(defn eval-term [term]
+  (reduce (eval (::sign term)) 0 (::rolls term)))
+
+(defn process-all [terms]
+  (letfn [(process [roll-fn]
+            (sum (map #(eval-term (roll-term roll-fn %)) terms)))]
+    {:roll-result (process rand-value)
+     :roll-min    (process min-value)
+     :roll-max    (process max-value)}))
 
 (defn parse-int
   "Parse an Integer, optionally providing a default if it cannot be parsed."
@@ -64,6 +72,6 @@
   [infile outfile]
   (with-open [in (io/reader infile)]
     (->> (line-seq in)
-         (map (comp roll-all parse))
+         (map (comp process-all parse))
          (#(with-out-str (json/pprint %)))
          (spit outfile))))

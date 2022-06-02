@@ -6,3 +6,13 @@
   [bot event content]
   (m/create-message! (:message-ch bot) (:channel-id event)
                      :content content))
+
+(defn manual-kill! []
+  (throw (ex-info "ManualKill" {:manual-kill? true})))
+
+
+(defn spoiler [s]
+  (str "||" s "||"))
+
+(defn ticks [s]
+  (str "`" s "`"))

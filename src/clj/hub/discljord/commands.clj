@@ -1,6 +1,7 @@
 (ns hub.discljord.commands
   (:require
    [clojure.string :as string]
+   [hub.discljord.dice :as dice]
    [hub.discljord.guess-that-sound :as guess-that-sound]
    [hub.discljord.minesweeper :as minesweeper]
    [hub.discljord.tarot :as tarot]
@@ -9,7 +10,7 @@
 (defn manual-kill [bot [_event-type event-data]]
   ;; this works but why does it label itself a syntax error?
   (util/reply bot event-data "https://c.tenor.com/7crdHrZL5dsAAAAd/po-dies.gif")
-  (throw (ex-info "ManualKill" {:manual-kill? true})))
+  (util/manual-kill!))
 
 (defn working [bot event]
   (util/reply bot event "https://giphy.com/gifs/9K2nFglCAQClO"))
@@ -23,6 +24,7 @@
    "!guess"                 #'guess-that-sound/guess!
    "!answer"                #'guess-that-sound/answer!
    ;; Misc
+   "!roll"                  #'dice/roll
    "!minesweep"             #'minesweeper/spit-board
    "!tarot"                 #'tarot/handle-event})
 

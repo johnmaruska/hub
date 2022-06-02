@@ -3,15 +3,14 @@
    [hub.dice :as sut]
    [clojure.test :as t :refer [deftest is testing]]))
 
-
-(deftest roll-all
+(deftest process-all
   (testing "full expression"
     (let [terms [{::sut/sign '+ ::sut/n 2 ::sut/d 6}   ; min 2, max 12
                  {::sut/sign '- ::sut/n 2 ::sut/d 1}   ; min 2, max 2
                  {::sut/sign '- ::sut/n 4 ::sut/d 8}   ; min (* 4 8), max 4 because of sign
                  {::sut/sign '+ ::sut/n 1 ::sut/d 20}  ; min 1, max 20
                  ]
-          results      (sut/roll-all terms)
+          results      (sut/process-all terms)
           expected-min (+  2 (- 2) (- (* 4 8))  1)
           expected-max (+ 12 (- 2) (-       4)  20)]
       (is (= expected-min (:roll-min results)))
