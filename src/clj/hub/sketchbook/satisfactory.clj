@@ -2,8 +2,12 @@
   "Mostly just trying to see what number of buildings are required to build
   specific end-game materials."
   (:require
-   [hub.util :as util]
-   [hub.util.data-file :as data-file]))
+   [clojure.java.io :as io]
+   [hub.util :as util :refer [update-keys]]
+   [hub.util.file :as file]))
+
+(def ingredients-csv
+  (io/resource "data/satisfactory/ingredients.csv"))
 
 (defn parse-map-column
   "columns in the csv which correspond to a map are of form `key=digit`.
@@ -24,7 +28,7 @@
 
 (def parts-recipes
   (memoize
-   #(->> (data-file/load-csv "satisfactory/ingredients.csv")
+   #(->> (file/load-csv ingredients-csv)
          (map coerce-recipe)
          (reduce (fn [coll m] (assoc coll (:name m) m)) {}))))
 
@@ -85,4 +89,4 @@
        (recur (first ingredients)
               (add-part all-parts-required curr-part)
               (rest ingredients))))
-   (util/update-keys #(int (Math/ceil %)))))
+   (update-keys #(int (Math/ceil %)))))

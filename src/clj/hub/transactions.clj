@@ -2,7 +2,7 @@
   "Functions for inspecting bank transactions in CSV format.
 
   Hopefully build this out into a visualization component later?"
-  (:require [hub.util.data-file :as data]
+  (:require [hub.util.file :as file]
             [clojure.string :as string]
             [hub.util :as util]))
 
@@ -121,14 +121,14 @@
 (def base-config
   (memoize
    (fn []
-     {:categories (data/load-edn "categories.edn")
-      :prefixes   (sort-by count > (data/load-edn "prefixes.edn"))})))
+     {:categories (file/load-edn "categories.edn")
+      :prefixes   (sort-by count > (file/load-edn "prefixes.edn"))})))
 
 (defn load-csv
   ([csv]
    (load-csv csv (base-config)))
   ([csv config]
-   (map #(process-tx % config) (data/load-csv csv))))
+   (map #(process-tx % config) (file/load-csv csv))))
 
 (comment
   (do

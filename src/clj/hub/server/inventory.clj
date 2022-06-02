@@ -1,9 +1,9 @@
 (ns hub.server.inventory
   (:require
-   [hub.util.data-file :as data-file]
+   [hub.util.file :as file]
    [malli.util :as mu]))
 
-(def albums-csv "inventory/albums.csv")
+(def albums-csv "generated-data/inventory/albums.csv")
 
 (def album-spec
   [:map
@@ -15,7 +15,7 @@
 (defn albums
   "Vector of all albums in my inventory."
   []
-  (->> (data-file/load-csv albums-csv)
+  (->> (file/load-csv albums-csv)
        (filter #(every? not-empty (vals %)))))
 
 (defn results [entity]

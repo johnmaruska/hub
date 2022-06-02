@@ -1,10 +1,11 @@
 (ns hub.conway
   (:require
+   [clojure.java.io :as io]
    [clojure.tools.logging :as log]
    [hub.conway.game :as game]
    [hub.conway.sketch :as sketch]
    [hub.conway.terminal :as terminal]
-   [hub.util.data-file :as data-file]))
+   [hub.util.file :as file]))
 
 (def delay-ms 200)
 (def default-height 10)
@@ -14,7 +15,7 @@
   (game/random-seed default-width default-height))
 
 (defn load-seed [seed-name]
-  (data-file/load-edn (str "conway/" seed-name ".edn")))
+  (file/load-edn (io/resource (str "data/conway/" seed-name ".edn"))))
 
 (defn sketch-animate
   "Graphically display game animation."

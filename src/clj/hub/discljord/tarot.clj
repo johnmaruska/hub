@@ -1,14 +1,14 @@
 (ns hub.discljord.tarot
   (:require
+   [clojure.java.io :as io]
    [clojure.string :as string]
    [discljord.formatting :refer [mention-user]]
-   [hub.util :refer [parse-json]]
-   [hub.util.data-file :refer [reader]]
-   [hub.discljord.util :as util]))
+   [hub.discljord.util :as util]
+   [hub.util.file :as file]))
 
 (def cards
   (memoize
-   #(:cards (parse-json (reader "tarot.json")))))
+   #(:cards (file/load-json (io/resource "data/tarot.json")))))
 
 (defn flip-coin []
   (zero? (rand-int 2)))
