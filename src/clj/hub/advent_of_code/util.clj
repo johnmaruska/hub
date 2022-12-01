@@ -4,6 +4,9 @@
 (defn input [year day]
   (format "advent_of_code/%s/day/%s/input.txt" year day))
 
+(defn example [year day n]
+  (format "advent_of_code/%s/day/%s/example%s.txt" year day n))
+
 (defn read-file
   "Read and parse an entire file given `parse` fn which accepts an open reader."
   [parse filename]
