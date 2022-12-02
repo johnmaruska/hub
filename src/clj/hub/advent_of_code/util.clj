@@ -10,5 +10,7 @@
 (defn read-file
   "Read and parse an entire file given `parse` fn which accepts an open reader."
   [parse filename]
-  (with-open [reader (io/reader (io/resource filename))]
+  ;; use str resources instead of io/resources so we don't have to reload classpath
+  ;; to get new files
+  (with-open [reader (io/reader (str "resources/" filename))]
     (vec (parse reader))))
