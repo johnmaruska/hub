@@ -26,9 +26,9 @@
        count))
 
 
-(defn overlaps? [[a b]]
-  (or (<= (start b) (end a) (end b))
-      (<= (start a) (end b) (end a))))
+(defn overlaps? [[a b]]  ; simplified suggestion from srogee
+  (and (<= (start a) (end b)))
+       (<= (start b) (end a)))
 
 (defn part2 []
   (->> (utils/input 2022 4)
