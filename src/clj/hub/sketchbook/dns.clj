@@ -13,6 +13,9 @@
 (defn unhexify [hex-str]
   (.parseHex (HexFormat/of) hex-str))
 
+(defn decode-utf8 [bytes]
+  (apply str (map #(char (bit-and % 0xFF)) bytes)))
+
 (defn int->byte-pair [n]
   [(bit-and (bit-shift-right n 8) 0xFF)
    (bit-and n 0xFF)])
@@ -24,6 +27,46 @@
    (reduce (fn [acc b]
              (bit-or (bit-shift-left (bit-and acc 0xFFFFFFFF) 8) (bit-and b 0xFF)))
            0x00 bytes)))
+
+(defn ip-addr->bytes [ip-addr]
+  (byte-array (map (fn [x] (bit-and (Integer/parseInt x) 0xFF))
+                   (string/split ip-addr #"\."))))
+
+(defn bytes->ip-addr [bytes]
+  (string/join "." (map #(Integer/toString %) bytes)))
+
+(defn truncate-response [response]
+  (byte-array (reverse (drop-while zero? (reverse response)))))
+
+(defn udp-send [socket query]
+  (let [packet (java.net.DatagramPacket. query (count query))]
+    (.setData packet query)
+    (.send socket packet)))
+
+(defn udp-recv [socket]
+  (let [buffer (byte-array 1024)
+        packet (java.net.DatagramPacket. buffer 1024)]
+    (.receive socket packet)
+    (truncate-response buffer)))
+
+(defn perform-dns-query
+  "`ip-addr` is a string with ipv4 formatting, e.g. 8.8.8.8
+  `port` is an integer and `query` is a byte-array."
+  [ip-addr port query]
+  (with-open [socket (DatagramSocket.)]  ; a DatagramSocket is how you do UDP in Java
+    (.connect socket (InetAddress/getByAddress (ip-addr->bytes ip-addr)) port)
+    (udp-send socket query)
+    (udp-recv socket)))
+
+;;;; Constants
+
+(def TYPE-A 1)
+(def TYPE-NS 2)
+(def TYPE-TXT 16)
+
+(def CLASS-IN 1)
+
+(def RECURSION-DESIRED 2r10000000)
 
 ;;;; Part 1
 
@@ -60,49 +103,14 @@
   (byte-array (concat (:name question)
                       (mapcat int->byte-pair [(:type question) (:class question)]))))
 
-(def TYPE-A 1)
-(def CLASS-IN 1)
-(def RECURSION-DESIRED 2r10000000)
-
-(defn build-query [domain-name record-type]
+(defn build-query [domain-name record-type flags]
   (byte-array (concat (header->bytes (mk-header {:id            0x8298 #_ (rand-int 65535)
                                                  :num-questions 1
-                                                 :flags         2r100000000}))
+                                                 :flags         flags}))
                       (question->bytes (map->DnsQuestion
                                         {:name  (encode-dns-name domain-name)
                                          :type  record-type
                                          :class CLASS-IN})))))
-
-(defn truncate-response [response]
-  (byte-array (reverse (drop-while zero? (reverse response)))))
-
-(defn ip-addr->bytes [ip-addr]
-  (byte-array (map (comp byte #(Integer/parseInt %))
-                   (string/split ip-addr #"\."))))
-
-(defn bytes->ip-addr [bytes]
-  (string/join "." (map #(Integer/toString %) bytes)))
-
-(defn udp-send [socket query]
-  (let [packet (java.net.DatagramPacket. query (count query))]
-    (.setData packet query)
-    (.send socket packet)))
-
-(defn udp-recv [socket]
-  (let [buffer (byte-array 1024)
-        packet (java.net.DatagramPacket. buffer 1024)]
-    (.receive socket packet)
-    (truncate-response buffer)))
-
-(defn perform-dns-query
-  "`ip-addr` is a string with ipv4 formatting, e.g. 8.8.8.8
-  `port` is an integer and `query` is a byte-array."
-  [ip-addr port query]
-  (with-open [socket (DatagramSocket.)]  ; a DatagramSocket is how you do UDP in Java
-    (.connect socket (InetAddress/getByAddress (ip-addr->bytes ip-addr)) port)
-    (udp-send socket query)
-    (udp-recv socket)))
-
 
 ;;;; Part 2
 
@@ -157,13 +165,21 @@
     [name type class ttl data])
 
 (defn parse-record [^RandomAccessFile reader]
-  (let [name     (decode-name reader)
-        type     (bytes->long (read-n 2 reader))
-        class    (bytes->long (read-n 2 reader))
+  (let [name_    (decode-name reader)
+        type_    (bytes->long (read-n 2 reader))
+        class_   (bytes->long (read-n 2 reader))
         ttl      (bytes->long (read-n 4 reader))
         data-len (bytes->long (read-n 2 reader))
-        data     (read-n data-len reader)]
-    (->DnsRecord name type class ttl data)))
+        data     (cond
+                   (= TYPE-NS type_)
+                   (decode-name reader)
+
+                   (= TYPE-A type_)
+                   (bytes->ip-addr (read-n data-len reader))
+
+                   :else
+                   (read-n data-len reader))]
+    (->DnsRecord name_ type_ class_ ttl data)))
 
 (defrecord DnsPacket
     [header questions answers authorities additionals])
@@ -178,15 +194,31 @@
     (->DnsPacket header questions answers authorities additionals)))
 
 (defn lookup-domain [domain-name]
-  (let [query (build-query domain-name TYPE-A)]
+  (let [query (build-query domain-name TYPE-A RECURSION-DESIRED)]
     (-> (perform-dns-query "8.8.8.8" 53 query)
         parse-dns-packet :answers first :data bytes->ip-addr)))
 
-(comment
-  ;; TODO: double back to these with different record type
-  (lookup-domain "www.facebook.com")
-  (lookup-domain "www.metafilter.com")
-  )
-
-
 ;;;; Part 3: Implement our resolver
+
+(defn send-query [ip-addr domain-name record-type]
+  (let [query (build-query domain-name record-type 0)]
+    (parse-dns-packet (perform-dns-query ip-addr 53 query))))
+
+(defn get-answer [packet]
+  (:data (first (filter #(= (:type %) TYPE-A) (:answers packet)))))
+
+(defn get-nameserver-ip [packet]
+  (:data (first (filter #(= (:type %) TYPE-A) (:additionals packet)))))
+
+(defn get-nameserver [packet]
+  (:data (first (filter #(= (:type %) TYPE-NS) (:authorities packet)))))
+
+(defn resolve-domain [domain-name record-type]
+  (loop [nameserver "198.41.0.4"]
+    (println "Querying" nameserver "for" domain-name)
+    (let [response (send-query  nameserver domain-name record-type)]
+      (cond
+        (get-answer response)        (get-answer response)
+        (get-nameserver-ip response) (recur (get-nameserver-ip response))
+        (get-nameserver response)    (recur (resolve-domain (get-nameserver response) TYPE-A))
+        :else                        (throw (ex-info "Something went wrong" response))))))
