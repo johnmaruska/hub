@@ -1,4 +1,5 @@
 (ns hub.sketchbook.dns
+  "Implement DNS by Julia Evans https://implement-dns.wizardzines.com/"
   (:require
    [clojure.string :as string])
   (:import
@@ -12,9 +13,6 @@
   (.formatHex (HexFormat/of) byte-seq))
 (defn unhexify [hex-str]
   (.parseHex (HexFormat/of) hex-str))
-
-(defn decode-utf8 [bytes]
-  (apply str (map #(char (bit-and % 0xFF)) bytes)))
 
 (defn int->byte-pair [n]
   [(bit-and (bit-shift-right n 8) 0xFF)
@@ -81,7 +79,7 @@
    (merge {:num-questions 0 :num-answers 0 :num-authorities 0 :num-additionals 0}
           m)))
 
-(defn header->bytes [header]
+(defn header->bytes [^DnsHeader header]
   (byte-array (mapcat int->byte-pair [(:id header)
                                       (:flags header)
                                       (:num-questions header)
@@ -114,7 +112,10 @@
 
 ;;;; Part 2
 
-(defn bytes->random-access-file [bytes-data]
+(defn bytes->random-access-file
+  "We use a RandomAccessFile for read() and seek() operations that don't exist on
+  streams or arrays. Convert bytes into this class."
+  [bytes-data]
   (let [file (File/createTempFile "dns" "dat")
         raf  (RandomAccessFile. file "rw")]
     (.write raf bytes-data)
@@ -141,11 +142,11 @@
 
                     ;; leading 2-bits 2r11 mean it's compressed
                     (= 2r11000000 (bit-and length 2r11000000))
-                    (vec (concat parts [(decode-compressed-name length reader)]))
+                    (decode-compressed-name length reader)
 
                     :else
                     (recur (vec (concat parts [(read-n length reader)]))))))]
-    (string/join "." (map #(apply str (map char %)) parts))))
+    (string/join "." (map #(apply str (map char %)) parts)))  )
 
 (defn decode-compressed-name [length ^RandomAccessFile reader]
   (let [pointer     (bytes->long [(byte (bit-and length 2r00111111)) (.read reader)])
@@ -216,7 +217,7 @@
 (defn resolve-domain [domain-name record-type]
   (loop [nameserver "198.41.0.4"]
     (println "Querying" nameserver "for" domain-name)
-    (let [response (send-query  nameserver domain-name record-type)]
+    (let [response (send-query nameserver domain-name record-type)]
       (cond
         (get-answer response)        (get-answer response)
         (get-nameserver-ip response) (recur (get-nameserver-ip response))
