@@ -6,6 +6,7 @@
                  [org.clojure/data.json "2.4.0"]
                  [org.clojure/data.xml "0.0.8"]  ; required for tagsoup
                  [org.clojure/java.jdbc "0.7.12"]
+                 [org.clojure/math.combinatorics "0.2.0"]
                  [org.clojure/tools.logging "1.2.4"]
                  [org.clojure/tools.cli "1.0.206"]
                  ;; work with mp3 id3 tags
