@@ -1,6 +1,6 @@
 (defproject hub "0.1.0-SNAPSHOT"
   :description "Playground Clojure app for all the things I want but am too lazy to make a dedicated project for."
-  :dependencies [[org.clojure/clojure "1.10.1"]
+  :dependencies [[org.clojure/clojure "1.11.0"]
                  [org.clojure/core.match "1.0.0"]
                  [org.clojure/data.csv "1.0.1"]
                  [org.clojure/data.json "2.4.0"]
