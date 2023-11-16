@@ -1,12 +1,45 @@
 import csv
 import functools as fp
+import gzip
+import os
+import requests
+import sys
 import matplotlib.pyplot as plt
 
-### raw tsv reader stuff.
+from io import BytesIO
 
-BASICS_TSV = 'data/imdb/title.basics.tsv'
-EPISODE_TSV = 'data/imdb/title.episode.tsv'
-RATINGS_TSV = 'data/imdb/title.ratings.tsv'
+DATA_DIR = "data/imdb"
+
+BASICS_GZ = "https://datasets.imdbws.com/title.basics.tsv.gz"
+EPISODE_GZ = "https://datasets.imdbws.com/title.episode.tsv.gz"
+RATINGS_GZ = "https://datasets.imdbws.com/title.ratings.tsv.gz"
+
+BASICS_TSV = f"{DATA_DIR}/title.basics.tsv"
+EPISODE_TSV = f"{DATA_DIR}/title.episode.tsv"
+RATINGS_TSV = f"{DATA_DIR}/title.ratings.tsv"
+
+def download_gz(url, output_path):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    response = requests.get(url)
+    if response.status_code != 200:
+        print(f"Failed to download file from {url}. Status code: {response.status_code}")
+        return None
+
+    filename = url.split("/")[-1].replace(".gz", "")
+    with gzip.GzipFile(fileobj=BytesIO(response.content), mode='rb') as gz_file:
+        with open(output_path, 'wb') as output_file:
+            output_file.write(gz_file.read())
+
+    print(f"Downloaded and unzipped {url} to {output_path}")
+    return output_path
+
+def fetch_imdb_data():
+    for url, filename in [[BASICS_GZ, BASICS_TSV],
+                          [EPISODE_GZ, EPISODE_TSV],
+                          [RATINGS_GZ, RATINGS_TSV]]:
+        if not os.path.exists(filename):
+            print(f"Downloading IMDB data to  ./{filename}")
+            download_gz(url, filename)
 
 
 def tsv_reader(f):
@@ -81,23 +114,42 @@ def plot_episode_ratings(data):
     plt.show()
 
 
-def boxplot_season_ratings(data):
-    """Create and show a boxplot for the ratings of all seasons.
-`data` must be a dict of seasons to list of ratings."""
-    ratings_vecs = [ x[1] for x in
+def sort_season_key(pair):
+    """
+    Sort a pair of [season, episode_ratings], placing '\\N' at the end.
+    """
+    if pair[0] == '\\N':
+        return sys.maxsize  # largest int
+    else:
+        return int(pair[0])
+
+def boxplot_season_ratings(data, title):
+    """
+    Create and show a boxplot for the ratings of all seasons.
+    `data` must be a dict of seasons to list of ratings.
+    """
+    ratings_vecs = [ v for k, v in
                      sorted([[k, v] for k, v in data.items()],
-                            key = lambda x: int(x[0]))]
+                            key=sort_season_key) ]
     fig, ax = plt.subplots()
-    ax.boxplot(ratings_vec)
+
+    ax.boxplot(ratings_vecs)
+    ax.set_title(title)
+    ax.set_xlabel('Seasons')
+    ax.set_ylabel('Ratings')
+
     plt.ylim(0,10)
     plt.show()
 
 
 ### pandas for messing with the data
 
-# TCONST = tconst("The Owl House")
-TCONST = "tt8050756"
+fetch_imdb_data()
+
+TITLE = "SpongeBob SquarePants"
+TCONST = tconst(TITLE)
+# TCONST = "tt8050756"
 EPISODES = episodes(TCONST)
 RATINGS = with_ratings(EPISODES)
-# SEASONS = by_season(RATINGS)
-plot_episode_ratings(RATINGS)
+SEASONS = by_season(RATINGS)
+boxplot_season_ratings(SEASONS, TITLE)
